@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">UserSignUp</string>
+    <string name="label_username">Username</string>
+    <string name="input_username_hint">Enter username…</string>
+    <string name="label_password">Password</string>
+    <string name="input_password_hint">Enter password…</string>
+    <string name="label_retype">Retype</string>
+    <string name="input_retype_hint">Retype password…</string>
+    <string name="label_birthdate">Birthdate</string>
+    <string name="input_birthdate_hint">DD/MM/YYYY</string>
+    <string name="label_gender">Gender</string>
+    <string name="label_gender_male">Male</string>
+    <string name="label_gender_female">Female</string>
+    <string name="label_hobbies">Hobbies</string>
+    <string name="label_hobbies_1">Tennis</string>
+    <string name="label_hobbies_2">Futbal</string>
+    <string name="label_hobbies_3">Others</string>
+    <string name="label_button_select">Select</string>
+    <string name="label_button_reset">Reset</string>
+    <string name="label_button_signup">Sign-up</string>
+    <string name="label_button_exit">Exit</string>
+    <string name="label_result">Your information registered</string>
+    <string name="result_text">
+        Username: {{username}}\n\nPassword: {{password}}\n\nBirthdate: {{birthdate}}\n\nGender: {{gender}}\n\nHobbies: {{hobbies}}
+    </string>
+</resources>
