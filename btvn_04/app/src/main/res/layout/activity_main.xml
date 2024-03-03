@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal"
     android:baselineAligned="false"
+    android:orientation="horizontal"
     tools:context=".MainActivity">
 
     <FrameLayout
@@ -13,9 +14,55 @@
         android:layout_height="match_parent"
         android:layout_weight="2" />
 
-    <FrameLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/frameDetails"
         android:layout_width="95dp"
         android:layout_height="match_parent"
-        android:layout_weight="3" />
+        android:layout_weight="3">
+
+
+        <Button
+            android:id="@+id/First_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="260dp"
+            android:text="First"
+            android:textSize="12dp"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_editor_absoluteX="8dp" />
+
+        <Button
+            android:id="@+id/Previous_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="28dp"
+            android:layout_marginTop="8dp"
+            android:text="Previous"
+            android:textSize="12dp"
+            app:layout_constraintStart_toEndOf="@+id/Last_btn"
+            app:layout_constraintTop_toBottomOf="@+id/Next_btn" />
+
+        <Button
+            android:id="@+id/Next_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="28dp"
+            android:layout_marginTop="260dp"
+            android:text="Next"
+            android:textSize="12dp"
+            app:layout_constraintStart_toEndOf="@+id/First_btn"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/Last_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Last"
+            android:textSize="12dp"
+            app:layout_constraintTop_toBottomOf="@+id/First_btn"
+            tools:layout_editor_absoluteX="8dp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 </LinearLayout>

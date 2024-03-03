@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -35,6 +36,7 @@ public class FragmentRight extends Fragment implements FragmentCallbacks {
         tv2 = (TextView) view_layout_right.findViewById(R.id.userName);
         tv3 = (TextView) view_layout_right.findViewById(R.id.userClass);
         tv4 = (TextView) view_layout_right.findViewById(R.id.userScore);
+
         try { Bundle arguments = getArguments(); tv1.setText(arguments.getString("arg1", "")); }
         catch (Exception e) { Log.e("RED BUNDLE ERROR – ", "" + e.getMessage()); }
         return view_layout_right;
