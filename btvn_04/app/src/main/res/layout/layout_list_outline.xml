@@ -9,12 +9,12 @@
     android:background="@color/white">
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Mã số: "
         android:id="@+id/textMsg"
-        android:textSize="20dp"
-        android:padding="10dp"/>
+        android:layout_width="94dp"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:text="Mã số: "
+        android:textSize="18dp" />
     <ListView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
