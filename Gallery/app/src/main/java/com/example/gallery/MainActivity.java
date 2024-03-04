@@ -1,4 +1,4 @@
-package com.example.netflixproject;
+package com.example.gallery;
 
 import androidx.appcompat.app.AppCompatActivity;
 

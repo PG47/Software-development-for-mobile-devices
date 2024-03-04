@@ -1,4 +1,4 @@
-package com.example.netflixproject;
+package com.example.gallery;
 
 import org.junit.Test;
 

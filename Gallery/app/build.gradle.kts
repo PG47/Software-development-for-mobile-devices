@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.netflixproject"
+    namespace = "com.example.gallery"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.netflixproject"
+        applicationId = "com.example.gallery"
         minSdk = 29
         targetSdk = 34
         versionCode = 1

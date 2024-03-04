@@ -1,4 +1,4 @@
-package com.example.netflixproject;
+package com.example.gallery;
 
 import android.content.Context;
 
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
     public void useAppContext() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        assertEquals("com.example.netflixproject", appContext.getPackageName());
+        assertEquals("com.example.gallery", appContext.getPackageName());
     }
 }

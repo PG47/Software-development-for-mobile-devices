@@ -13,6 +13,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Netflix Project"
+rootProject.name = "Gallery"
 include(":app")
  
