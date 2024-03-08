@@ -46,10 +46,24 @@ public class MainActivity extends AppCompatActivity implements MainCallbacks {
             }
         });
 
+        findViewById(R.id.Last_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fragmentLeft.navigateToLastItem();
+            }
+        });
+
         findViewById(R.id.Next_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 fragmentLeft.navigateToNextItem();
+            }
+        });
+
+        findViewById(R.id.Previous_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fragmentLeft.navigateToPreviousItem();
             }
         });
     }

@@ -18,6 +18,7 @@ public class FragmentLeft extends Fragment {
     Context context = null;
     String message = "";
     ListView listView;
+    TextView txtBlue;
     private final String[] items = {
             "A1_9829,Lê Thị A,A1,8",
             "A1_1809,Lê Thị B,A1,9",
@@ -29,7 +30,7 @@ public class FragmentLeft extends Fragment {
             "A4_1160,Lê Thị H,A1,3"} ;
 
     private int curr_pos=0;
-    Integer[] thumbnails = {R.mipmap.m1_foreground, R.mipmap.m1_foreground, R.mipmap.m1_foreground, R.mipmap.m1_foreground, R.mipmap.m1_foreground, R.mipmap.m1_foreground, R.mipmap.m1_foreground, R.mipmap.m1_foreground};
+    Integer[] thumbnails = {R.mipmap.m1_foreground, R.mipmap.m2_foreground, R.mipmap.m1_foreground, R.mipmap.m3_foreground, R.mipmap.m5_foreground, R.mipmap.m2_foreground, R.mipmap.m1_foreground, R.mipmap.m5_foreground};
     public static FragmentLeft newInstance(String strArg) {
         FragmentLeft fragment = new FragmentLeft();
         Bundle args = new Bundle();
@@ -53,7 +54,7 @@ public class FragmentLeft extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         LinearLayout layoutleft = (LinearLayout) inflater.inflate(R.layout.layout_list_outline, null);
-        final TextView txtBlue = (TextView) layoutleft.findViewById(R.id.textMsg);
+        txtBlue = (TextView) layoutleft.findViewById(R.id.textMsg);
         listView = (ListView) layoutleft.findViewById(R.id.myList);
         listView.setBackgroundColor(Color.parseColor("#ffccddff"));
 
@@ -88,6 +89,16 @@ public class FragmentLeft extends Fragment {
         curr_pos=0;
         Select(curr_pos);
         listView.setSelection(0);
+        txtBlue.setText("Mã số: " + items[curr_pos].split(",")[0]);
+        listView.smoothScrollToPosition(0);
+        mainActivity.onMsgFromFragToMain("BLUE-FRAG", items[0]);
+    }
+    public void navigateToLastItem() {
+        Release(curr_pos);
+        curr_pos= items.length - 1;
+        Select(curr_pos);
+        listView.setSelection(0);
+        txtBlue.setText("Mã số: " + items[curr_pos].split(",")[0]);
         listView.smoothScrollToPosition(0);
         mainActivity.onMsgFromFragToMain("BLUE-FRAG", items[0]);
     }
@@ -98,6 +109,18 @@ public class FragmentLeft extends Fragment {
             curr_pos++; }
         else curr_pos =0;
         listView.setSelection(curr_pos);
+        txtBlue.setText("Mã số: " + items[curr_pos].split(",")[0]);
+        listView.smoothScrollToPosition(curr_pos);
+        Select(curr_pos);
+        mainActivity.onMsgFromFragToMain("BLUE-FRAG", items[curr_pos]);
+    }
+    public void navigateToPreviousItem() {
+        Release(curr_pos);
+        if (curr_pos > 0) {
+            curr_pos--; }
+        else curr_pos =items.length-1;
+        listView.setSelection(curr_pos);
+        txtBlue.setText("Mã số: " + items[curr_pos].split(",")[0]);
         listView.smoothScrollToPosition(curr_pos);
         Select(curr_pos);
         mainActivity.onMsgFromFragToMain("BLUE-FRAG", items[curr_pos]);
