@@ -43,12 +43,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-
 @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
 public class MainActivity extends AppCompatActivity {
     FragmentTransaction ft;
     fragmentTop_headbar f_headbar;
-    fragmentBot_bottombar f_botbar;
+    BottomNavigationView bottomNavigationView;
     private static final String tag = "PERMISSION_TAG";
     private static final int REQUEST_PERMISSIONS = 1234;
     private static final String [] PERMISSIONS = {
@@ -63,21 +62,54 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         f_headbar = fragmentTop_headbar.newInstance("first-blue");
-        f_botbar = fragmentBot_bottombar.newInstance("first-red");
 
         ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.headbar, f_headbar);
+        ft.replace(R.id.headerBar, f_headbar);
         ft.addToBackStack(null); // Add transaction to the back stack
         ft.commit();
 
-        ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.botom_bar, f_botbar);
-        ft.addToBackStack(null); // Add transaction to the back stack
-        ft.commit();
+        ImagesFragment imagesFragment = new ImagesFragment();
+        AlbumFragment albumFragment = new AlbumFragment();
+        MapFragment mapFragment = new MapFragment();
+        SearchFragment searchFragment = new SearchFragment();
+
+        bottomNavigationView = findViewById(R.id.bottomToolbar);
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.images) {
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.mainFragment, imagesFragment)
+                        .commit();
+                return true;
+            } else if (itemId == R.id.album) {
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.mainFragment, albumFragment)
+                        .commit();
+                return true;
+            } else if (itemId == R.id.map) {
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.mainFragment, mapFragment)
+                        .commit();
+                return true;
+            } else if (itemId == R.id.search) {
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.mainFragment, searchFragment)
+                        .commit();
+                return true;
+            }
+
+            return false;
+        });
+
+        bottomNavigationView.setSelectedItemId(R.id.images);
 
         if (checkPermission()) {
-            GridView gallery = (GridView) findViewById(R.id.imagesGrid);
-            gallery.setAdapter(new ImageAdapter(this));
+            // do later
         } else {
             requestPermission();
         }
@@ -151,70 +183,6 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this,"External Storage Permission is denied!", Toast.LENGTH_SHORT).show();
                 }
             }
-        }
-    }
-
-    private ArrayList<String> images;
-
-    private class ImageAdapter extends BaseAdapter {
-        private Activity context;
-
-        public ImageAdapter(Activity localContext) {
-            context = localContext;
-            images = getAllShownImagesPath(context);
-        }
-
-        public int getCount() {
-            return images.size();
-        }
-
-        public Object getItem(int position) {
-            return position;
-        }
-
-        public long getItemId(int position) {
-            return position;
-        }
-
-        public View getView(final int position, View convertView, ViewGroup parent) {
-            final ImageView imageView;
-
-            if (convertView == null) {
-                imageView = (ImageView) LayoutInflater.from(parent.getContext()).inflate(R.layout.item, parent, false);
-            } else {
-                imageView = (ImageView) convertView;
-            }
-
-            Glide.with(MainActivity.this).load(images.get(position)).centerCrop().into(imageView);
-
-            return imageView;
-        }
-
-        private ArrayList<String> getAllShownImagesPath(Activity activity) {
-            Uri uri;
-            Cursor cursor;
-            int column_index_data, column_index_folder_name;
-            ArrayList<String> listOfAllImages = new ArrayList<String>();
-            String absolutePathOfImage = null;
-            uri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-
-            String[] projection = { MediaStore.MediaColumns.DATA,
-                    MediaStore.Images.Media.BUCKET_DISPLAY_NAME };
-
-            cursor = activity.getContentResolver().query(uri, projection, null,
-                    null, null);
-
-            assert cursor != null;
-            column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
-            column_index_folder_name = cursor
-                    .getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
-
-            while (cursor.moveToNext()) {
-                absolutePathOfImage = cursor.getString(column_index_data);
-                listOfAllImages.add(absolutePathOfImage);
-            }
-
-            return listOfAllImages;
         }
     }
 }

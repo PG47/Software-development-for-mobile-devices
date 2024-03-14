@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/images"
+        android:title="Images"
+        android:icon="@drawable/ic_images_foreground"/>
+    <item
+        android:id="@+id/album"
+        android:title="Album"
+        android:icon="@drawable/ic_album_foreground"/>
+    <item
+        android:id="@+id/map"
+        android:title="Map"
+        android:icon="@drawable/ic_map_foreground"/>
+    <item
+        android:id="@+id/search"
+        android:title="Search"
+        android:icon="@drawable/ic_search_foreground"/>
+</menu>
