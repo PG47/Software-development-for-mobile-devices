@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="@color/black">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:id="@+id/option1">
+            <ImageButton
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:src="@drawable/ic_launcher_background" />
+            <TextView
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="Share"
+                android:textAlignment="center"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:id="@+id/option2"
+            android:layout_toRightOf="@+id/option1"
+            android:layout_marginLeft="2dp">
+            <ImageButton
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:src="@drawable/ic_launcher_background" />
+            <TextView
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="Edit"
+                android:textAlignment="center"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_toRightOf="@id/option2"
+            android:layout_marginLeft="2dp"
+            android:id="@+id/option3">
+            <ImageButton
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:src="@drawable/ic_launcher_background" />
+            <TextView
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="Camera"
+                android:textAlignment="center"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:id="@+id/option4"
+            android:layout_marginLeft="2dp"
+            android:layout_toRightOf="@id/option3">
+            <ImageButton
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:src="@drawable/ic_launcher_background" />
+            <TextView
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="Delete"
+                android:textAlignment="center"/>
+        </LinearLayout>
+    </LinearLayout>
+
+</RelativeLayout>
