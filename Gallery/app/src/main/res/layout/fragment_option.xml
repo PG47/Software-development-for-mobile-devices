@@ -22,6 +22,7 @@
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:text="Share"
+                android:textColor="@color/white"
                 android:textAlignment="center"/>
         </LinearLayout>
 
@@ -40,6 +41,7 @@
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:text="Edit"
+                android:textColor="@color/white"
                 android:textAlignment="center"/>
         </LinearLayout>
 
@@ -58,6 +60,7 @@
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:text="Camera"
+                android:textColor="@color/white"
                 android:textAlignment="center"/>
         </LinearLayout>
 
@@ -76,6 +79,7 @@
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:text="Delete"
+                android:textColor="@color/white"
                 android:textAlignment="center"/>
         </LinearLayout>
     </LinearLayout>
