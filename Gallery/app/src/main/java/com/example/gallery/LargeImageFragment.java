@@ -9,14 +9,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import androidx.fragment.app.Fragment;
+
+import com.bumptech.glide.Glide;
 
 public class LargeImageFragment extends Fragment {
     MainActivity mainActivity;
     Context context = null;
     ImageButton getBack;
+    ImageView selectedImage;
 
     public static LargeImageFragment newInstance(String strArg) {
         LargeImageFragment fragment = new LargeImageFragment();
@@ -52,11 +56,9 @@ public class LargeImageFragment extends Fragment {
             }
         }
 
-        Log.d("checking", "create view");
-        Intent intent = mainActivity.getIntent();
-        Log.d("checking", "passed");
-        String SelectedImage = intent.getStringExtra("SelectedImage");
-        Log.d("test", SelectedImage);
+        String selectedImage = getArguments().getString("selectedImage");
+        this.selectedImage = (ImageView) layoutImage.findViewById(R.id.imageSelected);
+        Glide.with(context).load(selectedImage).centerCrop().into(this.selectedImage);
 
         getBack = (ImageButton) layoutImage.findViewById(R.id.getBackButton);
         getBack.setOnClickListener(new View.OnClickListener() {

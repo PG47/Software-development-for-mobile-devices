@@ -33,6 +33,12 @@ public class DetailsActivity extends AppCompatActivity {
         fragmentImage = LargeImageFragment.newInstance("image");
         fragmentOption = OptionFragment.newInstance("option");
 
+        Intent intent = getIntent();
+        String selectedImage = intent.getStringExtra("SelectedImage");
+        Bundle bundle = new Bundle();
+        bundle.putString("selectedImage", selectedImage);
+        fragmentImage.setArguments(bundle);
+
         ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.detailsImage, fragmentImage);
         ft.addToBackStack(null); // Add transaction to the back stack

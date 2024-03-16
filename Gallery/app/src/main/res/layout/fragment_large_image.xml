@@ -4,41 +4,53 @@
     android:layout_height="match_parent">
 
     <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
         android:id="@+id/imageSelected"
-        android:src="@drawable/achillobator"
-        />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginHorizontal="10dp"
+        android:src="@drawable/achillobator" />
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp">
+
         <ImageButton
+            android:id="@+id/getBackButton"
             android:layout_width="70dp"
-            android:layout_height="50dp"
-            android:src="@color/material_dynamic_neutral_variant0"
-            android:id="@+id/getBackButton"/>
+            android:layout_height="60dp"
+            android:contentDescription="TODO1"
+            android:background="#00000000"
+            android:src="@drawable/ic_back_arrow_foreground" />
+
         <ImageButton
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:src="@drawable/ic_album_foreground"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:src="@drawable/ic_tag_foreground"
             android:id="@+id/component1"
             android:layout_toLeftOf="@id/component2"
-            android:layout_marginRight="10dp"/>
+            android:layout_marginRight="10dp"
+            android:contentDescription="TODO2"
+            android:background="#00000000"/>
         <ImageButton
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:src="@drawable/ic_album_foreground"
             android:layout_toLeftOf="@id/component3"
             android:id="@+id/component2"
-            android:layout_marginRight="10dp"/>
+            android:layout_marginRight="10dp"
+            android:contentDescription="TODO3"
+            android:background="#00000000"/>
         <ImageButton
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:src="@drawable/ic_album_foreground"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:src="@drawable/ic_action_foreground"
             android:layout_alignParentEnd="true"
-            android:id="@+id/component3"/>
+            android:id="@+id/component3"
+            android:contentDescription="TODO4"
+            android:background="#00000000"
+            android:layout_marginRight="10dp"/>
     </RelativeLayout>
 
 </RelativeLayout>
