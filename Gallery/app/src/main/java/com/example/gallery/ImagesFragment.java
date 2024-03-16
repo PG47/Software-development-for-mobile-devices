@@ -21,7 +21,8 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
-import java.util.Objects;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class ImagesFragment extends Fragment {
     private ArrayList<String> images;
@@ -39,7 +40,7 @@ public class ImagesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_images, container, false);
-        GridView gallery = (GridView) rootView.findViewById(R.id.imagesGrid);
+        GridView gallery = rootView.findViewById(R.id.imagesGrid);
         gallery.setAdapter(new ImageAdapter(requireActivity()));
         gallery.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -89,26 +90,25 @@ public class ImagesFragment extends Fragment {
         private ArrayList<String> getAllShownImagesPath(Activity activity) {
             Uri uri;
             Cursor cursor;
-            int column_index_data, column_index_folder_name;
+            int column_index_data;
             ArrayList<String> listOfAllImages = new ArrayList<String>();
-            String absolutePathOfImage = null;
             uri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 
             String[] projection = { MediaStore.MediaColumns.DATA,
-                    MediaStore.Images.Media.BUCKET_DISPLAY_NAME };
+                    MediaStore.Images.Media.DATE_TAKEN };
 
             cursor = activity.getContentResolver().query(uri, projection, null,
-                    null, null);
+                    null, MediaStore.Images.Media.DATE_TAKEN + " DESC");
 
             assert cursor != null;
             column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
-            column_index_folder_name = cursor
-                    .getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
 
             while (cursor.moveToNext()) {
-                absolutePathOfImage = cursor.getString(column_index_data);
+                String absolutePathOfImage = cursor.getString(column_index_data);
                 listOfAllImages.add(absolutePathOfImage);
             }
+
+            cursor.close();
 
             return listOfAllImages;
         }
