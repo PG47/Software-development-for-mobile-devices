@@ -1,6 +1,7 @@
 package com.example.gallery;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -8,9 +9,11 @@ import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -38,6 +41,14 @@ public class ImagesFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_images, container, false);
         GridView gallery = (GridView) rootView.findViewById(R.id.imagesGrid);
         gallery.setAdapter(new ImageAdapter(requireActivity()));
+        gallery.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Intent intent = new Intent(requireContext(), DetailsActivity.class);
+                intent.putExtra("SelectedImage", images.get(i));
+                startActivity(intent);
+            }
+        });
         return rootView;
     }
 

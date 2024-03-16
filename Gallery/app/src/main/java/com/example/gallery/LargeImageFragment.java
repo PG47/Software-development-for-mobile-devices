@@ -1,11 +1,14 @@
 package com.example.gallery;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 
 import androidx.fragment.app.Fragment;
@@ -13,6 +16,7 @@ import androidx.fragment.app.Fragment;
 public class LargeImageFragment extends Fragment {
     MainActivity mainActivity;
     Context context = null;
+    ImageButton getBack;
 
     public static LargeImageFragment newInstance(String strArg) {
         LargeImageFragment fragment = new LargeImageFragment();
@@ -47,6 +51,21 @@ public class LargeImageFragment extends Fragment {
                 throw new IllegalStateException("MainActivity must implement callbacks");
             }
         }
+
+        Log.d("checking", "create view");
+        Intent intent = mainActivity.getIntent();
+        Log.d("checking", "passed");
+        String SelectedImage = intent.getStringExtra("SelectedImage");
+        Log.d("test", SelectedImage);
+
+        getBack = (ImageButton) layoutImage.findViewById(R.id.getBackButton);
+        getBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mainActivity.finishAffinity();
+                System.exit(0);
+            }
+        });
 
         return layoutImage;
     }

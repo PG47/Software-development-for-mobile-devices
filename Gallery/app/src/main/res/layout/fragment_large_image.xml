@@ -15,9 +15,10 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp">
         <ImageButton
-            android:layout_width="50dp"
+            android:layout_width="70dp"
             android:layout_height="50dp"
-            android:src="@drawable/ic_launcher_background"/>
+            android:src="@color/material_dynamic_neutral_variant0"
+            android:id="@+id/getBackButton"/>
         <ImageButton
             android:layout_width="50dp"
             android:layout_height="50dp"
