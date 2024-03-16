@@ -76,7 +76,7 @@ public class ImagesFragment extends Fragment {
             final ImageView imageView;
 
             if (convertView == null) {
-                imageView = (ImageView) LayoutInflater.from(parent.getContext()).inflate(R.layout.item, parent, false);
+                imageView = (ImageView) LayoutInflater.from(parent.getContext()).inflate(R.layout.item_image, parent, false);
             } else {
                 imageView = (ImageView) convertView;
             }
