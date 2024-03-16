@@ -11,7 +11,7 @@ import android.widget.RelativeLayout;
 import androidx.fragment.app.Fragment;
 
 public class OptionFragment extends Fragment {
-    MainActivity mainActivity;
+    DetailsActivity mainActivity;
     public static OptionFragment newInstance(String strArg1) {
         OptionFragment fragment = new OptionFragment();
         Bundle bundle = new Bundle();
@@ -24,7 +24,7 @@ public class OptionFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            mainActivity = (MainActivity) getActivity();
+            mainActivity = (DetailsActivity) getActivity();
         }
     }
 
@@ -33,8 +33,8 @@ public class OptionFragment extends Fragment {
         RelativeLayout layoutImage = (RelativeLayout) inflater.inflate(R.layout.fragment_option, null);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (getActivity() instanceof MainActivity) {
-                mainActivity = (MainActivity) getActivity();
+            if (getActivity() instanceof DetailsActivity) {
+                mainActivity = (DetailsActivity) getActivity();
             } else {
                 throw new IllegalStateException("MainActivity must implement callbacks");
             }

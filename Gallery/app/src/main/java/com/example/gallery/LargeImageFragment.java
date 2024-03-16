@@ -17,7 +17,7 @@ import androidx.fragment.app.Fragment;
 import com.bumptech.glide.Glide;
 
 public class LargeImageFragment extends Fragment {
-    MainActivity mainActivity;
+    DetailsActivity mainActivity;
     Context context = null;
     ImageButton getBack;
     ImageView selectedImage;
@@ -36,7 +36,7 @@ public class LargeImageFragment extends Fragment {
         try {
             context = getActivity();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                mainActivity = (MainActivity) getActivity();
+                mainActivity = (DetailsActivity) getActivity();
             }
         }
         catch (IllegalStateException e) {
@@ -49,8 +49,8 @@ public class LargeImageFragment extends Fragment {
         RelativeLayout layoutImage = (RelativeLayout)inflater.inflate(R.layout.fragment_large_image, null);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (getActivity() instanceof MainActivity) {
-                mainActivity = (MainActivity) getActivity();
+            if (getActivity() instanceof DetailsActivity) {
+                mainActivity = (DetailsActivity) getActivity();
             } else {
                 throw new IllegalStateException("MainActivity must implement callbacks");
             }
@@ -58,14 +58,15 @@ public class LargeImageFragment extends Fragment {
 
         String selectedImage = getArguments().getString("selectedImage");
         this.selectedImage = (ImageView) layoutImage.findViewById(R.id.imageSelected);
-        Glide.with(context).load(selectedImage).centerCrop().into(this.selectedImage);
+        if (this.selectedImage != null) {
+            Glide.with(context).load(selectedImage).centerCrop().into(this.selectedImage);
+        }
 
         getBack = (ImageButton) layoutImage.findViewById(R.id.getBackButton);
         getBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mainActivity.finishAffinity();
-                System.exit(0);
+                mainActivity.finish();
             }
         });
 
