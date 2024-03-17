@@ -14,10 +14,12 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:id="@+id/option1">
+
             <ImageButton
                 android:layout_width="100dp"
                 android:layout_height="50dp"
-                android:src="@drawable/ic_launcher_background" />
+                android:scaleType="centerCrop"
+                android:src="@mipmap/share_icon_foreground" />
             <TextView
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
@@ -33,10 +35,12 @@
             android:id="@+id/option2"
             android:layout_toRightOf="@+id/option1"
             android:layout_marginLeft="2dp">
+
             <ImageButton
                 android:layout_width="100dp"
                 android:layout_height="50dp"
-                android:src="@drawable/ic_launcher_background" />
+                android:scaleType="centerCrop"
+                android:src="@mipmap/edit_image_icon_foreground" />
             <TextView
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
@@ -52,10 +56,12 @@
             android:layout_toRightOf="@id/option2"
             android:layout_marginLeft="2dp"
             android:id="@+id/option3">
+
             <ImageButton
                 android:layout_width="100dp"
                 android:layout_height="50dp"
-                android:src="@drawable/ic_launcher_background" />
+                android:scaleType="centerCrop"
+                android:src="@mipmap/camera_icon_foreground" />
             <TextView
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
@@ -71,10 +77,12 @@
             android:id="@+id/option4"
             android:layout_marginLeft="2dp"
             android:layout_toRightOf="@id/option3">
+
             <ImageButton
                 android:layout_width="100dp"
                 android:layout_height="50dp"
-                android:src="@drawable/ic_launcher_background" />
+                android:scaleType="centerCrop"
+                android:src="@mipmap/delete_icon_foreground" />
             <TextView
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
