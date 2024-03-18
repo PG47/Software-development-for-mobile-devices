@@ -1,17 +1,22 @@
 package com.example.gallery;
 
+import android.content.Intent;
 import android.graphics.Path;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import androidx.fragment.app.Fragment;
 
 public class OptionFragment extends Fragment {
     DetailsActivity mainActivity;
+    LinearLayout editButton;
     public static OptionFragment newInstance(String strArg1) {
         OptionFragment fragment = new OptionFragment();
         Bundle bundle = new Bundle();
@@ -30,7 +35,7 @@ public class OptionFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        RelativeLayout layoutImage = (RelativeLayout) inflater.inflate(R.layout.fragment_option, null);
+        RelativeLayout layoutOption = (RelativeLayout) inflater.inflate(R.layout.fragment_option, null);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (getActivity() instanceof DetailsActivity) {
@@ -40,6 +45,17 @@ public class OptionFragment extends Fragment {
             }
         }
 
-        return layoutImage;
+        String selectedImage = getArguments().getString("selectedImage");
+
+        editButton = (LinearLayout) layoutOption.findViewById(R.id.option2);
+        editButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(requireContext(), EditActivity.class);
+                intent.putExtra("SelectedImage", selectedImage);
+                startActivity(intent);
+            }
+        });
+        return layoutOption;
     }
 }

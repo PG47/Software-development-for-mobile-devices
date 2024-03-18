@@ -26,5 +26,9 @@
         <activity android:name=".DetailsActivity"
             android:exported="true">
         </activity>
+
+        <activity android:name=".EditActivity"
+            android:exported="true">
+        </activity>
     </application>
 </manifest>

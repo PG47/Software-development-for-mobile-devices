@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:background="@color/white">
+
+        <ImageButton
+            android:layout_width="66dp"
+            android:layout_height="66dp"
+            android:src="@drawable/ic_rotate_foreground"
+            android:background="#0000"
+            android:id="@+id/rotate"/>
+
+        <ImageButton
+            android:layout_width="66dp"
+            android:layout_height="66dp"
+            android:src="@drawable/ic_text_foreground"
+            android:background="#0000"
+            android:id="@+id/text"/>
+
+        <ImageButton
+            android:layout_width="66dp"
+            android:layout_height="66dp"
+            android:src="@drawable/ic_launcher_foreground"
+            android:background="#0000"
+            android:id="@+id/st"/>
+
+        <ImageButton
+            android:layout_width="66dp"
+            android:layout_height="66dp"
+            android:src="@drawable/ic_brightness_foreground"
+            android:background="#0000"
+            android:id="@+id/brightness"/>
+
+        <ImageButton
+            android:layout_width="66dp"
+            android:layout_height="66dp"
+            android:src="@drawable/ic_launcher_foreground"
+            android:background="#0000"
+            android:id="@+id/cropping"/>
+
+        <ImageButton
+            android:layout_width="66dp"
+            android:layout_height="66dp"
+            android:src="@drawable/ic_contrast_foreground"
+            android:background="#0000"
+            android:id="@+id/contrast"/>
+
+    </LinearLayout>
+
+</RelativeLayout>

@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:background="@color/black">
+    android:background="#808080">
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -14,14 +14,16 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:id="@+id/option1">
-            <ImageButton
+            <ImageView
                 android:layout_width="100dp"
-                android:layout_height="50dp"
-                android:src="@drawable/ic_launcher_background" />
+                android:layout_height="70dp"
+                android:src="@drawable/ic_share_foreground"
+                android:contentDescription="TODO"/>
             <TextView
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:text="Share"
+                android:textSize="25dp"
                 android:textColor="@color/white"
                 android:textAlignment="center"/>
         </LinearLayout>
@@ -33,14 +35,16 @@
             android:id="@+id/option2"
             android:layout_toRightOf="@+id/option1"
             android:layout_marginLeft="2dp">
-            <ImageButton
+            <ImageView
                 android:layout_width="100dp"
-                android:layout_height="50dp"
-                android:src="@drawable/ic_launcher_background" />
+                android:layout_height="70dp"
+                android:src="@drawable/ic_edit_foreground"
+                android:contentDescription="TODO" />
             <TextView
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:text="Edit"
+                android:textSize="25dp"
                 android:textColor="@color/white"
                 android:textAlignment="center"/>
         </LinearLayout>
@@ -52,14 +56,16 @@
             android:layout_toRightOf="@id/option2"
             android:layout_marginLeft="2dp"
             android:id="@+id/option3">
-            <ImageButton
+            <ImageView
                 android:layout_width="100dp"
-                android:layout_height="50dp"
-                android:src="@drawable/ic_launcher_background" />
+                android:layout_height="70dp"
+                android:src="@drawable/ic_camera_foreground"
+                android:contentDescription="TODO"/>
             <TextView
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:text="Camera"
+                android:textSize="25dp"
                 android:textColor="@color/white"
                 android:textAlignment="center"/>
         </LinearLayout>
@@ -71,14 +77,16 @@
             android:id="@+id/option4"
             android:layout_marginLeft="2dp"
             android:layout_toRightOf="@id/option3">
-            <ImageButton
+            <ImageView
                 android:layout_width="100dp"
-                android:layout_height="50dp"
-                android:src="@drawable/ic_launcher_background" />
+                android:layout_height="70dp"
+                android:src="@drawable/ic_delete_foreground"
+                android:contentDescription="TODO"/>
             <TextView
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:text="Delete"
+                android:textSize="25dp"
                 android:textColor="@color/white"
                 android:textAlignment="center"/>
         </LinearLayout>

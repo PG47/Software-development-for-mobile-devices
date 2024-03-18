@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#808080">
+
+<!--    <SeekBar-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:max="90"-->
+<!--        android:progress="2"-->
+<!--        android:thumb="@drawable/custom_thumb"-->
+<!--        android:progressTint="@color/white"-->
+<!--        android:progressDrawable="@color/white"-->
+<!--        android:theme="@style/Widget.AppCompat.SeekBar.Discrete" />-->
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Done"
+        android:id="@+id/actionDone"
+        android:layout_centerHorizontal="true"
+        android:backgroundTint="#9BCF53"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="Brightness:"
+        android:textColor="@color/black"
+        android:layout_below="@+id/actionDone"
+        android:id="@+id/info"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="60"
+        android:textColor="@color/black"
+        android:layout_below="@+id/info"
+        android:id="@+id/value"/>
+
+    <SeekBar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/value"
+        android:layout_marginTop="8dp"
+        android:progressTint="#FFCF81"
+        android:max="100"
+        android:progress="20" />
+
+</RelativeLayout>

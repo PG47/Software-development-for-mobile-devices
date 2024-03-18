@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_back_arrow_foreground"
+        android:background="#0000"
+        android:contentDescription="TODO"
+        android:id="@+id/backToDetails"/>
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_save_foreground"
+        android:background="#0000"
+        android:layout_alignParentEnd="true"
+        android:contentDescription="TODO"
+        android:id="@+id/saveImage"/>
+
+</RelativeLayout>
