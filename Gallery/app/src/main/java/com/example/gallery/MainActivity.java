@@ -61,6 +61,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        if (checkPermission()) {
+            // do later
+        } else {
+            requestPermission();
+            loadImages();
+        }
+
         f_headbar = fragmentTop_headbar.newInstance("first-blue");
 
         ft = getSupportFragmentManager().beginTransaction();
@@ -107,12 +114,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         bottomNavigationView.setSelectedItemId(R.id.images);
-
-        if (checkPermission()) {
-            // do later
-        } else {
-            requestPermission();
-        }
     }
 
     private void requestPermission() {
@@ -178,6 +179,7 @@ public class MainActivity extends AppCompatActivity {
 
                 if(write && read) {
                     Log.d(tag,"onActivityResult: External Storage Permission is granted!");
+                    loadImages();
                 } else {
                     Log.d(tag,"onActivityResult: External Storage Permission is denied!");
                     Toast.makeText(MainActivity.this,"External Storage Permission is denied!", Toast.LENGTH_SHORT).show();
@@ -185,4 +187,25 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    private void loadImages() {
+        ImagesFragment imagesFragment = new ImagesFragment();
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.mainFragment, imagesFragment)
+                .commit();
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Check if images fragment is not loaded yet
+        if (bottomNavigationView.getSelectedItemId() == R.id.images) {
+            ImagesFragment imagesFragment = (ImagesFragment) getSupportFragmentManager().findFragmentById(R.id.mainFragment);
+            loadImages();
+            if (imagesFragment == null) {
+                loadImages();
+            }
+        }
+    }
+
 }

@@ -26,6 +26,7 @@ import java.util.Comparator;
 
 public class ImagesFragment extends Fragment {
     private ArrayList<String> images;
+    private boolean isSelectionMode = false;
 
     public ImagesFragment() {
         // Required empty public constructor
@@ -41,24 +42,37 @@ public class ImagesFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_images, container, false);
         GridView gallery = rootView.findViewById(R.id.imagesGrid);
-        gallery.setAdapter(new ImageAdapter(requireActivity()));
-        gallery.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        ImageAdapter adapter = new ImageAdapter(requireActivity());
+        gallery.setAdapter(adapter);
+        gallery.setOnItemClickListener((parent, view, position, id) -> {
+            if (!isSelectionMode) {
+                // Handle regular item click
                 Intent intent = new Intent(requireContext(), DetailsActivity.class);
-                intent.putExtra("SelectedImage", images.get(i));
+                intent.putExtra("SelectedImage", images.get(position));
                 startActivity(intent);
+            } else {
+                // Handle item selection in multi-selection mode
+                // Toggle selection state
+                adapter.toggleSelection(position);
             }
+        });
+        gallery.setOnItemLongClickListener((parent, view, position, id) -> {
+            // Enter multi-selection mode on long press
+            isSelectionMode = true;
+            adapter.toggleSelection(position);
+            return true;
         });
         return rootView;
     }
 
     private class ImageAdapter extends BaseAdapter {
         private Activity context;
+        private ArrayList<Integer> selectedPositions;
 
         public ImageAdapter(Activity localContext) {
             context = localContext;
             images = getAllShownImagesPath(context);
+            selectedPositions = new ArrayList<>();
         }
 
         public int getCount() {
@@ -82,16 +96,32 @@ public class ImagesFragment extends Fragment {
                 imageView = (ImageView) convertView;
             }
 
+            // Highlight selected items
+            if (selectedPositions.contains(position)) {
+                imageView.setBackgroundResource(R.drawable.selected_image_background);
+            } else {
+                imageView.setBackgroundResource(android.R.color.transparent);
+            }
+
             Glide.with(context).load(images.get(position)).centerCrop().into(imageView);
 
             return imageView;
+        }
+
+        public void toggleSelection(int position) {
+            if (selectedPositions.contains(position)) {
+                selectedPositions.remove((Integer) position);
+            } else {
+                selectedPositions.add(position);
+            }
+            notifyDataSetChanged();
         }
 
         private ArrayList<String> getAllShownImagesPath(Activity activity) {
             Uri uri;
             Cursor cursor;
             int column_index_data;
-            ArrayList<String> listOfAllImages = new ArrayList<String>();
+            ArrayList<String> listOfAllImages = new ArrayList<>();
             uri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 
             String[] projection = { MediaStore.MediaColumns.DATA,
