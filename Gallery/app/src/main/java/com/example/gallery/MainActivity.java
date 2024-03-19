@@ -48,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
     FragmentTransaction ft;
     fragmentTop_headbar f_headbar;
     BottomNavigationView bottomNavigationView;
+    ImagesFragment imagesFragment;
+    private boolean isSelectionMode = false;
     private static final String tag = "PERMISSION_TAG";
     private static final int REQUEST_PERMISSIONS = 1234;
     private static final String [] PERMISSIONS = {
@@ -75,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
         ft.addToBackStack(null); // Add transaction to the back stack
         ft.commit();
 
-        ImagesFragment imagesFragment = new ImagesFragment();
+        imagesFragment = new ImagesFragment();
         AlbumFragment albumFragment = new AlbumFragment();
         MapFragment mapFragment = new MapFragment();
         SearchFragment searchFragment = new SearchFragment();
@@ -199,13 +201,22 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         // Check if images fragment is not loaded yet
-        if (bottomNavigationView.getSelectedItemId() == R.id.images) {
+        /*if (bottomNavigationView.getSelectedItemId() == R.id.images) {
             ImagesFragment imagesFragment = (ImagesFragment) getSupportFragmentManager().findFragmentById(R.id.mainFragment);
-            loadImages();
             if (imagesFragment == null) {
                 loadImages();
             }
-        }
+        }*/
     }
+
+    @Override
+    public void onBackPressed() {
+        if (imagesFragment != null) {
+            imagesFragment.ExitSelection();
+            return;
+        }
+        super.onBackPressed();
+    }
+
 
 }

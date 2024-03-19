@@ -26,11 +26,16 @@ import java.util.Comparator;
 
 public class ImagesFragment extends Fragment {
     private ArrayList<String> images;
-    private boolean isSelectionMode = false;
+    private boolean isSelectionMode;
 
     public ImagesFragment() {
         // Required empty public constructor
     }
+
+    public void setSelectionMode(boolean st) {
+        isSelectionMode=st;
+    }
+    ImageAdapter adapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -42,7 +47,7 @@ public class ImagesFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_images, container, false);
         GridView gallery = rootView.findViewById(R.id.imagesGrid);
-        ImageAdapter adapter = new ImageAdapter(requireActivity());
+        adapter = new ImageAdapter(requireActivity());
         gallery.setAdapter(adapter);
         gallery.setOnItemClickListener((parent, view, position, id) -> {
             if (!isSelectionMode) {
@@ -51,13 +56,11 @@ public class ImagesFragment extends Fragment {
                 intent.putExtra("SelectedImage", images.get(position));
                 startActivity(intent);
             } else {
-                // Handle item selection in multi-selection mode
-                // Toggle selection state
+                isSelectionMode = true;
                 adapter.toggleSelection(position);
             }
         });
         gallery.setOnItemLongClickListener((parent, view, position, id) -> {
-            // Enter multi-selection mode on long press
             isSelectionMode = true;
             adapter.toggleSelection(position);
             return true;
@@ -65,7 +68,7 @@ public class ImagesFragment extends Fragment {
         return rootView;
     }
 
-    private class ImageAdapter extends BaseAdapter {
+    public class ImageAdapter extends BaseAdapter {
         private Activity context;
         private ArrayList<Integer> selectedPositions;
 
@@ -77,6 +80,10 @@ public class ImagesFragment extends Fragment {
 
         public int getCount() {
             return images.size();
+        }
+
+        public boolean Is_SelectionMode() {
+            return isSelectionMode;
         }
 
         public Object getItem(int position) {
@@ -108,12 +115,19 @@ public class ImagesFragment extends Fragment {
             return imageView;
         }
 
+
         public void toggleSelection(int position) {
             if (selectedPositions.contains(position)) {
                 selectedPositions.remove((Integer) position);
             } else {
                 selectedPositions.add(position);
             }
+            notifyDataSetChanged();
+        }
+
+        public void exitSelectionMode() {
+            selectedPositions.clear();
+            isSelectionMode=false;
             notifyDataSetChanged();
         }
 
@@ -142,5 +156,12 @@ public class ImagesFragment extends Fragment {
 
             return listOfAllImages;
         }
+    }
+
+    public ImageAdapter getImageAdapter() {
+        return adapter;
+    }
+    public void ExitSelection() {
+        adapter.exitSelectionMode();
     }
 }
