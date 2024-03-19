@@ -3,26 +3,27 @@ package com.example.gallery;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.ImageView;
+import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
-import com.bumptech.glide.Glide;
-
-public class ImageFragment extends Fragment {
+public class ChangeFragment extends Fragment {
     EditActivity editActivity;
     Context context;
-    ImageView myImage;
+    FragmentTransaction transaction;
+    Button finishChange;
+    static String changeType;
 
-    public static ImageFragment newInstance(String strArg) {
-        ImageFragment fragment = new ImageFragment();
+    public static ChangeFragment newInstance(String strArg) {
+        ChangeFragment fragment = new ChangeFragment();
         Bundle args = new Bundle();
+        changeType = strArg;
         args.putString("strArg1", strArg);
         fragment.setArguments(args);
         return fragment;
@@ -44,7 +45,7 @@ public class ImageFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        RelativeLayout layoutImage = (RelativeLayout)inflater.inflate(R.layout.fragment_image, null);
+        RelativeLayout changeOption = (RelativeLayout)inflater.inflate(R.layout.fragment_change, null);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (getActivity() instanceof EditActivity) {
@@ -54,16 +55,23 @@ public class ImageFragment extends Fragment {
             }
         }
 
-        String selectedImage = getArguments().getString("selectedImage");
-        myImage = (ImageView) layoutImage.findViewById(R.id.image);
-        if (selectedImage != null) {
-            Glide.with(context).load(selectedImage).centerCrop().into(this.myImage);
-        }
+        TextView textView = changeOption.findViewById(R.id.info);
+        TextView textView1 = changeOption.findViewById(R.id.value);
+        textView.setText(changeType);
+        textView1.setText("0");
 
-        return layoutImage;
-    }
+        finishChange = (Button) changeOption.findViewById(R.id.actionDone);
+        finishChange.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                EditFragment editFragment = EditFragment.newInstance("Options");
+                transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.AllOptions, editFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
+            }
+        });
 
-    public void executeRotate(int value) {
-        myImage.setRotation(value);
+        return changeOption;
     }
 }

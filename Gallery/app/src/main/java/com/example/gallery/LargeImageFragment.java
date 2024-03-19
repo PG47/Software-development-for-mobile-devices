@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 
 import androidx.fragment.app.Fragment;
 
@@ -36,7 +37,7 @@ public class LargeImageFragment extends Fragment {
         try {
             context = getActivity();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                mainActivity = (DetailsActivity) getActivity();
+                mainActivity = (DetailsActivity) context;
             }
         }
         catch (IllegalStateException e) {
@@ -50,7 +51,7 @@ public class LargeImageFragment extends Fragment {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (getActivity() instanceof DetailsActivity) {
-                mainActivity = (DetailsActivity) getActivity();
+                mainActivity = (DetailsActivity) context;
             } else {
                 throw new IllegalStateException("MainActivity must implement callbacks");
             }
@@ -66,7 +67,9 @@ public class LargeImageFragment extends Fragment {
         getBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mainActivity.finish();
+                if (mainActivity != null) {
+                    mainActivity.finish();
+                }
             }
         });
 

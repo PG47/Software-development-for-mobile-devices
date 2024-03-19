@@ -2,6 +2,7 @@ package com.example.gallery;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,8 +20,8 @@ public class EditActivity extends AppCompatActivity {
         setContentView(R.layout.activity_edit);
 
         fragmentSaveBack = SaveBackFragment.newInstance("SaveBack");
-        fragmentOptions = EditFragment.newInstance("Options");
         fragmentImage = ImageFragment.newInstance("MyImage");
+        fragmentOptions = EditFragment.newInstance("Options");
 
         Intent intent = getIntent();
         String selectedImage = intent.getStringExtra("SelectedImage");
@@ -29,17 +30,11 @@ public class EditActivity extends AppCompatActivity {
         fragmentImage.setArguments(bundle);
 
         ft = getSupportFragmentManager().beginTransaction();
+
         ft.replace(R.id.SaveAndBack, fragmentSaveBack);
-        ft.addToBackStack(null); // Add transaction to the back stack
-        ft.commit();
-
-        ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.Image, fragmentImage);
-        ft.addToBackStack(null); // Add transaction to the back stack
-        ft.commit();
-
-        ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.AllOptions, fragmentOptions);
+
         ft.addToBackStack(null); // Add transaction to the back stack
         ft.commit();
 
@@ -50,5 +45,9 @@ public class EditActivity extends AppCompatActivity {
             }
         };
         getOnBackPressedDispatcher().addCallback(this,onBackPressedCallback);
+    }
+
+    public void updateRotate(int value) {
+        fragmentImage.executeRotate(value);
     }
 }

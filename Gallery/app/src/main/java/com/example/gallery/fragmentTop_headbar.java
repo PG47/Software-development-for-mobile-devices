@@ -3,6 +3,7 @@ package com.example.gallery;
 import static com.google.android.material.internal.ContextUtils.getActivity;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -29,7 +30,9 @@ public class fragmentTop_headbar extends Fragment {
         super.onCreate(savedInstanceState);
         try {
             context = getActivity();
-            mainActivity = (MainActivity) getActivity();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                mainActivity = (MainActivity) getActivity();
+            }
         }
         catch (IllegalStateException e) {
             throw new IllegalStateException("MainActivity must implement callbacks");

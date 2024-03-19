@@ -11,11 +11,13 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 public class EditFragment extends Fragment {
     EditActivity editActivity;
     Context context;
     ImageButton rotate, addText, st1, brightness, crop, contrast;
+    FragmentTransaction transaction;
 
     public static EditFragment newInstance(String strArg) {
         EditFragment fragment = new EditFragment();
@@ -61,42 +63,60 @@ public class EditFragment extends Fragment {
         rotate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                editActivity.finish();
+                RotateFragment rotateFragment = RotateFragment.newInstance("Rotate");
+                transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.AllOptions, rotateFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
             }
         });
 
         addText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                editActivity.finish();
+                if (editActivity != null) {
+                    editActivity.finish();
+                }
             }
         });
 
         st1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                editActivity.finish();
+                if (editActivity != null) {
+                    editActivity.finish();
+                }
             }
         });
 
         brightness.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                editActivity.finish();
+                ChangeFragment changeFragment = ChangeFragment.newInstance("Brightness");
+                transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.AllOptions, changeFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
             }
         });
 
         crop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                editActivity.finish();
+                if (editActivity != null) {
+                    editActivity.finish();
+                }
             }
         });
 
         contrast.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                editActivity.finish();
+                ChangeFragment changeFragment = ChangeFragment.newInstance("Contrast");
+                transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.AllOptions, changeFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
             }
         });
 

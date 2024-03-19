@@ -3,8 +3,8 @@
     <!-- Icon -->
     <item android:id="@android:id/secondaryProgress">
         <shape android:shape="rectangle">
-            <size android:width="0.2dp" android:height="10dp" />
-            <solid android:color="#000000" /> <!-- Icon color -->
+            <size android:width="1dp" android:height="30dp" />
+            <solid android:color="#FFF455" /> <!-- Icon color -->
         </shape>
     </item>
 </layer-list>

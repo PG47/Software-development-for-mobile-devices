@@ -60,14 +60,19 @@ public class SaveBackFragment extends Fragment {
         getBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                editActivity.finish();
+                Log.d("test", "st" + editActivity);
+                if (editActivity != null) {
+                    editActivity.finish();
+                }
             }
         });
 
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                editActivity.finish();
+                if (editActivity != null) {
+                    editActivity.finish();
+                }
             }
         });
 
