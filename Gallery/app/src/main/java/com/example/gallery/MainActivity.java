@@ -70,10 +70,10 @@ public class MainActivity extends AppCompatActivity {
             loadImages();
         }
 
-        f_headbar = fragmentTop_headbar.newInstance("first-blue");
+        f_headbar = fragmentTop_headbar.newInstance("first-headbar");
 
         ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.headerBar, f_headbar);
+        ft.replace(R.id.head_bar, f_headbar);
         ft.addToBackStack(null); // Add transaction to the back stack
         ft.commit();
 
