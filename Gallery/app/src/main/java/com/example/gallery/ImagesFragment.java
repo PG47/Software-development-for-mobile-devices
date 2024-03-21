@@ -79,7 +79,20 @@ public class ImagesFragment extends Fragment {
         });
 
         selectAll = rootView.findViewById(R.id.select_all);
+        selectAll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                adapter.toggleSelectAll();
+            }
+        });
+
         selectExit = rootView.findViewById(R.id.select_exit);
+        selectExit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ExitSelection();
+            }
+        });
 
         return rootView;
     }
@@ -137,6 +150,14 @@ public class ImagesFragment extends Fragment {
                 selectedPositions.remove((Integer) position);
             } else {
                 selectedPositions.add(position);
+            }
+            notifyDataSetChanged();
+        }
+
+        public void toggleSelectAll() {
+            selectedPositions.clear();
+            for (int i = 0; i < images.size(); i++) {
+                selectedPositions.add(i);
             }
             notifyDataSetChanged();
         }
