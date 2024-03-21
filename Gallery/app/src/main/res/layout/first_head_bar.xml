@@ -20,7 +20,7 @@
             android:layout_width="152dp"
             android:layout_height="70dp"
             android:fontFamily="Inter"
-            android:padding="20sp"
+            android:padding="15sp"
             android:text="TEAM 7"
             android:textColor="@color/black"
             android:textSize="30sp"

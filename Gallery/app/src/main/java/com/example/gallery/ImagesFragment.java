@@ -16,30 +16,36 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
 public class ImagesFragment extends Fragment {
+    ImageButton selectAll;
+    ImageButton selectExit;
     private ArrayList<String> images;
     private boolean isSelectionMode;
+    NavigationChange callback;
+    ImageAdapter adapter;
 
     public ImagesFragment() {
         // Required empty public constructor
     }
 
     public void setSelectionMode(boolean st) {
-        isSelectionMode=st;
+        isSelectionMode = st;
     }
-    ImageAdapter adapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        callback = (NavigationChange) requireActivity();
     }
 
     @Override
@@ -49,6 +55,7 @@ public class ImagesFragment extends Fragment {
         GridView gallery = rootView.findViewById(R.id.imagesGrid);
         adapter = new ImageAdapter(requireActivity());
         gallery.setAdapter(adapter);
+
         gallery.setOnItemClickListener((parent, view, position, id) -> {
             if (!isSelectionMode) {
                 // Handle regular item click
@@ -56,21 +63,43 @@ public class ImagesFragment extends Fragment {
                 intent.putExtra("SelectedImage", images.get(position));
                 startActivity(intent);
             } else {
-                isSelectionMode = true;
                 adapter.toggleSelection(position);
             }
         });
+
         gallery.setOnItemLongClickListener((parent, view, position, id) -> {
+            if (!isSelectionMode) {
+                callback.startSelection();
+                selectAll.setVisibility(View.VISIBLE);
+                selectExit.setVisibility(View.VISIBLE);
+            }
             isSelectionMode = true;
             adapter.toggleSelection(position);
             return true;
         });
+
+        selectAll = rootView.findViewById(R.id.select_all);
+        selectAll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                adapter.toggleSelectAll();
+            }
+        });
+
+        selectExit = rootView.findViewById(R.id.select_exit);
+        selectExit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ExitSelection();
+            }
+        });
+
         return rootView;
     }
 
     public class ImageAdapter extends BaseAdapter {
-        private Activity context;
-        private ArrayList<Integer> selectedPositions;
+        private final Activity context;
+        private final ArrayList<Integer> selectedPositions;
 
         public ImageAdapter(Activity localContext) {
             context = localContext;
@@ -125,9 +154,17 @@ public class ImagesFragment extends Fragment {
             notifyDataSetChanged();
         }
 
+        public void toggleSelectAll() {
+            selectedPositions.clear();
+            for (int i = 0; i < images.size(); i++) {
+                selectedPositions.add(i);
+            }
+            notifyDataSetChanged();
+        }
+
         public void exitSelectionMode() {
             selectedPositions.clear();
-            isSelectionMode=false;
+            isSelectionMode = false;
             notifyDataSetChanged();
         }
 
@@ -163,5 +200,8 @@ public class ImagesFragment extends Fragment {
     }
     public void ExitSelection() {
         adapter.exitSelectionMode();
+        callback.endSelection();
+        selectAll.setVisibility(View.INVISIBLE);
+        selectExit.setVisibility(View.INVISIBLE);
     }
 }

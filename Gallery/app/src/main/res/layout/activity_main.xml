@@ -11,17 +11,20 @@
         android:id="@+id/head_bar"
         android:layout_width="match_parent"
         android:layout_height="70dp"
-        android:layout_weight="7" />
+        android:layout_weight="7"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <FrameLayout
         android:id="@+id/mainFragment"
-        android:layout_width="413dp"
-        android:layout_height="528dp"
+        android:layout_width="411dp"
+        android:layout_height="0dp"
         android:background="#99000000"
         app:layout_constraintBottom_toTopOf="@+id/bottomToolbar"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/head_bar"
+        app:layout_constraintVertical_bias="0.0"
         app:layout_constraintVertical_weight="3">
 
     </FrameLayout>
@@ -30,7 +33,10 @@
         android:id="@+id/bottomToolbar"
         android:layout_width="match_parent"
         android:layout_height="75dp"
-        app:itemIconSize="30dp"
+        app:itemIconSize="60dp"
+        app:itemPaddingTop="-3dp"
+        app:labelVisibilityMode="labeled"
+        app:itemActiveIndicatorStyle="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -39,39 +45,21 @@
 
     </com.google.android.material.bottomnavigation.BottomNavigationView>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/sort_menu"
-        android:layout_width="413dp"
-        android:layout_height="60dp"
-        android:layout_marginTop="68dp"
-        android:orientation="horizontal"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="0dp">
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/selectToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        app:itemIconSize="60dp"
+        app:itemPaddingTop="-3dp"
+        app:labelVisibilityMode="labeled"
+        app:itemActiveIndicatorStyle="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/bottom_select_menu"
+        android:visibility="invisible">
 
-        <ImageButton
-            android:id="@+id/sort_button"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:layout_marginStart="20dp"
-            android:background="#FFFFFF"
-            android:backgroundTint="#00FFFFFF"
-            android:scaleType="fitXY"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:srcCompat="@mipmap/sort_icon_foreground" />
-
-        <ImageButton
-            android:id="@+id/date_button"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:layout_marginStart="2dp"
-            android:background="#00FFFFFF"
-            android:scaleType="fitXY"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.06"
-            app:layout_constraintStart_toEndOf="@+id/sort_button"
-            app:srcCompat="@mipmap/calendar_icon_foreground" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.bottomnavigation.BottomNavigationView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
