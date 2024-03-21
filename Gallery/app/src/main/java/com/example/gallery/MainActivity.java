@@ -44,10 +44,11 @@ import java.util.List;
 import java.util.Objects;
 
 @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NavigationChange {
     FragmentTransaction ft;
     fragmentTop_headbar f_headbar;
     BottomNavigationView bottomNavigationView;
+    BottomNavigationView bottomSelectView;
     ImagesFragment imagesFragment;
     private boolean isSelectionMode = false;
     private static final String tag = "PERMISSION_TAG";
@@ -81,6 +82,8 @@ public class MainActivity extends AppCompatActivity {
         AlbumFragment albumFragment = new AlbumFragment();
         MapFragment mapFragment = new MapFragment();
         SearchFragment searchFragment = new SearchFragment();
+
+        bottomSelectView = findViewById(R.id.selectToolbar);
 
         bottomNavigationView = findViewById(R.id.bottomToolbar);
         bottomNavigationView.setOnItemSelectedListener(item -> {
@@ -218,5 +221,15 @@ public class MainActivity extends AppCompatActivity {
         super.onBackPressed();
     }
 
+    @Override
+    public void startSelection() {
+        bottomNavigationView.setVisibility(View.INVISIBLE);
+        bottomSelectView.setVisibility(View.VISIBLE);
+    }
 
+    @Override
+    public void endSelection() {
+        bottomNavigationView.setVisibility(View.VISIBLE);
+        bottomSelectView.setVisibility(View.INVISIBLE);
+    }
 }

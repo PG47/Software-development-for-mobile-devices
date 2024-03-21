@@ -19,6 +19,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,19 +28,21 @@ import java.util.Comparator;
 public class ImagesFragment extends Fragment {
     private ArrayList<String> images;
     private boolean isSelectionMode;
+    NavigationChange callback;
+    ImageAdapter adapter;
 
     public ImagesFragment() {
         // Required empty public constructor
     }
 
     public void setSelectionMode(boolean st) {
-        isSelectionMode=st;
+        isSelectionMode = st;
     }
-    ImageAdapter adapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        callback = (NavigationChange) requireActivity();
     }
 
     @Override
@@ -49,6 +52,7 @@ public class ImagesFragment extends Fragment {
         GridView gallery = rootView.findViewById(R.id.imagesGrid);
         adapter = new ImageAdapter(requireActivity());
         gallery.setAdapter(adapter);
+
         gallery.setOnItemClickListener((parent, view, position, id) -> {
             if (!isSelectionMode) {
                 // Handle regular item click
@@ -56,21 +60,25 @@ public class ImagesFragment extends Fragment {
                 intent.putExtra("SelectedImage", images.get(position));
                 startActivity(intent);
             } else {
-                isSelectionMode = true;
                 adapter.toggleSelection(position);
             }
         });
+
         gallery.setOnItemLongClickListener((parent, view, position, id) -> {
+            if (!isSelectionMode) {
+                callback.startSelection();
+            }
             isSelectionMode = true;
             adapter.toggleSelection(position);
             return true;
         });
+
         return rootView;
     }
 
     public class ImageAdapter extends BaseAdapter {
-        private Activity context;
-        private ArrayList<Integer> selectedPositions;
+        private final Activity context;
+        private final ArrayList<Integer> selectedPositions;
 
         public ImageAdapter(Activity localContext) {
             context = localContext;
@@ -127,7 +135,8 @@ public class ImagesFragment extends Fragment {
 
         public void exitSelectionMode() {
             selectedPositions.clear();
-            isSelectionMode=false;
+            isSelectionMode = false;
+            callback.endSelection();
             notifyDataSetChanged();
         }
 

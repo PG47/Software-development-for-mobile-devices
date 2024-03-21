@@ -34,6 +34,7 @@
         android:layout_height="75dp"
         app:itemIconSize="60dp"
         app:itemPaddingTop="-3dp"
+        app:labelVisibilityMode="labeled"
         app:itemActiveIndicatorStyle="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -43,14 +44,31 @@
 
     </com.google.android.material.bottomnavigation.BottomNavigationView>
 
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/selectToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        app:itemIconSize="60dp"
+        app:itemPaddingTop="-3dp"
+        app:labelVisibilityMode="labeled"
+        app:itemActiveIndicatorStyle="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/bottom_select_menu"
+        android:visibility="invisible">
+
+    </com.google.android.material.bottomnavigation.BottomNavigationView>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/sort_menu"
         android:layout_width="413dp"
         android:layout_height="60dp"
         android:layout_marginTop="68dp"
         android:orientation="horizontal"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="0dp">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
             android:id="@+id/sort_button"
