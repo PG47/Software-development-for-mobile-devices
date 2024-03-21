@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -26,6 +27,8 @@ import java.util.Collections;
 import java.util.Comparator;
 
 public class ImagesFragment extends Fragment {
+    ImageButton selectAll;
+    ImageButton selectExit;
     private ArrayList<String> images;
     private boolean isSelectionMode;
     NavigationChange callback;
@@ -67,11 +70,16 @@ public class ImagesFragment extends Fragment {
         gallery.setOnItemLongClickListener((parent, view, position, id) -> {
             if (!isSelectionMode) {
                 callback.startSelection();
+                selectAll.setVisibility(View.VISIBLE);
+                selectExit.setVisibility(View.VISIBLE);
             }
             isSelectionMode = true;
             adapter.toggleSelection(position);
             return true;
         });
+
+        selectAll = rootView.findViewById(R.id.select_all);
+        selectExit = rootView.findViewById(R.id.select_exit);
 
         return rootView;
     }
@@ -136,7 +144,6 @@ public class ImagesFragment extends Fragment {
         public void exitSelectionMode() {
             selectedPositions.clear();
             isSelectionMode = false;
-            callback.endSelection();
             notifyDataSetChanged();
         }
 
@@ -172,5 +179,8 @@ public class ImagesFragment extends Fragment {
     }
     public void ExitSelection() {
         adapter.exitSelectionMode();
+        callback.endSelection();
+        selectAll.setVisibility(View.INVISIBLE);
+        selectExit.setVisibility(View.INVISIBLE);
     }
 }

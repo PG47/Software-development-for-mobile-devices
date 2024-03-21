@@ -41,6 +41,34 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.533"
             app:srcCompat="@drawable/calendar_icon_foreground" />
+
+        <ImageButton
+            android:id="@+id/select_all"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:background="#00FFFFFF"
+            android:scaleType="fitXY"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/select_exit"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.533"
+            app:srcCompat="@drawable/ic_select_all_foreground"
+            android:visibility="invisible"/>
+
+        <ImageButton
+            android:id="@+id/select_exit"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_marginEnd="10dp"
+            android:background="#00FFFFFF"
+            android:scaleType="fitXY"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.533"
+            app:srcCompat="@drawable/ic_close_foreground"
+            android:visibility="invisible"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <GridView
