@@ -14,11 +14,19 @@ import android.widget.RelativeLayout;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
+import android.graphics.Matrix;
+import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
+import android.view.View;
+import com.github.chrisbanes.photoview.PhotoView;
 
 public class ImageFragment extends Fragment {
     EditActivity editActivity;
     Context context;
-    ImageView myImage;
+    PhotoView myImage;
+    float zoomLevel = (float) Math.sqrt(2);
+    View theBorder;
+    int imageHeight;
 
     public static ImageFragment newInstance(String strArg) {
         ImageFragment fragment = new ImageFragment();
@@ -55,7 +63,10 @@ public class ImageFragment extends Fragment {
         }
 
         String selectedImage = getArguments().getString("selectedImage");
-        myImage = (ImageView) layoutImage.findViewById(R.id.image);
+        myImage = (PhotoView) layoutImage.findViewById(R.id.image);
+        theBorder = (View) layoutImage.findViewById(R.id.border);
+
+        imageHeight = myImage.getHeight();
         if (selectedImage != null) {
             Glide.with(context).load(selectedImage).centerCrop().into(this.myImage);
         }
@@ -64,6 +75,15 @@ public class ImageFragment extends Fragment {
     }
 
     public void executeRotate(int value) {
-        myImage.setRotation(value);
+        myImage.setRotation(value - 45);
+        float scaleFactor = calculateScaleFactor(value);
+        myImage.setScaleX(scaleFactor);
+        myImage.setScaleY(scaleFactor);
+    }
+    private float calculateScaleFactor(float angle) {
+        if (angle > 45) {
+            return (float) Math.sin(Math.toRadians(angle)) * zoomLevel;
+        }
+        return (float) Math.cos(Math.toRadians(angle)) * zoomLevel;
     }
 }
