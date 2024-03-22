@@ -31,6 +31,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -44,10 +45,13 @@ import java.util.List;
 import java.util.Objects;
 
 @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NavigationChange {
     FragmentTransaction ft;
     fragmentTop_headbar f_headbar;
     BottomNavigationView bottomNavigationView;
+    BottomNavigationView bottomSelectView;
+    ImagesFragment imagesFragment;
+    private boolean isSelectionMode = false;
     private static final String tag = "PERMISSION_TAG";
     private static final int REQUEST_PERMISSIONS = 1234;
     private static final String [] PERMISSIONS = {
@@ -68,17 +72,19 @@ public class MainActivity extends AppCompatActivity {
             loadImages();
         }
 
-        f_headbar = fragmentTop_headbar.newInstance("first-blue");
+        f_headbar = fragmentTop_headbar.newInstance("first-headbar");
 
         ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.headerBar, f_headbar);
+        ft.replace(R.id.head_bar, f_headbar);
         ft.addToBackStack(null); // Add transaction to the back stack
         ft.commit();
 
-        ImagesFragment imagesFragment = new ImagesFragment();
+        imagesFragment = new ImagesFragment();
         AlbumFragment albumFragment = new AlbumFragment();
         MapFragment mapFragment = new MapFragment();
         SearchFragment searchFragment = new SearchFragment();
+
+        bottomSelectView = findViewById(R.id.selectToolbar);
 
         bottomNavigationView = findViewById(R.id.bottomToolbar);
         bottomNavigationView.setOnItemSelectedListener(item -> {
@@ -199,13 +205,32 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         // Check if images fragment is not loaded yet
-        if (bottomNavigationView.getSelectedItemId() == R.id.images) {
+        /*if (bottomNavigationView.getSelectedItemId() == R.id.images) {
             ImagesFragment imagesFragment = (ImagesFragment) getSupportFragmentManager().findFragmentById(R.id.mainFragment);
-            loadImages();
             if (imagesFragment == null) {
                 loadImages();
             }
-        }
+        }*/
     }
 
+    @Override
+    public void onBackPressed() {
+        if (imagesFragment != null) {
+            imagesFragment.ExitSelection();
+            return;
+        }
+        super.onBackPressed();
+    }
+
+    @Override
+    public void startSelection() {
+        bottomNavigationView.setVisibility(View.INVISIBLE);
+        bottomSelectView.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void endSelection() {
+        bottomNavigationView.setVisibility(View.VISIBLE);
+        bottomSelectView.setVisibility(View.INVISIBLE);
+    }
 }
