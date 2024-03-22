@@ -33,7 +33,6 @@
         android:thumb="@drawable/custom_thumb"
         android:tickMark="@drawable/tick_mark"
         android:tickMarkTintMode="multiply"
-        android:background="@color/black"
         android:id="@+id/testSeekBar"/>
 
 </RelativeLayout>

@@ -91,7 +91,7 @@ public class RotateFragment extends Fragment {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 rotateAngle.setText((i - 45) + "°");
-                editActivity.updateRotate(i - 45);
+                editActivity.updateRotate(i);
             }
 
             @Override

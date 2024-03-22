@@ -3,13 +3,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ImageView
+    <View
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:id="@+id/border"
+        android:background="@drawable/border"
+        android:layout_marginHorizontal="10dp"
+        android:visibility="invisible"/>
+
+    <com.github.chrisbanes.photoview.PhotoView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:src="@drawable/atrociraptor"
         android:layout_marginHorizontal="10dp"
         android:id="@+id/image"
-        android:scaleType="fitCenter"/>
+        android:scaleType="fitCenter" />
 
 </RelativeLayout>
