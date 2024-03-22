@@ -40,7 +40,8 @@
             app:layout_constraintStart_toEndOf="@+id/sort_button"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.533"
-            app:srcCompat="@drawable/calendar_icon_foreground" />
+            app:srcCompat="@drawable/calendar_icon_foreground"
+            tools:ignore="SpeakableTextPresentCheck" />
 
         <ImageButton
             android:id="@+id/select_all"

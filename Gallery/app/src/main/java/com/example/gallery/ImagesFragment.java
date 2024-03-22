@@ -3,6 +3,9 @@ package com.example.gallery;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -28,6 +31,7 @@ import java.util.Comparator;
 
 public class ImagesFragment extends Fragment {
     ImageButton selectAll;
+    Boolean active = false;
     ImageButton selectExit;
     private ArrayList<String> images;
     private boolean isSelectionMode;
@@ -69,6 +73,7 @@ public class ImagesFragment extends Fragment {
 
         gallery.setOnItemLongClickListener((parent, view, position, id) -> {
             if (!isSelectionMode) {
+                active=false;
                 callback.startSelection();
                 selectAll.setVisibility(View.VISIBLE);
                 selectExit.setVisibility(View.VISIBLE);
@@ -82,7 +87,19 @@ public class ImagesFragment extends Fragment {
         selectAll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                adapter.toggleSelectAll();
+                Drawable icon = getResources().getDrawable(R.drawable.ic_select_all_foreground);
+                if(active==false) {
+                    adapter.toggleSelectAll();
+                    active=true;
+                    icon.setColorFilter(Color.GREEN, PorterDuff.Mode.SRC_IN);
+                    selectAll.setImageDrawable(icon);
+                } else {
+                    adapter.toggleDeSelectAll();
+                    active=false;
+                    icon.clearColorFilter();
+                    selectAll.setImageDrawable(icon);
+                }
+
             }
         });
 
@@ -159,6 +176,10 @@ public class ImagesFragment extends Fragment {
             for (int i = 0; i < images.size(); i++) {
                 selectedPositions.add(i);
             }
+            notifyDataSetChanged();
+        }
+        public void toggleDeSelectAll() {
+            selectedPositions.clear();
             notifyDataSetChanged();
         }
 
