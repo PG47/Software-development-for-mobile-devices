@@ -3,6 +3,7 @@ package com.example.gallery;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -11,6 +12,8 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import android.provider.MediaStore;
@@ -217,6 +220,18 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             return listOfAllImages;
         }
 
+        public void confirmDeleteSelections() {
+            int count = selectedPositions.size();
+            AlertDialog.Builder builder = getBuilder("Delete selected items?",
+                    "This will delete " + count + " item(s) permanently.", new CallbackDialog() {
+                        @Override
+                        public void onPositiveClick() {
+                            deleteSelections();
+                        }
+                    });
+            builder.show();
+        }
+
         public void deleteSelections() {
             String[] projection = { MediaStore.Images.Media._ID };
 
@@ -257,23 +272,43 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         selectExit.setVisibility(View.INVISIBLE);
     }
 
+    private interface CallbackDialog {
+        void onPositiveClick();
+    }
+
+    @NonNull
+    private AlertDialog.Builder getBuilder(String title, String message, CallbackDialog callback) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
+        builder.setTitle(title);
+        builder.setMessage(message);
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                callback.onPositiveClick();
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {}
+        });
+        return builder;
+    }
+
     @Override
     public void share() {
-        adapter.deleteSelections();
+
     }
 
     @Override
     public void addAlbum() {
-        adapter.deleteSelections();
+
     }
 
     @Override
     public void secure() {
-        adapter.deleteSelections();
+
     }
 
     @Override
     public void delete() {
-        adapter.deleteSelections();
+        adapter.confirmDeleteSelections();
     }
 }
