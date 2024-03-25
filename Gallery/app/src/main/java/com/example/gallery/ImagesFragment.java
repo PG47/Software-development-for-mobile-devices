@@ -1,6 +1,8 @@
 package com.example.gallery;
 
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -29,7 +31,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-public class ImagesFragment extends Fragment {
+public class ImagesFragment extends Fragment implements SelectOptions {
     ImageButton selectAll;
     Boolean active = false;
     ImageButton selectExit;
@@ -88,7 +90,7 @@ public class ImagesFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Drawable icon = getResources().getDrawable(R.drawable.ic_select_all_foreground);
-                if(active==false) {
+                if (!active) {
                     adapter.toggleSelectAll();
                     active=true;
                     icon.setColorFilter(Color.GREEN, PorterDuff.Mode.SRC_IN);
@@ -214,6 +216,35 @@ public class ImagesFragment extends Fragment {
 
             return listOfAllImages;
         }
+
+        public void deleteSelections() {
+            String[] projection = { MediaStore.Images.Media._ID };
+
+            String selection = MediaStore.Images.Media.DATA + " = ?";
+            Uri queryUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+            ContentResolver contentResolver = getActivity().getContentResolver();
+
+            for (int i = 0; i < selectedPositions.size(); i++) {
+                String[] selectionArgs = new String[] { images.get(selectedPositions.get(i)) };
+
+                Cursor cursor = contentResolver.query(queryUri, projection, selection, selectionArgs, null);
+
+                assert cursor != null;
+                int column_index_data = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
+
+                if (cursor.moveToFirst()) {
+                    long id = cursor.getLong(column_index_data);
+                    Uri deleteUri = ContentUris.withAppendedId(queryUri, id);
+                    contentResolver.delete(deleteUri, null, null);
+                }
+
+                cursor.close();
+            }
+
+            images = getAllShownImagesPath(context);
+            notifyDataSetChanged();
+            ExitSelection();
+        }
     }
 
     public ImageAdapter getImageAdapter() {
@@ -224,5 +255,10 @@ public class ImagesFragment extends Fragment {
         callback.endSelection();
         selectAll.setVisibility(View.INVISIBLE);
         selectExit.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public void delete() {
+        adapter.deleteSelections();
     }
 }

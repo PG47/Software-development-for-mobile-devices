@@ -17,6 +17,7 @@ import android.app.ActivityManager;
 import android.database.Cursor;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -51,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements NavigationChange 
     BottomNavigationView bottomNavigationView;
     BottomNavigationView bottomSelectView;
     ImagesFragment imagesFragment;
+    SelectOptions selectOptions;
     private boolean isSelectionMode = false;
     private static final String tag = "PERMISSION_TAG";
     private static final int REQUEST_PERMISSIONS = 1234;
@@ -84,7 +86,28 @@ public class MainActivity extends AppCompatActivity implements NavigationChange 
         MapFragment mapFragment = new MapFragment();
         SearchFragment searchFragment = new SearchFragment();
 
+        selectOptions = (SelectOptions) imagesFragment;
+
         bottomSelectView = findViewById(R.id.selectToolbar);
+        bottomSelectView.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.share) {
+
+                return true;
+            } else if (itemId == R.id.add) {
+
+                return true;
+            } else if (itemId == R.id.secure) {
+
+                return true;
+            } else if (itemId == R.id.delete) {
+                selectOptions.delete();
+                return true;
+            }
+
+            return false;
+        });
 
         bottomNavigationView = findViewById(R.id.bottomToolbar);
         bottomNavigationView.setOnItemSelectedListener(item -> {
