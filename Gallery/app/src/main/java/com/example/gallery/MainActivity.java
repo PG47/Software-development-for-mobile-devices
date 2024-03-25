@@ -93,13 +93,13 @@ public class MainActivity extends AppCompatActivity implements NavigationChange 
             int itemId = item.getItemId();
 
             if (itemId == R.id.share) {
-
+                selectOptions.share();
                 return true;
             } else if (itemId == R.id.add) {
-
+                selectOptions.addAlbum();
                 return true;
             } else if (itemId == R.id.secure) {
-
+                selectOptions.secure();
                 return true;
             } else if (itemId == R.id.delete) {
                 selectOptions.delete();

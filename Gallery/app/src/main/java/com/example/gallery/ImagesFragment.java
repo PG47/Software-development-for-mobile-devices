@@ -258,6 +258,21 @@ public class ImagesFragment extends Fragment implements SelectOptions {
     }
 
     @Override
+    public void share() {
+        adapter.deleteSelections();
+    }
+
+    @Override
+    public void addAlbum() {
+        adapter.deleteSelections();
+    }
+
+    @Override
+    public void secure() {
+        adapter.deleteSelections();
+    }
+
+    @Override
     public void delete() {
         adapter.deleteSelections();
     }
