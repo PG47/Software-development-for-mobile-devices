@@ -11,6 +11,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
@@ -44,7 +45,7 @@ public class SaveBackFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        RelativeLayout layoutSaveBack = (RelativeLayout)inflater.inflate(R.layout.fragment_save_back, null);
+        ConstraintLayout layoutSaveBack = (ConstraintLayout)inflater.inflate(R.layout.fragment_save_back, null);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (getActivity() instanceof EditActivity) {

@@ -17,7 +17,7 @@
 
     <FrameLayout
         android:id="@+id/mainFragment"
-        android:layout_width="411dp"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="#99000000"
         app:layout_constraintBottom_toTopOf="@+id/bottomToolbar"

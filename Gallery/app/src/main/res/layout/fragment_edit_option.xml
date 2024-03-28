@@ -29,7 +29,7 @@
         <ImageButton
             android:layout_width="66dp"
             android:layout_height="66dp"
-            android:src="@drawable/ic_launcher_foreground"
+            android:src="@drawable/ic_filter_foreground"
             android:background="#0000"
             android:id="@+id/st"/>
 
@@ -43,7 +43,7 @@
         <ImageButton
             android:layout_width="66dp"
             android:layout_height="66dp"
-            android:src="@drawable/ic_launcher_foreground"
+            android:src="@drawable/ic_crop_foreground"
             android:background="#0000"
             android:id="@+id/cropping"/>
 
