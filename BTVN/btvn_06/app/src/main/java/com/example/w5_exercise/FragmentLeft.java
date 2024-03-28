@@ -148,17 +148,18 @@ public class FragmentLeft extends Fragment {
 
     private void createOrLoadStudentData() {
         File dbFile = getActivity().getDatabasePath("DB_BTVN06");
+        creatHocSinhData();
         if (!dbFile.exists()) {
             // Database does not exist, create it
-            creatStudentData();
+            creatLopData();
+            creatHocSinhData();
         } else {
             // Database exists, load data
-            creatStudentData();
             loadStudentData();
         }
     }
 
-    private void creatStudentData() {
+    private void creatLopData() {
         // Open or create the database
         SQLiteDatabase db = SQLiteDatabase.openDatabase(myDbPath, null, SQLiteDatabase.CREATE_IF_NECESSARY);
 
@@ -166,15 +167,40 @@ public class FragmentLeft extends Fragment {
         db.beginTransaction();
         try {
             // Create the table if it doesn't exist
-            db.execSQL("CREATE TABLE LOP (MaLop INTEGER PRIMARY KEY AUTOINCREMENT, TenLop TEXT);");
-            db.execSQL("INSERT INTO LOP (TenLop) VALUES ('KHTN');");
-            db.setTransactionSuccessful();
-            db.execSQL("CREATE TABLE HOCSINH (MaHS TEXT PRIMARY KEY AUTOINCREMENT, TenHS TEXT, MaLop INTEGER, DTB INTGER);");
+            db.execSQL("CREATE TABLE IF NOT EXISTS LOP (MaLop INTEGER PRIMARY KEY AUTOINCREMENT, TenLop TEXT);");
 
             // Insert data into the LOP table
+            db.execSQL("INSERT INTO LOP (TenLop) VALUES ('KHTN');");
 
+            // Set transaction as successful
+            db.setTransactionSuccessful();
+        } catch (Exception e) {
+            Log.e("DatabaseError", "Error performing database operations: " + e.getMessage());
+        } finally {
+            // End transaction
+            db.endTransaction();
+
+            // Close the database
+            db.close();
+        }
+    }
+    private void creatHocSinhData() {
+        // Open or create the database
+        SQLiteDatabase db = SQLiteDatabase.openDatabase(myDbPath, null, SQLiteDatabase.CREATE_IF_NECESSARY);
+
+        // Begin transaction
+        db.beginTransaction();
+        try {
+            // Create the table if it doesn't exist
+            db.execSQL("CREATE TABLE HOCSINH (ID INTEGER PRIMARY KEY AUTOINCREMENT, MaHS TEXT, TenHS TEXT, MaLop INTEGER, DTB INTEGER);");
 
             // Insert data into the HOCSINH table
+            db.execSQL("CREATE TRIGGER generate_MaHS AFTER INSERT ON HOCSINH " +
+                    "BEGIN " +
+                    "UPDATE HOCSINH SET MaHS = 'A'||'_'||NEW.ID WHERE rowid = NEW.rowid; " +
+                    "END;");
+
+
             db.execSQL("INSERT INTO HOCSINH (MaHS, TenHS, MaLop, DTB) VALUES ('A1_9829', 'Lê Thị A', 1, 8);");
             db.execSQL("INSERT INTO HOCSINH (MaHS, TenHS, MaLop, DTB) VALUES ('A1_1809', 'Lê Thị B', 1, 9);");
             db.execSQL("INSERT INTO HOCSINH (MaHS, TenHS, MaLop, DTB) VALUES ('A2_3509', 'Lê Thị C', 1, 10);");
