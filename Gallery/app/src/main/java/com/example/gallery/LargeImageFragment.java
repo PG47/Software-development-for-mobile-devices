@@ -20,7 +20,6 @@ import com.bumptech.glide.Glide;
 public class LargeImageFragment extends Fragment {
     DetailsActivity mainActivity;
     Context context = null;
-    ImageButton getBack;
     ImageView selectedImage;
 
     public static LargeImageFragment newInstance(String strArg) {
@@ -62,16 +61,6 @@ public class LargeImageFragment extends Fragment {
         if (this.selectedImage != null) {
             Glide.with(context).load(selectedImage).centerCrop().into(this.selectedImage);
         }
-
-        getBack = (ImageButton) layoutImage.findViewById(R.id.getBackButton);
-        getBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mainActivity != null) {
-                    mainActivity.finish();
-                }
-            }
-        });
 
         return layoutImage;
     }

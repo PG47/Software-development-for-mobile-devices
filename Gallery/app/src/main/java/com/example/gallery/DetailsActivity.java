@@ -24,6 +24,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 public class DetailsActivity extends AppCompatActivity {
     FragmentTransaction ft;
+    HeadDetailsFragment headDetailsFragment;
     LargeImageFragment fragmentImage;
     OptionFragment fragmentOption;
 
@@ -32,6 +33,7 @@ public class DetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
 
+        headDetailsFragment = HeadDetailsFragment.newInstance("header");
         fragmentImage = LargeImageFragment.newInstance("image");
         fragmentOption = OptionFragment.newInstance("option");
 
@@ -39,8 +41,15 @@ public class DetailsActivity extends AppCompatActivity {
         String selectedImage = intent.getStringExtra("SelectedImage");
         Bundle bundle = new Bundle();
         bundle.putString("selectedImage", selectedImage);
+
+        headDetailsFragment.setArguments(bundle);
         fragmentImage.setArguments(bundle);
         fragmentOption.setArguments(bundle);
+
+        ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.headerImage, headDetailsFragment);
+        ft.addToBackStack(null); // Add transaction to the back stack
+        ft.commit();
 
         ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.detailsImage, fragmentImage);
