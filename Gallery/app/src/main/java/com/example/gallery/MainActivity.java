@@ -11,10 +11,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.ActivityManager;
-import android.database.Cursor;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -22,35 +18,21 @@ import android.os.Build;
 import android.os.Bundle;
 import android.Manifest;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.GridView;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
 public class MainActivity extends AppCompatActivity implements NavigationChange {
     FragmentTransaction ft;
-    fragmentTop_headbar f_headbar;
+    HeadBarFragment f_headbar;
     BottomNavigationView bottomNavigationView;
     BottomNavigationView bottomSelectView;
     ImagesFragment imagesFragment;
+    SelectOptions selectOptions;
     private boolean isSelectionMode = false;
     private static final String tag = "PERMISSION_TAG";
     private static final int REQUEST_PERMISSIONS = 1234;
@@ -72,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements NavigationChange 
             loadImages();
         }
 
-        f_headbar = fragmentTop_headbar.newInstance("first-headbar");
+        f_headbar = HeadBarFragment.newInstance("first-headbar");
 
         ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.head_bar, f_headbar);
@@ -84,7 +66,28 @@ public class MainActivity extends AppCompatActivity implements NavigationChange 
         MapFragment mapFragment = new MapFragment();
         SearchFragment searchFragment = new SearchFragment();
 
+        selectOptions = (SelectOptions) imagesFragment;
+
         bottomSelectView = findViewById(R.id.selectToolbar);
+        bottomSelectView.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.share) {
+                selectOptions.share();
+                return true;
+            } else if (itemId == R.id.add) {
+                selectOptions.addAlbum();
+                return true;
+            } else if (itemId == R.id.secure) {
+                selectOptions.secure();
+                return true;
+            } else if (itemId == R.id.delete) {
+                selectOptions.delete();
+                return true;
+            }
+
+            return false;
+        });
 
         bottomNavigationView = findViewById(R.id.bottomToolbar);
         bottomNavigationView.setOnItemSelectedListener(item -> {

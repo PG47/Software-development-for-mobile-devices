@@ -14,9 +14,12 @@ import android.widget.RelativeLayout;
 
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 public class OptionFragment extends Fragment {
     DetailsActivity mainActivity;
     LinearLayout editButton;
+    BottomNavigationView bottomOptionView;
     public static OptionFragment newInstance(String strArg1) {
         OptionFragment fragment = new OptionFragment();
         Bundle bundle = new Bundle();
@@ -47,15 +50,29 @@ public class OptionFragment extends Fragment {
 
         String selectedImage = getArguments().getString("selectedImage");
 
-        editButton = (LinearLayout) layoutOption.findViewById(R.id.option2);
-        editButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        bottomOptionView = layoutOption.findViewById(R.id.optionToolbar);
+        bottomOptionView.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.share) {
+
+                return true;
+            } else if (itemId == R.id.edit) {
                 Intent intent = new Intent(requireContext(), EditActivity.class);
                 intent.putExtra("SelectedImage", selectedImage);
                 startActivity(intent);
+                return true;
+            } else if (itemId == R.id.camera) {
+
+                return true;
+            } else if (itemId == R.id.delete) {
+
+                return true;
             }
+
+            return false;
         });
+
         return layoutOption;
     }
 }

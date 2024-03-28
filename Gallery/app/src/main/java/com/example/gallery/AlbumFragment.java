@@ -1,64 +1,156 @@
 package com.example.gallery;
 
+import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link AlbumFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Objects;
+
 public class AlbumFragment extends Fragment {
-
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private ArrayList<String> albums;
+    private ArrayList<Uri> albumsImage;
+    AlbumAdapter adapter;
 
     public AlbumFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment AlbumFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static AlbumFragment newInstance(String param1, String param2) {
-        AlbumFragment fragment = new AlbumFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_album, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_album, container, false);
+        GridView gallery = rootView.findViewById(R.id.albumsGrid);
+        adapter = new AlbumAdapter(requireActivity());
+        gallery.setAdapter(adapter);
+
+        return rootView;
+    }
+
+    public class AlbumAdapter extends BaseAdapter {
+        private final Activity context;
+
+        public AlbumAdapter(Activity localContext) {
+            context = localContext;
+            albums = getAllShownAlbumsPath(context);
+        }
+
+        public int getCount() {
+            return albums.size();
+        }
+
+        public Object getItem(int position) {
+            return position;
+        }
+
+        public long getItemId(int position) {
+            return position;
+        }
+
+        public View getView(final int position, View convertView, ViewGroup parent) {
+            final View layoutView;
+
+            if (convertView == null) {
+                layoutView = (View) LayoutInflater.from(parent.getContext()).inflate(R.layout.item_album, parent, false);
+            } else {
+                layoutView = (View) convertView;
+            }
+
+            TextView albumName = layoutView.findViewById(R.id.albumName);
+            albumName.setText(albums.get(position));
+
+            ImageView albumImage = layoutView.findViewById(R.id.albumImage);
+            Glide.with(context).load(albumsImage.get(position)).centerCrop().into(albumImage);
+
+            return layoutView;
+        }
+
+        private ArrayList<String> getAllShownAlbumsPath(Activity activity) {
+            Uri uri;
+            Cursor cursor;
+            int column_index_name;
+            int column_index_id;
+            ArrayList<String> listOfAllAlbums = new ArrayList<>();
+            ArrayList<Uri> listOfAllAlbumsImage = new ArrayList<>();
+            uri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+
+            String[] projection = { MediaStore.Images.Media.BUCKET_DISPLAY_NAME,
+                    MediaStore.Images.Media.BUCKET_ID };
+            cursor = activity.getContentResolver().query(uri, projection, null,
+                    null, null);
+
+            assert cursor != null;
+            column_index_name = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
+            column_index_id = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_ID);
+
+            while (cursor.moveToNext()) {
+                String absolutePathOfAlbum = cursor.getString(column_index_name);
+                if (!listOfAllAlbums.contains(absolutePathOfAlbum)) {
+                    listOfAllAlbums.add(absolutePathOfAlbum);
+
+                    String albumID = cursor.getString(column_index_id);
+                    String[] projectionImage = { MediaStore.Images.Media._ID };
+                    String selection = MediaStore.Images.Media.BUCKET_ID + " = ?";
+                    String[] selectionArgs = { albumID };
+
+                    Cursor cursorImage = activity.getContentResolver().query(uri, projectionImage,
+                            selection, selectionArgs, null);
+
+                    Uri imageUri = null;
+                    assert cursorImage != null;
+                    if (cursorImage.moveToFirst()) {
+                        int column_index_image = cursorImage.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
+                        long imageID = cursorImage.getLong(column_index_image);
+
+                        imageUri = Uri.withAppendedPath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "" + imageID);
+                        listOfAllAlbumsImage.add(imageUri);
+
+                        cursorImage.close();
+                    }
+                }
+            }
+
+            cursor.close();
+
+            albumsImage = listOfAllAlbumsImage;
+            return listOfAllAlbums;
+        }
     }
 }
