@@ -101,7 +101,7 @@ public class RotateFragment extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
+                editActivity.startToZoom();
             }
         });
 
