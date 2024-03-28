@@ -42,5 +42,6 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
-    implementation("com.github.chrisbanes:PhotoView:2.3.0")
+    implementation("com.github.bfrachia:android-image-cropper:2.7.0")
+
 }

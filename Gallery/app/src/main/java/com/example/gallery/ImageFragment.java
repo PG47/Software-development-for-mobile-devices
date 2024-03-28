@@ -1,9 +1,20 @@
 package com.example.gallery;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,23 +22,29 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
-import android.graphics.Matrix;
-import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
-import android.view.View;
-import com.github.chrisbanes.photoview.PhotoView;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageActivity;
+import com.theartofdev.edmodo.cropper.CropImageOptions;
+import com.theartofdev.edmodo.cropper.CropImageView;
+
+import java.io.File;
+
 
 public class ImageFragment extends Fragment {
     EditActivity editActivity;
     Context context;
-    PhotoView myImage;
     float zoomLevel = (float) Math.sqrt(2);
-    View theBorder;
-    int imageHeight;
-
+    private CropImageView cropImageView;
+    private Uri imageUri;
+    private ImageView myImage;
+    private CustomCroppingFrame croppingFrame;
+    private Bitmap originalBitmap;
+    private Bitmap adjustedBitmap;
+    String selectedImage;
     public static ImageFragment newInstance(String strArg) {
         ImageFragment fragment = new ImageFragment();
         Bundle args = new Bundle();
@@ -51,6 +68,17 @@ public class ImageFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof EditActivity) {
+            editActivity = (EditActivity) context;
+        } else {
+            throw new IllegalStateException("EditActivity must implement callbacks");
+        }
+    }
+
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         RelativeLayout layoutImage = (RelativeLayout)inflater.inflate(R.layout.fragment_image, null);
 
@@ -62,28 +90,142 @@ public class ImageFragment extends Fragment {
             }
         }
 
-        String selectedImage = getArguments().getString("selectedImage");
-        myImage = (PhotoView) layoutImage.findViewById(R.id.image);
-        theBorder = (View) layoutImage.findViewById(R.id.border);
+        selectedImage = getArguments().getString("selectedImage");
+        originalBitmap = BitmapFactory.decodeFile(selectedImage);
+        adjustedBitmap = originalBitmap;
 
-        imageHeight = myImage.getHeight();
-        if (selectedImage != null) {
-            Glide.with(context).load(selectedImage).centerCrop().into(this.myImage);
-        }
+        myImage = (ImageView) layoutImage.findViewById(R.id.showImageView);
+        myImage.setImageBitmap(originalBitmap);
+
+//        if (selectedImage != null) {
+//            Glide.with(context).load(selectedImage).centerCrop().into(this.myImage);
+//        }
+//        cropImageView = (CropImageView) layoutImage.findViewById(com.theartofdev.edmodo.cropper.R.id.cropImageView);
+//        originalBitmap = BitmapFactory.decodeFile(selectedImage);
+//
+//        File file = new File(selectedImage);
+//        imageUri = FileProvider.getUriForFile(context, context.getPackageName() + ".provider", file);
+//        cropImageView.setImageUriAsync(imageUri);
+//        cropImageView.setAspectRatio(1, 1);
+//        cropImageView.setOnSetImageUriCompleteListener(new CropImageView.OnSetImageUriCompleteListener() {
+//            @Override
+//            public void onSetImageUriComplete(CropImageView view, Uri uri, Exception error) {
+//                if (error != null) {
+//                    // Handle error
+//                    Log.e("ImageLoadError", "Error loading image: " + error.getMessage());
+//                } else {
+//                    // Image loaded successfully
+//                    Log.d("ImageLoadSuccess", "Image loaded successfully!");
+//                }
+//            }
+//        });
+//
+//        cropImageView.setVisibility(View.VISIBLE);
+//        cropImageView.setFixedAspectRatio(true);
+//        cropImageView.setAutoZoomEnabled(false);
+//        cropImageView.setOnCropImageCompleteListener(new CropImageView.OnCropImageCompleteListener() {
+//            @Override
+//            public void onCropImageComplete(CropImageView view, CropImageView.CropResult result) {
+//                Uri croppedImageUri = result.getUri();
+//                cropImageView.setImageUriAsync(croppedImageUri);
+//            }
+//        });
 
         return layoutImage;
     }
 
     public void executeRotate(int value) {
-        myImage.setRotation(value - 45);
         float scaleFactor = calculateScaleFactor(value);
-        myImage.setScaleX(scaleFactor);
-        myImage.setScaleY(scaleFactor);
+        Matrix matrix = new Matrix();
+        matrix.postRotate(value - 45);
+        matrix.postScale(scaleFactor, scaleFactor);
+        Bitmap rotatedAndScaled = Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.getWidth(), originalBitmap.getHeight(), matrix, true);
+        cropImageView.setImageBitmap(rotatedAndScaled);
+    }
+
+    public void executeChangeBrightness(int value) {
+        float brightnessFactor = Math.max(0, Math.min(100, value));;
+        int width = adjustedBitmap.getWidth();
+        int height = adjustedBitmap.getHeight();
+
+        int[] pixels = new int[width * height];
+        originalBitmap.getPixels(pixels, 0, width, 0, 0, width, height);
+
+        for (int i = 0; i < pixels.length; i++) {
+            int alpha = (pixels[i] >> 24) & 0xFF;
+            int red = (pixels[i] >> 16) & 0xFF;
+            int green = (pixels[i] >> 8) & 0xFF;
+            int blue = pixels[i] & 0xFF;
+
+            red = (int) (red + brightnessFactor);
+            green = (int) (green + brightnessFactor);
+            blue = (int) (blue + brightnessFactor);
+
+            red = Math.min(255, Math.max(0, red));
+            green = Math.min(255, Math.max(0, green));
+            blue = Math.min(255, Math.max(0, blue));
+
+            pixels[i] = (alpha << 24) | (red << 16) | (green << 8) | blue;
+        }
+
+        adjustedBitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
+        myImage.setImageBitmap(adjustedBitmap);
+    }
+
+    public void executeChangeContrast(int value) {
+        float contrastLevel = value / 10F;
+        int width = adjustedBitmap.getWidth();
+        int height = adjustedBitmap.getHeight();
+
+        int[] pixels = new int[width * height];
+        adjustedBitmap.getPixels(pixels, 0, width, 0, 0, width, height);
+
+        for (int i = 0; i < pixels.length; i++) {
+            int alpha = (pixels[i] >> 24) & 0xFF;
+            int red = (pixels[i] >> 16) & 0xFF;
+            int green = (pixels[i] >> 8) & 0xFF;
+            int blue = pixels[i] & 0xFF;
+
+            red = (int) ((red - 128) * contrastLevel + 128);
+            green = (int) ((green - 128) * contrastLevel + 128);
+            blue = (int) ((blue - 128) * contrastLevel + 128);
+
+            red = Math.min(255, Math.max(0, red));
+            green = Math.min(255, Math.max(0, green));
+            blue = Math.min(255, Math.max(0, blue));
+
+            pixels[i] = (alpha << 24) | (red << 16) | (green << 8) | blue;
+        }
+
+        adjustedBitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
+        myImage.setImageBitmap(adjustedBitmap);
+    }
+
+    public void executeZoom() {
+        int cropWidth = 450; // Width of the crop rectangle
+        int cropHeight = 300; // Height of the crop rectangle
+
+// Calculate the position of the crop rectangle relative to the center of the cropImageView
+        int centerX = 1000 / 2; // X-coordinate of the center of the cropImageView
+        int centerY = 1500 / 2; // Y-coordinate of the center of the cropImageView
+        int left = centerX - (cropWidth / 2); // X-coordinate of the left edge of the crop rectangle
+        int top = centerY - (cropHeight / 2); // Y-coordinate of the top edge of the crop rectangle
+        int right = left + cropWidth; // X-coordinate of the right edge of the crop rectangle
+        int bottom = top + cropHeight;
+        Log.d("test value", "width: " + cropImageView.getWidth() + "height: " + cropImageView.getHeight() + ", " + left + ", " + top + ", " + right + ", " + bottom);
+        cropImageView.setCropRect(new Rect(left, top, right, bottom));
+        cropImageView.setAutoZoomEnabled(true);
     }
     private float calculateScaleFactor(float angle) {
         if (angle > 45) {
             return (float) Math.sin(Math.toRadians(angle)) * zoomLevel;
         }
         return (float) Math.cos(Math.toRadians(angle)) * zoomLevel;
+    }
+
+    private void startCroppingActivity() {
+        CropImage.activity(imageUri)
+                .setGuidelines(CropImageView.Guidelines.ON)
+                .start(requireActivity());
     }
 }

@@ -20,24 +20,24 @@
         android:text="Brightness:"
         android:textColor="@color/black"
         android:layout_below="@+id/actionDone"
-        android:id="@+id/info"/>
+        android:id="@+id/changeType"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:text="60"
+        android:text="0"
         android:textColor="@color/black"
-        android:layout_below="@+id/info"
+        android:layout_below="@+id/changeType"
         android:id="@+id/value"/>
 
     <SeekBar
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/value"
-        android:layout_marginTop="8dp"
         android:progressTint="#FFCF81"
         android:max="100"
-        android:progress="0" />
+        android:progress="0"
+        android:id="@+id/seekbar"/>
 
 </RelativeLayout>

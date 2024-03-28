@@ -1,100 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:background="#808080">
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true">
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:id="@+id/option1">
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/optionToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        app:itemIconSize="60dp"
+        app:itemPaddingTop="-3dp"
+        app:labelVisibilityMode="labeled"
+        app:itemActiveIndicatorStyle="@color/white"
+        app:menu="@menu/bottom_option_menu">
 
-            <ImageView
-                android:layout_width="100dp"
-                android:layout_height="50dp"
-                android:scaleType="centerCrop"
-                android:src="@mipmap/share_icon_foreground" />
-            <TextView
-                android:layout_width="100dp"
-                android:layout_height="wrap_content"
-                android:text="Share"
-                android:textSize="25dp"
-                android:textColor="@color/white"
-                android:textAlignment="center"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:id="@+id/option2"
-            android:layout_toRightOf="@+id/option1"
-            android:layout_marginLeft="2dp">
-
-            <ImageView
-                android:layout_width="100dp"
-                android:layout_height="50dp"
-                android:scaleType="centerCrop"
-                android:src="@mipmap/edit_image_icon_foreground" />
-            <TextView
-                android:layout_width="100dp"
-                android:layout_height="wrap_content"
-                android:text="Edit"
-                android:textSize="25dp"
-                android:textColor="@color/white"
-                android:textAlignment="center"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_toRightOf="@id/option2"
-            android:layout_marginLeft="2dp"
-            android:id="@+id/option3">
-
-            <ImageView
-                android:layout_width="100dp"
-                android:layout_height="50dp"
-                android:scaleType="centerCrop"
-                android:src="@mipmap/camera_icon_foreground" />
-            <TextView
-                android:layout_width="100dp"
-                android:layout_height="wrap_content"
-                android:text="Camera"
-                android:textSize="25dp"
-                android:textColor="@color/white"
-                android:textAlignment="center"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:id="@+id/option4"
-            android:layout_marginLeft="2dp"
-            android:layout_toRightOf="@id/option3">
-
-            <ImageView
-                android:layout_width="100dp"
-                android:layout_height="50dp"
-                android:scaleType="centerCrop"
-                android:src="@mipmap/delete_icon_foreground" />
-            <TextView
-                android:layout_width="100dp"
-                android:layout_height="wrap_content"
-                android:text="Delete"
-                android:textSize="25dp"
-                android:textColor="@color/white"
-                android:textAlignment="center"/>
-        </LinearLayout>
-    </LinearLayout>
+    </com.google.android.material.bottomnavigation.BottomNavigationView>
 
 </RelativeLayout>

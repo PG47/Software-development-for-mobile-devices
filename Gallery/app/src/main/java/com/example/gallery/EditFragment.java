@@ -16,7 +16,7 @@ import androidx.fragment.app.FragmentTransaction;
 public class EditFragment extends Fragment {
     EditActivity editActivity;
     Context context;
-    ImageButton rotate, addText, st1, brightness, crop, contrast;
+    ImageButton rotate, addText, others, brightness, crop, contrast;
     FragmentTransaction transaction;
 
     public static EditFragment newInstance(String strArg) {
@@ -55,7 +55,7 @@ public class EditFragment extends Fragment {
 
         rotate = (ImageButton) layoutOption.findViewById(R.id.rotate);
         addText = (ImageButton) layoutOption.findViewById(R.id.text);
-        st1 = (ImageButton) layoutOption.findViewById(R.id.st);
+        others = (ImageButton) layoutOption.findViewById(R.id.others);
         brightness = (ImageButton) layoutOption.findViewById(R.id.brightness);
         crop = (ImageButton) layoutOption.findViewById(R.id.cropping);
         contrast = (ImageButton) layoutOption.findViewById(R.id.contrast);
@@ -80,7 +80,7 @@ public class EditFragment extends Fragment {
             }
         });
 
-        st1.setOnClickListener(new View.OnClickListener() {
+        others.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (editActivity != null) {

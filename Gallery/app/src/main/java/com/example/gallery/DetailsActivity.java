@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
@@ -18,20 +19,24 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentTransaction;
 
 public class DetailsActivity extends AppCompatActivity {
     FragmentTransaction ft;
+    HeadDetailsFragment headDetailsFragment;
     LargeImageFragment fragmentImage;
     OptionFragment fragmentOption;
+    Boolean optionsHidden;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
 
+        headDetailsFragment = HeadDetailsFragment.newInstance("header");
         fragmentImage = LargeImageFragment.newInstance("image");
         fragmentOption = OptionFragment.newInstance("option");
 
@@ -39,8 +44,15 @@ public class DetailsActivity extends AppCompatActivity {
         String selectedImage = intent.getStringExtra("SelectedImage");
         Bundle bundle = new Bundle();
         bundle.putString("selectedImage", selectedImage);
+
+        headDetailsFragment.setArguments(bundle);
         fragmentImage.setArguments(bundle);
         fragmentOption.setArguments(bundle);
+
+        ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.headerImage, headDetailsFragment);
+        ft.addToBackStack(null); // Add transaction to the back stack
+        ft.commit();
 
         ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.detailsImage, fragmentImage);
@@ -59,5 +71,24 @@ public class DetailsActivity extends AppCompatActivity {
             }
         };
         getOnBackPressedDispatcher().addCallback(this,onBackPressedCallback);
+
+        optionsHidden = false;
+
+        ConstraintLayout layout = (ConstraintLayout) findViewById(R.id.detailsLayout);
+        layout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ft = getSupportFragmentManager().beginTransaction();
+                ft.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+                if (!optionsHidden) {
+                    ft.hide(headDetailsFragment).hide(fragmentOption);
+                }
+                else {
+                    ft.show(headDetailsFragment).show(fragmentOption);
+                }
+                ft.commit();
+                optionsHidden = !optionsHidden;
+            }
+        });
     }
 }

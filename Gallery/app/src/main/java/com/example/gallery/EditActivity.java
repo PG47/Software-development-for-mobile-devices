@@ -50,4 +50,7 @@ public class EditActivity extends AppCompatActivity {
     public void updateRotate(int value) {
         fragmentImage.executeRotate(value);
     }
+    public void startToZoom() {fragmentImage.executeZoom();}
+    public void changeBrightness(int value) { fragmentImage.executeChangeBrightness(value); }
+    public void changeContrast(int value) { fragmentImage.executeChangeContrast(value); }
 }
