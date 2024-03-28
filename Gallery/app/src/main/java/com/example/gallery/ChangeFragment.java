@@ -3,22 +3,27 @@ package com.example.gallery;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 public class ChangeFragment extends Fragment {
-    EditActivity editActivity;
-    Context context;
-    FragmentTransaction transaction;
-    Button finishChange;
-    static String changeType;
+    private EditActivity editActivity;
+    private Context context;
+    private FragmentTransaction transaction;
+    private Button finishChange;
+    private static String changeType;
+    private TextView type;
+    private TextView value;
+    private SeekBar scrollValue;
 
     public static ChangeFragment newInstance(String strArg) {
         ChangeFragment fragment = new ChangeFragment();
@@ -44,6 +49,16 @@ public class ChangeFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof EditActivity) {
+            editActivity = (EditActivity) context;
+        } else {
+            throw new IllegalStateException("EditActivity must implement callbacks");
+        }
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         RelativeLayout changeOption = (RelativeLayout)inflater.inflate(R.layout.fragment_change, null);
 
@@ -55,12 +70,36 @@ public class ChangeFragment extends Fragment {
             }
         }
 
-        TextView textView = changeOption.findViewById(R.id.info);
-        TextView textView1 = changeOption.findViewById(R.id.value);
-        textView.setText(changeType);
-        textView1.setText("0");
-
+        type = changeOption.findViewById(R.id.changeType);
+        value = changeOption.findViewById(R.id.value);
+        scrollValue = changeOption.findViewById(R.id.seekbar);
         finishChange = (Button) changeOption.findViewById(R.id.actionDone);
+
+        type.setText(changeType);
+        value.setText("0");
+
+        scrollValue.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                if (changeType == "Brightness") {
+                    editActivity.changeBrightness(i);
+                    value.setText(String.valueOf(i));
+                } else if (changeType == "Contrast") {
+                    editActivity.changeContrast(i);
+                    value.setText(String.valueOf(i));
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
         finishChange.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

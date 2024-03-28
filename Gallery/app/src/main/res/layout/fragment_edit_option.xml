@@ -31,7 +31,7 @@
             android:layout_height="66dp"
             android:src="@drawable/ic_launcher_foreground"
             android:background="#0000"
-            android:id="@+id/st"/>
+            android:id="@+id/others"/>
 
         <ImageButton
             android:layout_width="66dp"
