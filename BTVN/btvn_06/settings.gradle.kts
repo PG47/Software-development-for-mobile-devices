@@ -13,6 +13,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "W5-Exercise"
+rootProject.name = "btvn_06"
 include(":app")
  
