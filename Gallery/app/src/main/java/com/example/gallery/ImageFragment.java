@@ -145,22 +145,30 @@ public class ImageFragment extends Fragment {
 
     public void executeChangeBrightness(int value) {
         float brightnessFactor = Math.max(0, Math.min(100, value));;
-        float scaleFactor = brightnessFactor / 50.0f;
-        ColorMatrix colorMatrix = new ColorMatrix();
-        colorMatrix.set(new float[]{
-                scaleFactor, 0, 0, 0, 0,
-                0, scaleFactor, 0, 0, 0,
-                0, 0, scaleFactor, 0, 0,
-                0, 0, 0, 1, 0
-        });
-        Paint paint = new Paint();
-        paint.setColorFilter(new ColorMatrixColorFilter(colorMatrix));
+        int width = adjustedBitmap.getWidth();
+        int height = adjustedBitmap.getHeight();
 
-        adjustedBitmap = Bitmap.createBitmap(adjustedBitmap.getWidth(), adjustedBitmap.getHeight(), adjustedBitmap.getConfig());
+        int[] pixels = new int[width * height];
+        originalBitmap.getPixels(pixels, 0, width, 0, 0, width, height);
 
-        Canvas canvas = new Canvas(adjustedBitmap);
-        canvas.drawBitmap(adjustedBitmap, 0, 0, paint);
+        for (int i = 0; i < pixels.length; i++) {
+            int alpha = (pixels[i] >> 24) & 0xFF;
+            int red = (pixels[i] >> 16) & 0xFF;
+            int green = (pixels[i] >> 8) & 0xFF;
+            int blue = pixels[i] & 0xFF;
 
+            red = (int) (red + brightnessFactor);
+            green = (int) (green + brightnessFactor);
+            blue = (int) (blue + brightnessFactor);
+
+            red = Math.min(255, Math.max(0, red));
+            green = Math.min(255, Math.max(0, green));
+            blue = Math.min(255, Math.max(0, blue));
+
+            pixels[i] = (alpha << 24) | (red << 16) | (green << 8) | blue;
+        }
+
+        adjustedBitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
         myImage.setImageBitmap(adjustedBitmap);
     }
 
