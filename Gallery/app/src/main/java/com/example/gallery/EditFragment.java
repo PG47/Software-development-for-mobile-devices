@@ -1,6 +1,7 @@
 package com.example.gallery;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,11 +14,13 @@ import android.widget.RelativeLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 public class EditFragment extends Fragment {
     EditActivity editActivity;
     Context context;
-    ImageButton rotate, addText, others, brightness, crop, contrast;
     FragmentTransaction transaction;
+    BottomNavigationView bottomEditView;
 
     public static EditFragment newInstance(String strArg) {
         EditFragment fragment = new EditFragment();
@@ -53,73 +56,52 @@ public class EditFragment extends Fragment {
             }
         }
 
-        rotate = (ImageButton) layoutOption.findViewById(R.id.rotate);
-        addText = (ImageButton) layoutOption.findViewById(R.id.text);
-        others = (ImageButton) layoutOption.findViewById(R.id.others);
-        brightness = (ImageButton) layoutOption.findViewById(R.id.brightness);
-        crop = (ImageButton) layoutOption.findViewById(R.id.cropping);
-        contrast = (ImageButton) layoutOption.findViewById(R.id.contrast);
+        bottomEditView = layoutOption.findViewById(R.id.editToolbar);
+        bottomEditView.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
 
-        rotate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+            if (itemId == R.id.rotate) {
                 RotateFragment rotateFragment = RotateFragment.newInstance("Rotate");
-                transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                transaction = requireActivity().getSupportFragmentManager().beginTransaction();
                 transaction.replace(R.id.AllOptions, rotateFragment);
                 transaction.addToBackStack(null);
                 transaction.commit();
+                return true;
+            } else if (itemId == R.id.text) {
+
+                return true;
+            } else if (itemId == R.id.filter) {
+
+                return true;
+            } else if (itemId == R.id.crop) {
+
+                return true;
             }
+
+            return false;
         });
 
-        addText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (editActivity != null) {
-                    editActivity.finish();
-                }
-            }
-        });
-
-        others.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (editActivity != null) {
-                    editActivity.finish();
-                }
-            }
-        });
-
-        brightness.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ChangeFragment changeFragment = ChangeFragment.newInstance("Brightness");
-                transaction = getActivity().getSupportFragmentManager().beginTransaction();
-
-                transaction.replace(R.id.AllOptions, changeFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
-            }
-        });
-
-        crop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (editActivity != null) {
-                    editActivity.finish();
-                }
-            }
-        });
-
-        contrast.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ChangeFragment changeFragment = ChangeFragment.newInstance("Contrast");
-                transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.AllOptions, changeFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
-            }
-        });
+//        brightness.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                ChangeFragment changeFragment = ChangeFragment.newInstance("Brightness");
+//                transaction = getActivity().getSupportFragmentManager().beginTransaction();
+//                transaction.replace(R.id.AllOptions, changeFragment);
+//                transaction.addToBackStack(null);
+//                transaction.commit();
+//            }
+//        });
+//
+//        contrast.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                ChangeFragment changeFragment = ChangeFragment.newInstance("Contrast");
+//                transaction = getActivity().getSupportFragmentManager().beginTransaction();
+//                transaction.replace(R.id.AllOptions, changeFragment);
+//                transaction.addToBackStack(null);
+//                transaction.commit();
+//            }
+//        });
 
         return layoutOption;
     }

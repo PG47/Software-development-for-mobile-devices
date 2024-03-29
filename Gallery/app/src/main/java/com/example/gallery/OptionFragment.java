@@ -18,8 +18,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class OptionFragment extends Fragment {
     DetailsActivity mainActivity;
-    LinearLayout editButton;
     BottomNavigationView bottomOptionView;
+
     public static OptionFragment newInstance(String strArg1) {
         OptionFragment fragment = new OptionFragment();
         Bundle bundle = new Bundle();
