@@ -140,7 +140,7 @@ public class ImageFragment extends Fragment {
         matrix.postRotate(value - 45);
         matrix.postScale(scaleFactor, scaleFactor);
         Bitmap rotatedAndScaled = Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.getWidth(), originalBitmap.getHeight(), matrix, true);
-        cropImageView.setImageBitmap(rotatedAndScaled);
+        myImage.setImageBitmap(rotatedAndScaled);
     }
 
     public void executeChangeBrightness(int value) {
@@ -202,19 +202,19 @@ public class ImageFragment extends Fragment {
     }
 
     public void executeZoom() {
-        int cropWidth = 450; // Width of the crop rectangle
-        int cropHeight = 300; // Height of the crop rectangle
-
-// Calculate the position of the crop rectangle relative to the center of the cropImageView
-        int centerX = 1000 / 2; // X-coordinate of the center of the cropImageView
-        int centerY = 1500 / 2; // Y-coordinate of the center of the cropImageView
-        int left = centerX - (cropWidth / 2); // X-coordinate of the left edge of the crop rectangle
-        int top = centerY - (cropHeight / 2); // Y-coordinate of the top edge of the crop rectangle
-        int right = left + cropWidth; // X-coordinate of the right edge of the crop rectangle
-        int bottom = top + cropHeight;
-        Log.d("test value", "width: " + cropImageView.getWidth() + "height: " + cropImageView.getHeight() + ", " + left + ", " + top + ", " + right + ", " + bottom);
-        cropImageView.setCropRect(new Rect(left, top, right, bottom));
-        cropImageView.setAutoZoomEnabled(true);
+//        int cropWidth = 450; // Width of the crop rectangle
+//        int cropHeight = 300; // Height of the crop rectangle
+//
+//// Calculate the position of the crop rectangle relative to the center of the cropImageView
+//        int centerX = 1000 / 2; // X-coordinate of the center of the cropImageView
+//        int centerY = 1500 / 2; // Y-coordinate of the center of the cropImageView
+//        int left = centerX - (cropWidth / 2); // X-coordinate of the left edge of the crop rectangle
+//        int top = centerY - (cropHeight / 2); // Y-coordinate of the top edge of the crop rectangle
+//        int right = left + cropWidth; // X-coordinate of the right edge of the crop rectangle
+//        int bottom = top + cropHeight;
+//        Log.d("test value", "width: " + cropImageView.getWidth() + "height: " + cropImageView.getHeight() + ", " + left + ", " + top + ", " + right + ", " + bottom);
+//        cropImageView.setCropRect(new Rect(left, top, right, bottom));
+//        cropImageView.setAutoZoomEnabled(true);
     }
     private float calculateScaleFactor(float angle) {
         if (angle > 45) {

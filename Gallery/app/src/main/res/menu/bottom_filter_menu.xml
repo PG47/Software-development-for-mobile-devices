@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/contrast"
+        android:title="Contrast"
+        android:icon="@drawable/ic_contrast_foreground"/>
+    <item
+        android:id="@+id/grayscale"
+        android:title="Grayscale"
+        android:icon="@mipmap/ic_grayscale_foreground"/>
+    <item
+        android:id="@+id/sepia"
+        android:title="Sepia"
+        android:icon="@drawable/ic_brightness_foreground"/>
+    <item
+        android:id="@+id/blur"
+        android:title="Blur"
+        android:icon="@drawable/ic_blur_foreground"/>
+    <item
+        android:id="@+id/sharpen"
+        android:title="Sharpen"
+        android:icon="@mipmap/ic_sharpen_foreground"/>
+</menu>

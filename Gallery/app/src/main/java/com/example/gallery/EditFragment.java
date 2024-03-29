@@ -68,10 +68,25 @@ public class EditFragment extends Fragment {
                 transaction.commit();
                 return true;
             } else if (itemId == R.id.text) {
-
+                AddTextFragment addTextFragment = AddTextFragment.newInstance("Text");
+                transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.AllOptions, addTextFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
                 return true;
             } else if (itemId == R.id.filter) {
-
+                FilterFragment filterFragment = FilterFragment.newInstance("Filter");
+                transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.AllOptions, filterFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
+                return true;
+            } else if (itemId == R.id.brightness) {
+                ChangeFragment changeFragment = ChangeFragment.newInstance("Brightness");
+                transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.AllOptions, changeFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
                 return true;
             } else if (itemId == R.id.crop) {
 
