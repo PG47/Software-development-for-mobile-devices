@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#80808080">
+
+<!--    <Button-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_centerHorizontal="true"-->
+<!--        android:text="Done"-->
+<!--        android:id="@+id/actionDone"/>-->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:id="@+id/font">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Font family:"
+            android:id="@+id/fontTextView" />
+
+        <Spinner
+            android:layout_width="100dp"
+            android:layout_height="48dp"
+            android:background="@drawable/border"
+            android:layout_marginLeft="10dp"
+            android:id="@+id/listFonts"
+            android:textAlignment="center"
+            android:padding="2dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Font size:"
+            android:layout_marginLeft="20dp"/>
+
+        <EditText
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/border"
+            android:layout_marginLeft="10dp"
+            android:text="11"
+            android:textAlignment="center"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="I"
+            android:textSize="30dp"
+            android:textStyle="italic"
+            android:layout_marginLeft="20dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="B"
+            android:textSize="30dp"
+            android:textStyle="bold"
+            android:layout_marginLeft="10dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="35dp"
+        android:layout_below="@id/font">
+
+        <ImageView
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:src="@drawable/ic_palette_foreground"/>
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/listColor"
+                android:orientation="horizontal"
+                android:paddingVertical="7dp"/>
+        </HorizontalScrollView>
+    </LinearLayout>
+</RelativeLayout>

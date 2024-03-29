@@ -66,7 +66,6 @@ public class RotateFragment extends Fragment {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (getActivity() instanceof EditActivity) {
                 editActivity = (EditActivity) context;
-                Log.d("test create view", "st" + getActivity());
             } else {
                 throw new IllegalStateException("EditActivity must implement callbacks");
             }
