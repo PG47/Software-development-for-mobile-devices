@@ -94,6 +94,7 @@ public class EditFragment extends Fragment {
             public void onClick(View view) {
                 ChangeFragment changeFragment = ChangeFragment.newInstance("Brightness");
                 transaction = getActivity().getSupportFragmentManager().beginTransaction();
+
                 transaction.replace(R.id.AllOptions, changeFragment);
                 transaction.addToBackStack(null);
                 transaction.commit();

@@ -178,7 +178,7 @@ public class ImageFragment extends Fragment {
         int height = adjustedBitmap.getHeight();
 
         int[] pixels = new int[width * height];
-        adjustedBitmap.getPixels(pixels, 0, width, 0, 0, width, height);
+        originalBitmap.getPixels(pixels, 0, width, 0, 0, width, height);
 
         for (int i = 0; i < pixels.length; i++) {
             int alpha = (pixels[i] >> 24) & 0xFF;
