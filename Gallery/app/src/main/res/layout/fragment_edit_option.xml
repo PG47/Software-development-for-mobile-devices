@@ -1,59 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_centerVertical="true"
-    android:orientation="vertical"
-    android:id="@+id/editOptions">
+    android:orientation="horizontal"
+    android:background="#808080">
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:background="@color/white">
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/editToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        app:itemIconSize="60dp"
+        app:itemPaddingTop="-3dp"
+        app:labelVisibilityMode="labeled"
+        app:itemActiveIndicatorStyle="@color/white"
+        app:menu="@menu/bottom_edit_menu">
 
-        <ImageButton
-            android:layout_width="66dp"
-            android:layout_height="66dp"
-            android:src="@drawable/ic_rotate_foreground"
-            android:background="#0000"
-            android:id="@+id/rotate"/>
-
-        <ImageButton
-            android:layout_width="66dp"
-            android:layout_height="66dp"
-            android:src="@drawable/ic_text_foreground"
-            android:background="#0000"
-            android:id="@+id/text"/>
-
-        <ImageButton
-            android:layout_width="66dp"
-            android:layout_height="66dp"
-            android:src="@drawable/ic_filter_foreground"
-            android:background="#0000"
-            android:id="@+id/others"/>
-
-        <ImageButton
-            android:layout_width="66dp"
-            android:layout_height="66dp"
-            android:src="@drawable/ic_brightness_foreground"
-            android:background="#0000"
-            android:id="@+id/brightness"/>
-
-        <ImageButton
-            android:layout_width="66dp"
-            android:layout_height="66dp"
-            android:src="@drawable/ic_crop_foreground"
-            android:background="#0000"
-            android:id="@+id/cropping"/>
-
-        <ImageButton
-            android:layout_width="66dp"
-            android:layout_height="66dp"
-            android:src="@drawable/ic_contrast_foreground"
-            android:background="#0000"
-            android:id="@+id/contrast"/>
-
-    </LinearLayout>
+    </com.google.android.material.bottomnavigation.BottomNavigationView>
 
 </RelativeLayout>
