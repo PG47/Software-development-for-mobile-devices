@@ -148,6 +148,7 @@ public class FragmentLeft extends Fragment {
 
     private void createOrLoadStudentData() {
         File dbFile = getActivity().getDatabasePath("DB_BTVN06");
+        creatLopData();
         creatHocSinhData();
         if (!dbFile.exists()) {
             // Database does not exist, create it
@@ -167,10 +168,13 @@ public class FragmentLeft extends Fragment {
         db.beginTransaction();
         try {
             // Create the table if it doesn't exist
-            db.execSQL("CREATE TABLE IF NOT EXISTS LOP (MaLop INTEGER PRIMARY KEY AUTOINCREMENT, TenLop TEXT);");
+            db.execSQL("DROP TABLE IF EXISTS LOP;");
+            db.execSQL("CREATE TABLE IF NOT EXISTS LOP (ID INTEGER PRIMARY KEY AUTOINCREMENT, MaLop TEXT UNIQUE, TenLop TEXT);");
 
             // Insert data into the LOP table
-            db.execSQL("INSERT INTO LOP (TenLop) VALUES ('KHTN');");
+            db.execSQL("INSERT INTO LOP (MaLop, TenLop) VALUES ('A1','KHTN');");
+            db.execSQL("INSERT INTO LOP (MaLop, TenLop) VALUES ('A2','BACK KHOA');");
+            db.execSQL("INSERT INTO LOP (MaLop, TenLop) VALUES ('A3','CNTT');");
 
             // Set transaction as successful
             db.setTransactionSuccessful();
@@ -192,23 +196,23 @@ public class FragmentLeft extends Fragment {
         db.beginTransaction();
         try {
             // Create the table if it doesn't exist
-            db.execSQL("CREATE TABLE HOCSINH (ID INTEGER PRIMARY KEY AUTOINCREMENT, MaHS TEXT, TenHS TEXT, MaLop INTEGER, DTB INTEGER);");
+            db.execSQL("DROP TABLE IF EXISTS HOCSINH;");
+            db.execSQL("CREATE TABLE HOCSINH (ID INTEGER PRIMARY KEY AUTOINCREMENT, MaHS TEXT, TenHS TEXT, MaLop TEXT, DTB INTEGER, FOREIGN KEY(MaLop) REFERENCES LOP(MaLop));");
 
-            // Insert data into the HOCSINH table
-            db.execSQL("CREATE TRIGGER generate_MaHS AFTER INSERT ON HOCSINH " +
+            /*db.execSQL("CREATE TRIGGER generate_MaHS AFTER INSERT ON HOCSINH " +
                     "BEGIN " +
                     "UPDATE HOCSINH SET MaHS = 'A'||'_'||NEW.ID WHERE rowid = NEW.rowid; " +
-                    "END;");
+                    "END;");*/
 
-
-            db.execSQL("INSERT INTO HOCSINH (MaHS, TenHS, MaLop, DTB) VALUES ('A1_9829', 'Lê Thị A', 1, 8);");
-            db.execSQL("INSERT INTO HOCSINH (MaHS, TenHS, MaLop, DTB) VALUES ('A1_1809', 'Lê Thị B', 1, 9);");
-            db.execSQL("INSERT INTO HOCSINH (MaHS, TenHS, MaLop, DTB) VALUES ('A2_3509', 'Lê Thị C', 1, 10);");
-            db.execSQL("INSERT INTO HOCSINH (MaHS, TenHS, MaLop, DTB) VALUES ('A2_3100', 'Lê Thị D', 1, 7);");
-            db.execSQL("INSERT INTO HOCSINH (MaHS, TenHS, MaLop, DTB) VALUES ('A1_1120', 'Lê Thị E', 1, 6);");
-            db.execSQL("INSERT INTO HOCSINH (MaHS, TenHS, MaLop, DTB) VALUES ('A3_4120', 'Lê Thị F', 1, 5);");
-            db.execSQL("INSERT INTO HOCSINH (MaHS, TenHS, MaLop, DTB) VALUES ('A2_8100', 'Lê Thị G', 1, 4);");
-            db.execSQL("INSERT INTO HOCSINH (MaHS, TenHS, MaLop, DTB) VALUES ('A4_1160', 'Lê Thị H', 1, 3);");
+            // Insert data into the HOCSINH table
+            db.execSQL("INSERT INTO HOCSINH (MaHS, TenHS, MaLop, DTB) VALUES ('A1_9829', 'Lê Thị A', 'A1', 8);");
+            db.execSQL("INSERT INTO HOCSINH (MaHS, TenHS, MaLop, DTB) VALUES ('A1_1809', 'Lê Thị B', 'A2', 9);");
+            db.execSQL("INSERT INTO HOCSINH (MaHS, TenHS, MaLop, DTB) VALUES ('A2_3509', 'Lê Thị C', 'A1', 10);");
+            db.execSQL("INSERT INTO HOCSINH (MaHS, TenHS, MaLop, DTB) VALUES ('A2_3100', 'Lê Thị D', 'A3', 7);");
+            db.execSQL("INSERT INTO HOCSINH (MaHS, TenHS, MaLop, DTB) VALUES ('A1_1120', 'Lê Thị E', 'A3', 6);");
+            db.execSQL("INSERT INTO HOCSINH (MaHS, TenHS, MaLop, DTB) VALUES ('A3_4120', 'Lê Thị F', 'A2', 5);");
+            db.execSQL("INSERT INTO HOCSINH (MaHS, TenHS, MaLop, DTB) VALUES ('A2_8100', 'Lê Thị G', 'A1', 4);");
+            db.execSQL("INSERT INTO HOCSINH (MaHS, TenHS, MaLop, DTB) VALUES ('A4_1160', 'Lê Thị H', 'A2', 3);");
 
             // Set transaction as successful
             db.setTransactionSuccessful();
@@ -228,25 +232,9 @@ public class FragmentLeft extends Fragment {
         SQLiteDatabase db = SQLiteDatabase.openDatabase(myDbPath, null, SQLiteDatabase.OPEN_READONLY);
 
         Cursor cursor = null;
-        cursor= db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null);
-
-        // Check if cursor is valid
-        if (cursor != null) {
-            // Iterate through the cursor to retrieve table names
-            while (cursor.moveToNext()) {
-                // Get the table name from the cursor
-                String tableName = cursor.getString(0); // Assuming name is at index 0
-
-                // Output the table name
-                Log.d("Table Name", tableName);
-            }
-
-            // Close the cursor
-            cursor.close();
-        }
         // Query the HOCSINH table to get all the data
         try {
-             cursor= db.rawQuery("SELECT * FROM HOCSINH", null);
+             cursor = db.rawQuery("SELECT * FROM HOCSINH", null);
         } catch (SQLiteException e) {
             Log.e("SQLiteException", "Error executing query: " + e.getMessage());
             // Handle the exception here, such as showing an error message to the user
@@ -262,7 +250,9 @@ public class FragmentLeft extends Fragment {
             // Format the data and add it to the items array
             @SuppressLint("Range") String maHS = cursor.getString(cursor.getColumnIndex("MaHS"));
             @SuppressLint("Range") String tenHS = cursor.getString(cursor.getColumnIndex("TenHS"));
-            items[i] = maHS + "," + tenHS;
+            @SuppressLint("Range") String lop = cursor.getString(cursor.getColumnIndex("MaLop"));
+            @SuppressLint("Range") String dtb = cursor.getString(cursor.getColumnIndex("DTB"));
+            items[i] = maHS + "," + tenHS + "," + lop + "," + dtb;
             i++;
         }
         cursor.close();
