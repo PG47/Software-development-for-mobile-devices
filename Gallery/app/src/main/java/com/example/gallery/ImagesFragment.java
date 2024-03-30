@@ -96,6 +96,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                 selectExit.setVisibility(View.VISIBLE);
             }
             isSelectionMode = true;
+
             adapter.toggleSelection(position);
             return true;
         });
@@ -167,16 +168,22 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             }
 
             // Highlight selected items
-            if (selectedPositions.contains(position)) {
+            if (isSelectionMode) {
                 imageView.setBackgroundResource(R.drawable.selected_image_background);
-            } else {
+            }else {
+                // Otherwise, set transparent background
                 imageView.setBackgroundResource(android.R.color.transparent);
+            }
+            if (selectedPositions.contains(position)) {
+                // If it's in selected positions, set background with green color
+                imageView.setBackgroundResource(R.drawable.selected_green_image_background);
             }
 
             Glide.with(context).load(images.get(position)).centerCrop().into(imageView);
 
             return imageView;
         }
+
 
 
         public void toggleSelection(int position) {
