@@ -1,5 +1,7 @@
 package com.example.gallery;
 
+import static androidx.core.content.ContextCompat.getSystemService;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -13,13 +15,20 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.text.InputType;
 import android.util.Log;
 import android.view.DragEvent;
+import android.view.GestureDetector;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import androidx.core.content.FileProvider;
@@ -38,13 +47,11 @@ public class ImageFragment extends Fragment {
     EditActivity editActivity;
     Context context;
     float zoomLevel = (float) Math.sqrt(2);
-    private CropImageView cropImageView;
-    private Uri imageUri;
     private ImageView myImage;
-    private CustomCroppingFrame croppingFrame;
     private Bitmap originalBitmap;
     private Bitmap adjustedBitmap;
     String selectedImage;
+    RelativeLayout layoutImage;
     public static ImageFragment newInstance(String strArg) {
         ImageFragment fragment = new ImageFragment();
         Bundle args = new Bundle();
@@ -80,7 +87,7 @@ public class ImageFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        RelativeLayout layoutImage = (RelativeLayout)inflater.inflate(R.layout.fragment_image, null);
+        layoutImage = (RelativeLayout)inflater.inflate(R.layout.fragment_image, null);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (getActivity() instanceof EditActivity) {
@@ -201,6 +208,58 @@ public class ImageFragment extends Fragment {
         myImage.setImageBitmap(adjustedBitmap);
     }
 
+    public void executeAddEditText() {
+        EditText editText = new EditText(context);
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+        editText.setLayoutParams(layoutParams);
+        editText.setHint("Enter text here");
+        editText.setInputType(InputType.TYPE_CLASS_TEXT);
+
+        editText.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                view.startDrag(null, new View.DragShadowBuilder(view), null, 0);
+                return true;
+            }
+        });
+        editText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                view.requestFocus();
+            }
+        });
+        editText.setOnTouchListener(new View.OnTouchListener() {
+            float dX, dY;
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        dX = v.getX() - event.getRawX();
+                        dY = v.getY() - event.getRawY();
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        v.setX(event.getRawX() + dX);
+                        v.setY(event.getRawY() + dY);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        v.setVisibility(View.VISIBLE);
+                        break;
+                }
+                return false;
+            }
+        });
+
+        layoutImage.addView(editText);
+    }
+
+    public void updateEditText() {
+
+    }
+
     public void executeZoom() {
 //        int cropWidth = 450; // Width of the crop rectangle
 //        int cropHeight = 300; // Height of the crop rectangle
@@ -223,9 +282,9 @@ public class ImageFragment extends Fragment {
         return (float) Math.cos(Math.toRadians(angle)) * zoomLevel;
     }
 
-    private void startCroppingActivity() {
-        CropImage.activity(imageUri)
-                .setGuidelines(CropImageView.Guidelines.ON)
-                .start(requireActivity());
-    }
+//    private void startCroppingActivity() {
+//        CropImage.activity(imageUri)
+//                .setGuidelines(CropImageView.Guidelines.ON)
+//                .start(requireActivity());
+//    }
 }

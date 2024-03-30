@@ -2,6 +2,8 @@ package com.example.gallery;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -57,10 +59,10 @@ public class LargeImageFragment extends Fragment {
         }
 
         String selectedImage = getArguments().getString("selectedImage");
-        this.selectedImage = (ImageView) layoutImage.findViewById(R.id.imageSelected);
-        if (this.selectedImage != null) {
-            Glide.with(context).load(selectedImage).centerCrop().into(this.selectedImage);
-        }
+        Bitmap originalBitmap = BitmapFactory.decodeFile(selectedImage);
+
+        ImageView myImage = (ImageView) layoutImage.findViewById(R.id.imageSelected);
+        myImage.setImageBitmap(originalBitmap);
 
         return layoutImage;
     }
