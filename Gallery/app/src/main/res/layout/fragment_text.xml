@@ -40,17 +40,20 @@
 
         <EditText
             android:layout_width="60dp"
-            android:layout_height="wrap_content"
+            android:layout_height="40dp"
             android:background="@drawable/border"
             android:layout_marginLeft="10dp"
             android:text="11"
-            android:textAlignment="center"/>
+            android:id="@+id/fontSize"
+            android:textAlignment="center"
+            android:textSize="20dp"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="I"
             android:textSize="30dp"
+            android:id="@+id/italic"
             android:textStyle="italic"
             android:layout_marginLeft="20dp"/>
 
@@ -60,6 +63,7 @@
             android:text="B"
             android:textSize="30dp"
             android:textStyle="bold"
+            android:id="@+id/bold"
             android:layout_marginLeft="10dp"/>
     </LinearLayout>
 

@@ -3,10 +3,9 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string-array name="font_families">
-        <item>Arial</item>
-        <item>Times New Roman</item>
-        <item>Helvetica</item>
-        <item>Courier New</item>
-        <item>Georgia</item>
+        <item>Monospace</item>
+        <item>Sans Serif</item>
+        <item>Serif</item>
+        <item>Default bold</item>
     </string-array>
 </resources>

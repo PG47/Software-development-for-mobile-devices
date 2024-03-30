@@ -11,12 +11,14 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.InputType;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.DragEvent;
 import android.view.GestureDetector;
 import android.view.Gravity;
@@ -31,6 +33,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
@@ -52,6 +55,7 @@ public class ImageFragment extends Fragment {
     private Bitmap adjustedBitmap;
     String selectedImage;
     RelativeLayout layoutImage;
+    EditText editText;
     public static ImageFragment newInstance(String strArg) {
         ImageFragment fragment = new ImageFragment();
         Bundle args = new Bundle();
@@ -209,7 +213,7 @@ public class ImageFragment extends Fragment {
     }
 
     public void executeAddEditText() {
-        EditText editText = new EditText(context);
+        editText = new EditText(context);
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -256,8 +260,43 @@ public class ImageFragment extends Fragment {
         layoutImage.addView(editText);
     }
 
-    public void updateEditText() {
+    public void updateEditText(String strFontFamily, String strFontSize, boolean isItalic, boolean isBold, int textColor) {
+        Log.d("test", strFontFamily + ", " + strFontSize + ", " + isItalic + ", " + isBold + ", " + textColor);
+        textColor = ContextCompat.getColor(context, textColor);
+        Typeface typeface;
+        switch (strFontFamily) {
+            case "MONOSPACE": {
+                typeface = Typeface.create(Typeface.MONOSPACE, Typeface.NORMAL);
+                break;
+            }
+            case "SANS_SERIF": {
+                typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL);
+                break;
+            }
+            case "SERIF": {
+                typeface = Typeface.create(Typeface.SERIF, Typeface.NORMAL);
+                break;
+            }
+            case "DEFAULT_BOLD": {
+                typeface = Typeface.create(Typeface.DEFAULT_BOLD, Typeface.NORMAL);
+                break;
+            }
+            default:
+                typeface = Typeface.create(Typeface.MONOSPACE, Typeface.NORMAL);
+                break;
+        }
 
+        if (isItalic && isBold) {
+            typeface = Typeface.create(typeface, Typeface.BOLD_ITALIC);
+        } else if (isItalic) {
+            typeface = Typeface.create(typeface, Typeface.ITALIC);
+        } else if (isBold) {
+            typeface = Typeface.create(typeface, Typeface.BOLD);
+        }
+
+        editText.setTypeface(typeface);
+        editText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, Float.parseFloat(strFontSize));
+        editText.setTextColor(textColor);
     }
 
     public void executeZoom() {
