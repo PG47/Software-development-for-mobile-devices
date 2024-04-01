@@ -19,6 +19,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.provider.MediaStore;
 import android.util.Log;
@@ -239,6 +241,10 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             return listOfAllImages;
         }
 
+        public void addAlumSelection() {
+            int count = selectedPositions.size();
+
+        }
         public void confirmDeleteSelections() {
             int count = selectedPositions.size();
             AlertDialog.Builder builder = getBuilder("Delete selected items?",
@@ -366,7 +372,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
     @Override
     public void addAlbum() {
-
+        adapter.addAlumSelection();
     }
 
     @Override
