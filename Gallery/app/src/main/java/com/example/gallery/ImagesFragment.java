@@ -1,9 +1,11 @@
 package com.example.gallery;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -24,14 +26,19 @@ import androidx.fragment.app.FragmentTransaction;
 
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -241,8 +248,123 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             return listOfAllImages;
         }
 
-        public void addAlumSelection() {
-            int count = selectedPositions.size();
+        private ArrayList<String> getAllAlbums() {
+            ArrayList<String> albumNames = new ArrayList<>();
+
+            // Query the device's media store for the list of albums
+            Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+            String[] projection = {MediaStore.Images.Media.BUCKET_DISPLAY_NAME};
+            String orderBy = MediaStore.Images.Media.DATE_TAKEN + " DESC";
+
+            try (Cursor cursor = requireContext().getContentResolver().query(uri, projection, null, null, orderBy)) {
+                if (cursor != null) {
+                    while (cursor.moveToNext()) {
+                        String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME));
+                        if (!albumNames.contains(albumName)) {
+                            albumNames.add(albumName);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return albumNames;
+        }
+        public void add_to_Alum() {
+            ArrayList<String> albumNames = getAllAlbums();
+
+            // Convert ArrayList<String> to String array
+            String[] albumsArray = albumNames.toArray(new String[0]);
+
+            // Create a dialog to act as the popup menu
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+            builder.setTitle("Choose Album");
+
+            // Add albums to the list dynamically
+            builder.setItems(albumsArray, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    String selectedAlbum = albumNames.get(which);
+                    moveImagesToAlbum(selectedAlbum);
+                }
+            });
+
+            // Show the dialog
+            AlertDialog dialog = builder.create();
+            dialog.show();
+
+            // Set dialog position to center
+            WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+            Window window = dialog.getWindow();
+            if (window != null) {
+                lp.copyFrom(window.getAttributes());
+                lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
+                lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                lp.gravity = Gravity.CENTER;
+                window.setAttributes(lp);
+            }
+        }
+
+
+        private void moveImagesToAlbum(String albumName) {
+            long albumId = getAlbumId(albumName);
+            if (albumId != -1) {
+                ContentValues values = new ContentValues();
+                values.put(MediaStore.Images.Media.BUCKET_ID, albumId);
+                values.put(MediaStore.Images.Media.BUCKET_DISPLAY_NAME, albumName);
+
+                ContentResolver contentResolver = requireActivity().getContentResolver();
+                for (int position : selectedPositions) {
+                    Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                    String selection = MediaStore.Images.Media.DATA + "=?";
+                    String[] selectionArgs = { images.get(position) };
+                    Cursor cursor = contentResolver.query(uri, null, selection, selectionArgs, null);
+                    if (cursor != null && cursor.moveToFirst()) {
+                        @SuppressLint("Range") long imageId = cursor.getLong(cursor.getColumnIndex(MediaStore.Images.Media._ID));
+                        cursor.close();
+
+                        Uri contentUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, imageId);
+                        contentResolver.update(contentUri, values, null, null);
+                    }
+                }
+                // After moving images, exit selection mode
+                ExitSelection();
+            } else {
+                // Handle case where the album ID could not be retrieved
+                Log.e("ImagesFragment", "Album ID not found for album: " + albumName);
+            }
+        }
+
+
+        // Helper method to get album ID based on the album name
+        private long getAlbumId(String albumName) {
+            String[] projection = { MediaStore.Images.Media.BUCKET_ID };
+            String selection = MediaStore.Images.Media.BUCKET_DISPLAY_NAME + "=?";
+            String[] selectionArgs = { albumName };
+            Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+
+            Cursor cursor = requireActivity().getContentResolver().query(uri, projection, selection, selectionArgs, null);
+            long albumId = -1;
+
+            if (cursor != null) {
+                if (cursor.moveToFirst()) {
+                    int columnIndex = cursor.getColumnIndex(MediaStore.Images.Media.BUCKET_ID);
+                    if (columnIndex != -1) {
+                        albumId = cursor.getLong(columnIndex);
+                    } else {
+                        // Log an error if the column index is -1
+                        Log.e("ImagesFragment", "Column index for BUCKET_ID is -1");
+                    }
+                }
+                cursor.close();
+            }
+
+            return albumId;
+        }
+
+
+
+        public void add_to_new_Album() {
 
         }
         public void confirmDeleteSelections() {
@@ -372,7 +494,12 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
     @Override
     public void addAlbum() {
-        adapter.addAlumSelection();
+        adapter.add_to_Alum();
+    }
+
+    @Override
+    public void newAlbum() {
+        adapter.add_to_new_Album();
     }
 
     @Override

@@ -3,6 +3,6 @@
     <item android:id="@+id/menu_add_to_exist_album"
         android:title="Add to exist album"/>
 
-    <item android:id="@+id/menu_add_to_exist_album"
-        android:title="Add to exist album"/>
+    <item android:id="@+id/menu_add_to_new_album"
+        android:title="Add to a new album"/>
 </menu>

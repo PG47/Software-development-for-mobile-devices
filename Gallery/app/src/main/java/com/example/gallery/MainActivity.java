@@ -20,6 +20,7 @@ import android.Manifest;
 import android.os.Environment;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
 import android.widget.Toast;
@@ -80,13 +81,33 @@ public class MainActivity extends AppCompatActivity implements NavigationChange 
             } else if (itemId == R.id.add) {
                 popupMenu = new PopupMenu(MainActivity.this, findViewById(R.id.add));
                 popupMenu.getMenuInflater().inflate(R.menu.add_to_album_menu, popupMenu.getMenu());
-                popupMenu.setOnDismissListener(menu -> {
-                    // Handle popup menu dismissal
-                    // For example, if you want to do something when the popup menu is dismissed
-                    Log.d("PopupMenu", "Dismissed");
+
+                // Inside your setOnMenuItemClickListener method
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        // Handle menu item click
+                        int itemId = item.getItemId(); // Get the ID of the clicked menu item
+
+                        // Use if-else statements to handle menu item clicks
+                        if (itemId == R.id.menu_add_to_exist_album) {
+                            // Handle "Add to existing album" menu item click
+                            Log.d("PopupMenu", "Add to existing album clicked");
+                            selectOptions.addAlbum();
+                            return true;
+                        } else if (itemId == R.id.menu_add_to_new_album) {
+                            // Handle "Create new album" menu item click
+                            Log.d("PopupMenu", "Create new album clicked");
+                            selectOptions.newAlbum();
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    };
                 });
+
+                popupMenu.setOnDismissListener(menu -> {Log.d("PopupMenu", "Dismissed");});
                 popupMenu.show();
-                selectOptions.addAlbum();
                 return true;
             } else if (itemId == R.id.secure) {
                 selectOptions.secure();
