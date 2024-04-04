@@ -274,7 +274,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
             return albumNames;
         }
-        public void add_to_Alum() {
+        public void add_to_Album() {
             ArrayList<String> albumNames = getAllAlbums();
 
             // Convert ArrayList<String> to String array
@@ -559,7 +559,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
     @Override
     public void addAlbum() {
-        adapter.add_to_Alum();
+        adapter.add_to_Album();
     }
 
     @Override
