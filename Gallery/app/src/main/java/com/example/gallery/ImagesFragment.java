@@ -37,6 +37,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -356,21 +357,20 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
 
         // Helper method to get album ID based on the album name
-        private long getAlbumId(String albumName) {
+        private boolean CheckAlbum(String albumName) {
             String[] projection = { MediaStore.Images.Media.BUCKET_ID };
             String selection = MediaStore.Images.Media.BUCKET_DISPLAY_NAME + "=?";
             String[] selectionArgs = { albumName };
             Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 
             Cursor cursor = requireActivity().getContentResolver().query(uri, projection, selection, selectionArgs, null);
-            long albumId = -1;
 
             if (cursor != null) {
                 try {
                     if (cursor.moveToFirst()) {
                         int columnIndex = cursor.getColumnIndex(MediaStore.Images.Media.BUCKET_ID);
                         if (columnIndex != -1) {
-                            albumId = cursor.getLong(columnIndex);
+                            return true;
                         } else {
                             // Log an error if the column index is -1
                             Log.e("ImagesFragment", "Column index for BUCKET_ID is -1");
@@ -383,16 +383,55 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                 // Log an error if the cursor is null
                 Log.e("ImagesFragment", "Cursor is null");
             }
-
-            return albumId;
+            return false;
         }
-
-
-
 
         public void add_to_new_Album() {
+            // Create an EditText view for user input
+            final EditText input = new EditText(requireContext());
 
+            // Create an AlertDialog builder
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+            builder.setTitle("Create New Album");
+            builder.setMessage("Enter the name for the new album:");
+
+            // Add the EditText view to the dialog
+            builder.setView(input);
+
+            // Set positive button for user confirmation
+            builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    String albumName = input.getText().toString().trim();
+                    if (!albumName.isEmpty()) {
+                        if (!CheckAlbum(albumName)) {
+                            // Call method to add images to the new album with the provided name
+                            //addImagesToNewAlbum(albumName);
+                        } else {
+                            // Show error toast if album already exists
+                            Toast.makeText(requireContext(), "Album already exists", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        // Show error toast if album name is empty
+                        Toast.makeText(requireContext(), "Album name cannot be empty", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+
+            // Set negative button for cancel action
+            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            });
+
+            // Show the dialog
+            AlertDialog dialog = builder.create();
+            dialog.show();
         }
+
+
         public void confirmDeleteSelections() {
             int count = selectedPositions.size();
             AlertDialog.Builder builder = getBuilder("Delete selected items?",
