@@ -20,7 +20,9 @@ import android.Manifest;
 import android.os.Environment;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -31,6 +33,7 @@ public class MainActivity extends AppCompatActivity implements NavigationChange 
     HeadBarFragment f_headbar;
     BottomNavigationView bottomNavigationView;
     BottomNavigationView bottomSelectView;
+    PopupMenu popupMenu;
     ImagesFragment imagesFragment;
     SelectOptions selectOptions;
     private boolean isSelectionMode = false;
@@ -55,7 +58,6 @@ public class MainActivity extends AppCompatActivity implements NavigationChange 
         }
 
         f_headbar = HeadBarFragment.newInstance("first-headbar");
-
         ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.head_bar, f_headbar);
         ft.addToBackStack(null); // Add transaction to the back stack
@@ -70,13 +72,42 @@ public class MainActivity extends AppCompatActivity implements NavigationChange 
 
         bottomSelectView = findViewById(R.id.selectToolbar);
         bottomSelectView.setOnItemSelectedListener(item -> {
+
             int itemId = item.getItemId();
 
             if (itemId == R.id.share) {
                 selectOptions.share();
                 return true;
             } else if (itemId == R.id.add) {
-                selectOptions.addAlbum();
+                popupMenu = new PopupMenu(MainActivity.this, findViewById(R.id.add));
+                popupMenu.getMenuInflater().inflate(R.menu.add_to_album_menu, popupMenu.getMenu());
+
+                // Inside your setOnMenuItemClickListener method
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        // Handle menu item click
+                        int itemId = item.getItemId(); // Get the ID of the clicked menu item
+
+                        // Use if-else statements to handle menu item clicks
+                        if (itemId == R.id.menu_add_to_exist_album) {
+                            // Handle "Add to existing album" menu item click
+                            Log.d("PopupMenu", "Add to existing album clicked");
+                            selectOptions.addAlbum();
+                            return true;
+                        } else if (itemId == R.id.menu_add_to_new_album) {
+                            // Handle "Create new album" menu item click
+                            Log.d("PopupMenu", "Create new album clicked");
+                            selectOptions.newAlbum();
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    };
+                });
+
+                popupMenu.setOnDismissListener(menu -> {Log.d("PopupMenu", "Dismissed");});
+                popupMenu.show();
                 return true;
             } else if (itemId == R.id.secure) {
                 selectOptions.secure();
