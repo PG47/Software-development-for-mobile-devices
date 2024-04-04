@@ -40,8 +40,8 @@ public class MainActivity extends AppCompatActivity implements NavigationChange 
     private static final String tag = "PERMISSION_TAG";
     private static final int REQUEST_PERMISSIONS = 1234;
     private static final String [] PERMISSIONS = {
-        Manifest.permission.READ_MEDIA_IMAGES,
-        Manifest.permission.MANAGE_EXTERNAL_STORAGE
+            Manifest.permission.READ_MEDIA_IMAGES,
+            Manifest.permission.MANAGE_EXTERNAL_STORAGE
     };
     private static final int PERMISSION_COUNT = 2;
 
@@ -191,22 +191,22 @@ public class MainActivity extends AppCompatActivity implements NavigationChange 
     }
 
     private final ActivityResultLauncher<Intent> storageActivityResultLauncher = registerForActivityResult(
-        new ActivityResultContracts.StartActivityForResult(),
-        new ActivityResultCallback<ActivityResult>() {
-            @Override
-            public void onActivityResult(ActivityResult o) {
-                if(Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
-                    if(Environment.isExternalStorageManager()) {
-                        Log.d(tag,"onActivityResult: Manage external Storage Permission is granted!");
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult o) {
+                    if(Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
+                        if(Environment.isExternalStorageManager()) {
+                            Log.d(tag,"onActivityResult: Manage external Storage Permission is granted!");
+                        } else {
+                            Log.d(tag,"onActivityResult: Manage external Storage Permission is denied!");
+                            Toast.makeText(MainActivity.this,"Manage external Storage Permission is denied!", Toast.LENGTH_SHORT).show();
+                        }
                     } else {
-                        Log.d(tag,"onActivityResult: Manage external Storage Permission is denied!");
-                        Toast.makeText(MainActivity.this,"Manage external Storage Permission is denied!", Toast.LENGTH_SHORT).show();
-                    }
-                } else {
 
+                    }
                 }
             }
-        }
     );
 
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -268,3 +268,4 @@ public class MainActivity extends AppCompatActivity implements NavigationChange 
         bottomSelectView.setVisibility(View.INVISIBLE);
     }
 }
+

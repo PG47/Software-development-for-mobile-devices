@@ -1,8 +1,10 @@
 package com.example.gallery;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -25,11 +27,20 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
 
+
 public class OptionFragment extends Fragment {
     DetailsActivity mainActivity;
     BottomNavigationView bottomOptionView;
+    private OnImageDeleteListener onImageDeleteListener;
 
-    private ArrayList<String> images;
+    public void setOnImageDeleteListener(OnImageDeleteListener listener) {
+        this.onImageDeleteListener = listener;
+    }
+
+
+    public interface OnImageDeleteListener {
+        void onImageDeleted();
+    }
 
     public static OptionFragment newInstance(String strArg1) {
         OptionFragment fragment = new OptionFragment();
@@ -101,6 +112,25 @@ public class OptionFragment extends Fragment {
         builder.show();
     }
 
+    public static ArrayList<String> getAllShownImagesPath(Activity activity) {
+        Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+        String[] projection = { MediaStore.MediaColumns.DATA, MediaStore.Images.Media.DATE_TAKEN };
+        Cursor cursor = activity.getContentResolver().query(uri, projection, null,
+                null, MediaStore.Images.Media.DATE_TAKEN + " DESC");
+        ArrayList<String> listOfAllImages = new ArrayList<>();
+        if (cursor != null) {
+            int column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+            while (cursor.moveToNext()) {
+                String absolutePathOfImage = cursor.getString(column_index_data);
+                listOfAllImages.add(absolutePathOfImage);
+            }
+            cursor.close();
+        }
+        return listOfAllImages;
+    }
+
+    // Các phương thức khác trong OptionFragment ở đây...
+
     private void deleteSelectedImage(String selectedImage) {
         ContentResolver contentResolver = requireActivity().getContentResolver();
 
@@ -125,10 +155,12 @@ public class OptionFragment extends Fragment {
             } finally {
                 cursor.close();
             }
+            ArrayList<String> images = getAllShownImagesPath(requireActivity());
+            //mainActivity.finish();
+            if (onImageDeleteListener != null) {
+                onImageDeleteListener.onImageDeleted();
+            }
         }
-        /*
-        images = getAllShownImagesPath(requireContext());
-        notifyDataSetChanged();
-        */
     }
+
 }

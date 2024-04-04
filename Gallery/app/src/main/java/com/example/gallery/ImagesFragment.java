@@ -82,6 +82,15 @@ public class ImagesFragment extends Fragment implements SelectOptions {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        // Reload the list of images if needed
+        if (adapter != null) {
+            adapter.notifyDataSetChanged(); // Notify the adapter that the data set has changed
+        }
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_images, container, false);
