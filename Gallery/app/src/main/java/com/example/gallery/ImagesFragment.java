@@ -13,6 +13,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -24,6 +25,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Gravity;
@@ -285,7 +287,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             builder.setItems(albumsArray, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
                     String selectedAlbum = albumNames.get(which);
-                    moveImagesToAlbum(selectedAlbum);
+                    moveImagesToAlbum(selectedAlbum); // Call moveImagesToAlbum with the selected album name
                 }
             });
 
@@ -305,34 +307,51 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             }
         }
 
-
         private void moveImagesToAlbum(String albumName) {
-            long albumId = getAlbumId(albumName);
-            if (albumId != -1) {
-                ContentValues values = new ContentValues();
-                values.put(MediaStore.Images.Media.BUCKET_ID, albumId);
-                values.put(MediaStore.Images.Media.BUCKET_DISPLAY_NAME, albumName);
+            // Get the directory path of the target album
+            File albumDir = new File(Environment.getExternalStorageDirectory(), "DCIM/" + albumName);
 
-                ContentResolver contentResolver = requireActivity().getContentResolver();
-                for (int position : selectedPositions) {
-                    Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-                    String selection = MediaStore.Images.Media.DATA + "=?";
-                    String[] selectionArgs = { images.get(position) };
-                    Cursor cursor = contentResolver.query(uri, null, selection, selectionArgs, null);
-                    if (cursor != null && cursor.moveToFirst()) {
-                        @SuppressLint("Range") long imageId = cursor.getLong(cursor.getColumnIndex(MediaStore.Images.Media._ID));
-                        cursor.close();
-
-                        Uri contentUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, imageId);
-                        contentResolver.update(contentUri, values, null, null);
-                    }
+            if (!albumDir.exists()) {
+                // Create the target album directory if it doesn't exist
+                if (!albumDir.mkdirs()) {
+                    // If directory creation fails, show an error toast and return
+                    Toast.makeText(requireContext(), "Failed to create album directory", Toast.LENGTH_SHORT).show();
+                    return;
                 }
-                // After moving images, exit selection mode
-                ExitSelection();
-            } else {
-                // Handle case where the album ID could not be retrieved
-                Log.e("ImagesFragment", "Album ID not found for album: " + albumName);
             }
+
+            // Move selected images to the target album directory
+            for (int i : selectedPositions) {
+                // Get the source file
+                File sourceFile = new File(images.get(i));
+
+                // Get the destination file path
+                String destinationFilePath = albumDir.getPath() + "/" + sourceFile.getName();
+
+                // Create the destination file
+                File destinationFile = new File(destinationFilePath);
+
+                try {
+                    // Perform the file move operation
+                    if (sourceFile.renameTo(destinationFile)) {
+                        // If move operation is successful, update the gallery database
+                        MediaScannerConnection.scanFile(requireContext(), new String[]{destinationFilePath}, null, null);
+                    } else {
+                        // If move operation fails, show an error toast
+                        Toast.makeText(requireContext(), "Failed to move image: " + sourceFile.getName(), Toast.LENGTH_SHORT).show();
+                    }
+                } catch (Exception e) {
+                    // If an exception occurs during the move operation, show an error toast
+                    e.printStackTrace();
+                    Toast.makeText(requireContext(), "Error moving image: " + sourceFile.getName(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            // Exit selection mode after moving images
+            ExitSelection();
+
+            // Notify user about successful move
+            Toast.makeText(requireContext(), "Images moved to album: " + albumName, Toast.LENGTH_SHORT).show();
         }
 
 
@@ -347,20 +366,27 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             long albumId = -1;
 
             if (cursor != null) {
-                if (cursor.moveToFirst()) {
-                    int columnIndex = cursor.getColumnIndex(MediaStore.Images.Media.BUCKET_ID);
-                    if (columnIndex != -1) {
-                        albumId = cursor.getLong(columnIndex);
-                    } else {
-                        // Log an error if the column index is -1
-                        Log.e("ImagesFragment", "Column index for BUCKET_ID is -1");
+                try {
+                    if (cursor.moveToFirst()) {
+                        int columnIndex = cursor.getColumnIndex(MediaStore.Images.Media.BUCKET_ID);
+                        if (columnIndex != -1) {
+                            albumId = cursor.getLong(columnIndex);
+                        } else {
+                            // Log an error if the column index is -1
+                            Log.e("ImagesFragment", "Column index for BUCKET_ID is -1");
+                        }
                     }
+                } finally {
+                    cursor.close();
                 }
-                cursor.close();
+            } else {
+                // Log an error if the cursor is null
+                Log.e("ImagesFragment", "Cursor is null");
             }
 
             return albumId;
         }
+
 
 
 
