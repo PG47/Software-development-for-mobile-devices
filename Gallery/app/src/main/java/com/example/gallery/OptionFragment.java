@@ -32,6 +32,7 @@ public class OptionFragment extends Fragment {
     DetailsActivity mainActivity;
     BottomNavigationView bottomOptionView;
     private OnImageDeleteListener onImageDeleteListener;
+    String selectedImage;
 
     public void setOnImageDeleteListener(OnImageDeleteListener listener) {
         this.onImageDeleteListener = listener;
@@ -70,7 +71,7 @@ public class OptionFragment extends Fragment {
             }
         }
 
-        String selectedImage = getArguments().getString("selectedImage");
+        selectedImage = getArguments().getString("selectedImage");
 
         bottomOptionView = layoutOption.findViewById(R.id.optionToolbar);
         bottomOptionView.setOnItemSelectedListener(item -> {
