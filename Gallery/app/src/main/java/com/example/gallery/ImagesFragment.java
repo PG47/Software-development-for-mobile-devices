@@ -415,7 +415,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                     if (!albumName.isEmpty()) {
                         if (!CheckAlbum(albumName)) {
                             // Call method to add images to the new album with the provided name
-                            //addImagesToNewAlbum(albumName);
+                            addImagesToNewAlbum(albumName);
                         } else {
                             // Show error toast if album already exists
                             Toast.makeText(requireContext(), "Album already exists", Toast.LENGTH_SHORT).show();
@@ -438,6 +438,21 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             // Show the dialog
             AlertDialog dialog = builder.create();
             dialog.show();
+        }
+
+        private void addImagesToNewAlbum(String albumName) {
+            // Create a directory in the DCIM folder with the provided album name
+            File albumDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), albumName);
+            if (albumDir.mkdirs()) {
+                // If directory creation is successful, show a success toast
+                Toast.makeText(requireContext(), "Folder Created!\n" + albumDir.getAbsolutePath(), Toast.LENGTH_SHORT).show();
+            } else {
+                // If directory creation fails, show an error toast
+                Toast.makeText(requireContext(), "Failed to create folder!", Toast.LENGTH_SHORT).show();
+            }
+
+            // Now move all the selected images to the new album
+            moveImagesToAlbum(albumName);
         }
 
 
