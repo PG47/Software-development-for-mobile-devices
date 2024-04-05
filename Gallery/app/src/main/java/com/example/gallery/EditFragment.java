@@ -100,7 +100,11 @@ public class EditFragment extends Fragment {
                 transaction.commit();
                 return true;
             } else if (itemId == R.id.crop) {
-
+                CropFragment cropFragment = CropFragment.newInstance("Crop");
+                transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.AllOptions, cropFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
                 return true;
             }
 

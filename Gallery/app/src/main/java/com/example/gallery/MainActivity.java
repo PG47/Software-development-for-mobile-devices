@@ -27,8 +27,10 @@ import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.util.ArrayList;
+
 @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
-public class MainActivity extends AppCompatActivity implements NavigationChange {
+public class MainActivity extends AppCompatActivity implements NavigationChange, NavigationAlbum {
     FragmentTransaction ft;
     HeadBarFragment f_headbar;
     BottomNavigationView bottomNavigationView;
@@ -36,12 +38,14 @@ public class MainActivity extends AppCompatActivity implements NavigationChange 
     PopupMenu popupMenu;
     ImagesFragment imagesFragment;
     SelectOptions selectOptions;
+    AlbumFragment albumFragment;
+    private boolean insideAlbum = false;
     private boolean isSelectionMode = false;
     private static final String tag = "PERMISSION_TAG";
     private static final int REQUEST_PERMISSIONS = 1234;
     private static final String [] PERMISSIONS = {
-        Manifest.permission.READ_MEDIA_IMAGES,
-        Manifest.permission.MANAGE_EXTERNAL_STORAGE
+            Manifest.permission.READ_MEDIA_IMAGES,
+            Manifest.permission.MANAGE_EXTERNAL_STORAGE
     };
     private static final int PERMISSION_COUNT = 2;
 
@@ -64,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements NavigationChange 
         ft.commit();
 
         imagesFragment = new ImagesFragment();
-        AlbumFragment albumFragment = new AlbumFragment();
+        albumFragment = new AlbumFragment();
         MapFragment mapFragment = new MapFragment();
         SearchFragment searchFragment = new SearchFragment();
 
@@ -125,6 +129,14 @@ public class MainActivity extends AppCompatActivity implements NavigationChange 
             int itemId = item.getItemId();
 
             if (itemId == R.id.images) {
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .remove(imagesFragment)
+                        .commit();
+
+                imagesFragment = new ImagesFragment();
+                selectOptions = (SelectOptions) imagesFragment;
+
                 getSupportFragmentManager()
                         .beginTransaction()
                         .replace(R.id.mainFragment, imagesFragment)
@@ -191,22 +203,22 @@ public class MainActivity extends AppCompatActivity implements NavigationChange 
     }
 
     private final ActivityResultLauncher<Intent> storageActivityResultLauncher = registerForActivityResult(
-        new ActivityResultContracts.StartActivityForResult(),
-        new ActivityResultCallback<ActivityResult>() {
-            @Override
-            public void onActivityResult(ActivityResult o) {
-                if(Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
-                    if(Environment.isExternalStorageManager()) {
-                        Log.d(tag,"onActivityResult: Manage external Storage Permission is granted!");
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult o) {
+                    if(Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
+                        if(Environment.isExternalStorageManager()) {
+                            Log.d(tag,"onActivityResult: Manage external Storage Permission is granted!");
+                        } else {
+                            Log.d(tag,"onActivityResult: Manage external Storage Permission is denied!");
+                            Toast.makeText(MainActivity.this,"Manage external Storage Permission is denied!", Toast.LENGTH_SHORT).show();
+                        }
                     } else {
-                        Log.d(tag,"onActivityResult: Manage external Storage Permission is denied!");
-                        Toast.makeText(MainActivity.this,"Manage external Storage Permission is denied!", Toast.LENGTH_SHORT).show();
-                    }
-                } else {
 
+                    }
                 }
             }
-        }
     );
 
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -235,6 +247,7 @@ public class MainActivity extends AppCompatActivity implements NavigationChange 
                 .replace(R.id.mainFragment, imagesFragment)
                 .commit();
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -249,10 +262,16 @@ public class MainActivity extends AppCompatActivity implements NavigationChange 
 
     @Override
     public void onBackPressed() {
+        if (insideAlbum) {
+            closeAlbum();
+            return;
+        }
+
         if (imagesFragment != null) {
             imagesFragment.ExitSelection();
             return;
         }
+
         super.onBackPressed();
     }
 
@@ -267,4 +286,31 @@ public class MainActivity extends AppCompatActivity implements NavigationChange 
         bottomNavigationView.setVisibility(View.VISIBLE);
         bottomSelectView.setVisibility(View.INVISIBLE);
     }
+
+    @Override
+    public void openAlbum(ArrayList<String> images) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .remove(imagesFragment)
+                .commit();
+
+        imagesFragment = new ImagesFragment(images);
+        selectOptions = (SelectOptions) imagesFragment;
+        insideAlbum = true;
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.mainFragment, imagesFragment)
+                .commit();
+    }
+
+    @Override
+    public void closeAlbum() {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.mainFragment, albumFragment)
+                .commit();
+        insideAlbum = false;
+    }
 }
+

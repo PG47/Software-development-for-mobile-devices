@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_centerVertical="true">
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:text="Done"
+        android:id="@+id/actionDone"
+        android:layout_centerHorizontal="true"
+        android:backgroundTint="#9BCF53"
+        android:textSize="9dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="Strength:"
+        android:textColor="@color/black"
+        android:layout_below="@+id/actionDone"
+        android:id="@+id/changeType"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="0"
+        android:textColor="@color/black"
+        android:layout_below="@+id/changeType"
+        android:id="@+id/value"/>
+
+    <SeekBar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/value"
+        android:progressTint="#FFCF81"
+        android:max="100"
+        android:progress="0"
+        android:id="@+id/seekbar"/>
+
+</RelativeLayout>

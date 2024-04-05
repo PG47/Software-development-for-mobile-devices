@@ -1,48 +1,30 @@
 package com.example.gallery;
 
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
-import android.content.ContentResolver;
-import android.content.ContentUris;
-import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.CustomTarget;
-import com.bumptech.glide.request.transition.Transition;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class AlbumFragment extends Fragment {
     private ArrayList<String> albums;
-    private ArrayList<Uri> albumsImage;
+    private ArrayList<ArrayList<String>> albumsImages;
     AlbumAdapter adapter;
+    NavigationAlbum openAlbum;
 
     public AlbumFragment() {
         // Required empty public constructor
@@ -51,6 +33,7 @@ public class AlbumFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        openAlbum = (NavigationAlbum) requireActivity();
     }
 
     @Override
@@ -61,6 +44,10 @@ public class AlbumFragment extends Fragment {
         adapter = new AlbumAdapter(requireActivity());
         gallery.setAdapter(adapter);
 
+        gallery.setOnItemClickListener((parent, view, position, id) -> {
+            openAlbum.openAlbum(albumsImages.get(position));
+        });
+
         return rootView;
     }
 
@@ -69,7 +56,7 @@ public class AlbumFragment extends Fragment {
 
         public AlbumAdapter(Activity localContext) {
             context = localContext;
-            albums = getAllShownAlbumsPath(context);
+            getAllShownAlbumsPath(context);
         }
 
         public int getCount() {
@@ -97,60 +84,50 @@ public class AlbumFragment extends Fragment {
             albumName.setText(albums.get(position));
 
             ImageView albumImage = layoutView.findViewById(R.id.albumImage);
-            Glide.with(context).load(albumsImage.get(position)).centerCrop().into(albumImage);
+            Glide.with(context).load(albumsImages.get(position).get(0)).centerCrop().into(albumImage);
 
             return layoutView;
         }
 
-        private ArrayList<String> getAllShownAlbumsPath(Activity activity) {
+        private void getAllShownAlbumsPath(Activity activity) {
             Uri uri;
             Cursor cursor;
-            int column_index_name;
-            int column_index_id;
-            ArrayList<String> listOfAllAlbums = new ArrayList<>();
-            ArrayList<Uri> listOfAllAlbumsImage = new ArrayList<>();
+            int column_index_name, column_index_id, column_index_data;
+
+            ArrayList<Long> albumsID = new ArrayList<>();
+            albums = new ArrayList<>();
+            albumsImages = new ArrayList<>();
+
             uri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 
             String[] projection = { MediaStore.Images.Media.BUCKET_DISPLAY_NAME,
-                    MediaStore.Images.Media.BUCKET_ID };
+                    MediaStore.Images.Media.BUCKET_ID, MediaStore.Images.Media.DATA };
             cursor = activity.getContentResolver().query(uri, projection, null,
                     null, null);
 
             assert cursor != null;
             column_index_name = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
             column_index_id = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_ID);
+            column_index_data = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
 
             while (cursor.moveToNext()) {
                 String absolutePathOfAlbum = cursor.getString(column_index_name);
-                if (!listOfAllAlbums.contains(absolutePathOfAlbum)) {
-                    listOfAllAlbums.add(absolutePathOfAlbum);
+                Long albumID = cursor.getLong(column_index_id);
 
-                    String albumID = cursor.getString(column_index_id);
-                    String[] projectionImage = { MediaStore.Images.Media._ID };
-                    String selection = MediaStore.Images.Media.BUCKET_ID + " = ?";
-                    String[] selectionArgs = { albumID };
-
-                    Cursor cursorImage = activity.getContentResolver().query(uri, projectionImage,
-                            selection, selectionArgs, null);
-
-                    Uri imageUri = null;
-                    assert cursorImage != null;
-                    if (cursorImage.moveToFirst()) {
-                        int column_index_image = cursorImage.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
-                        long imageID = cursorImage.getLong(column_index_image);
-
-                        imageUri = Uri.withAppendedPath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "" + imageID);
-                        listOfAllAlbumsImage.add(imageUri);
-
-                        cursorImage.close();
-                    }
+                if (!albumsID.contains(albumID)) {
+                    albumsID.add(albumID);
+                    albums.add(absolutePathOfAlbum);
+                    albumsImages.add(new ArrayList<>());
                 }
+
+                int index = albumsID.indexOf(albumID);
+
+                String imagePath = cursor.getString(column_index_data);
+                // imageUri = Uri.withAppendedPath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "" + imageID);
+                albumsImages.get(index).add(imagePath);
             }
 
             cursor.close();
-
-            albumsImage = listOfAllAlbumsImage;
-            return listOfAllAlbums;
         }
     }
 }

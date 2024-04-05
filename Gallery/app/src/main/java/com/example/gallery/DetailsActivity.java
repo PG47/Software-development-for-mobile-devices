@@ -90,5 +90,14 @@ public class DetailsActivity extends AppCompatActivity {
                 optionsHidden = !optionsHidden;
             }
         });
+        fragmentOption.setOnImageDeleteListener(new OptionFragment.OnImageDeleteListener() {
+            @Override
+            public void onImageDeleted() {
+                finish();
+            }
+        });
+
     }
+
+
 }
