@@ -101,8 +101,8 @@ public class OptionFragment extends Fragment {
 
     private void confirmDeleteSelectedImage(String selectedImage) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle("Confirm Delete");
-        builder.setMessage("Are you sure you want to delete this image?");
+        builder.setTitle("Delete 1 item?");
+        builder.setMessage("This will delete 1 item permanently.");
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -157,7 +157,7 @@ public class OptionFragment extends Fragment {
                 cursor.close();
             }
             ArrayList<String> images = getAllShownImagesPath(requireActivity());
-            //mainActivity.finish();
+
             if (onImageDeleteListener != null) {
                 onImageDeleteListener.onImageDeleted();
             }

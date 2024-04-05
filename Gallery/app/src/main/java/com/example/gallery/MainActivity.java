@@ -133,6 +133,7 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
                         .commit();
 
                 imagesFragment = new ImagesFragment();
+                selectOptions = (SelectOptions) imagesFragment;
 
                 getSupportFragmentManager()
                         .beginTransaction()
@@ -286,6 +287,7 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
                 .commit();
 
         imagesFragment = new ImagesFragment(images);
+        selectOptions = (SelectOptions) imagesFragment;
 
         getSupportFragmentManager()
                 .beginTransaction()

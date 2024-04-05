@@ -449,6 +449,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         }
 
         public void confirmDeleteSelections() {
+            Log.d("YEAH", "HELLO???");
             int count = selectedPositions.size();
             AlertDialog.Builder builder = getBuilder("Delete selected items?",
                     "This will delete " + count + " item(s) permanently.", new CallbackDialog() {
