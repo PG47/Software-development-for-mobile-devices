@@ -105,7 +105,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
         gallery.setOnItemLongClickListener((parent, view, position, id) -> {
             if (!isSelectionMode) {
-                active=false;
+                active = false;
                 callback.startSelection();
                 selectAll.setVisibility(View.VISIBLE);
                 selectExit.setVisibility(View.VISIBLE);
@@ -447,7 +447,6 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             // Now move all the selected images to the new album
             moveImagesToAlbum(albumName);
         }
-
 
         public void confirmDeleteSelections() {
             int count = selectedPositions.size();
