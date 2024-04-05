@@ -31,6 +31,16 @@ public class EditFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof EditActivity) {
+            editActivity = (EditActivity) context;
+        } else {
+            throw new IllegalStateException("EditActivity must implement callbacks");
+        }
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         try {
@@ -73,6 +83,7 @@ public class EditFragment extends Fragment {
                 transaction.replace(R.id.AllOptions, addTextFragment);
                 transaction.addToBackStack(null);
                 transaction.commit();
+                editActivity.enableEditText();
                 return true;
             } else if (itemId == R.id.filter) {
                 FilterFragment filterFragment = FilterFragment.newInstance("Filter");
