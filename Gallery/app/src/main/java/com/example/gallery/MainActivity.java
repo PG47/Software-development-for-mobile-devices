@@ -27,8 +27,10 @@ import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.util.ArrayList;
+
 @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
-public class MainActivity extends AppCompatActivity implements NavigationChange {
+public class MainActivity extends AppCompatActivity implements NavigationChange, OpenAlbum {
     FragmentTransaction ft;
     HeadBarFragment f_headbar;
     BottomNavigationView bottomNavigationView;
@@ -125,6 +127,13 @@ public class MainActivity extends AppCompatActivity implements NavigationChange 
             int itemId = item.getItemId();
 
             if (itemId == R.id.images) {
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .remove(imagesFragment)
+                        .commit();
+
+                imagesFragment = new ImagesFragment();
+
                 getSupportFragmentManager()
                         .beginTransaction()
                         .replace(R.id.mainFragment, imagesFragment)
@@ -235,6 +244,7 @@ public class MainActivity extends AppCompatActivity implements NavigationChange 
                 .replace(R.id.mainFragment, imagesFragment)
                 .commit();
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -266,6 +276,21 @@ public class MainActivity extends AppCompatActivity implements NavigationChange 
     public void endSelection() {
         bottomNavigationView.setVisibility(View.VISIBLE);
         bottomSelectView.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public void openAlbum(ArrayList<String> images) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .remove(imagesFragment)
+                .commit();
+
+        imagesFragment = new ImagesFragment(images);
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.mainFragment, imagesFragment)
+                .commit();
     }
 }
 

@@ -1,11 +1,9 @@
 package com.example.gallery;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -22,41 +20,31 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
-import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 
 public class ImagesFragment extends Fragment implements SelectOptions {
     ImageButton selectAll;
@@ -66,9 +54,15 @@ public class ImagesFragment extends Fragment implements SelectOptions {
     private boolean isSelectionMode;
     NavigationChange callback;
     ImageAdapter adapter;
+    Boolean album = false;
 
     public ImagesFragment() {
         // Required empty public constructor
+    }
+
+    public ImagesFragment(ArrayList<String> _images) {
+        album = true;
+        images = _images;
     }
 
     public void setSelectionMode(boolean st) {
@@ -159,7 +153,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
         public ImageAdapter(Activity localContext) {
             context = localContext;
-            images = getAllShownImagesPath(context);
+            if (!album) images = getAllShownImagesPath(context);
             selectedPositions = new ArrayList<>();
         }
 
@@ -172,7 +166,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         }
 
         public Object getItem(int position) {
-            return position;
+            return images.get(position);
         }
 
         public long getItemId(int position) {
@@ -191,21 +185,19 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             // Highlight selected items
             if (isSelectionMode) {
                 imageView.setBackgroundResource(R.drawable.selected_image_background);
-            }else {
+            } else {
                 // Otherwise, set transparent background
                 imageView.setBackgroundResource(android.R.color.transparent);
             }
             if (selectedPositions.contains(position)) {
-                // If it's in selected positions, set background with green color
-                imageView.setBackgroundResource(R.drawable.selected_green_image_background);
+                // If it's in selected positions, set background with chosen color
+                imageView.setBackgroundResource(R.drawable.selected_chosen_image_background);
             }
 
             Glide.with(context).load(images.get(position)).centerCrop().into(imageView);
 
             return imageView;
         }
-
-
 
         public void toggleSelection(int position) {
             if (selectedPositions.contains(position)) {
@@ -223,6 +215,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             }
             notifyDataSetChanged();
         }
+
         public void toggleDeSelectAll() {
             selectedPositions.clear();
             notifyDataSetChanged();
@@ -549,6 +542,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
     public ImageAdapter getImageAdapter() {
         return adapter;
     }
+
     public void ExitSelection() {
         adapter.exitSelectionMode();
         callback.endSelection();
