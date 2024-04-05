@@ -1,9 +1,8 @@
 package com.example.gallery;
 
-import android.net.Uri;
-
 import java.util.ArrayList;
 
-public interface OpenAlbum {
+public interface NavigationAlbum {
     public void openAlbum(ArrayList<String> images);
+    public void closeAlbum();
 }

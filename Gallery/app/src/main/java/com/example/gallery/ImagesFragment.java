@@ -50,9 +50,11 @@ public class ImagesFragment extends Fragment implements SelectOptions {
     ImageButton selectAll;
     Boolean active = false;
     ImageButton selectExit;
+    ImageButton exitAlbum;
     private ArrayList<String> images;
     private boolean isSelectionMode;
     NavigationChange callback;
+    NavigationAlbum closeAlbum;
     ImageAdapter adapter;
     Boolean album = false;
 
@@ -73,6 +75,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         callback = (NavigationChange) requireActivity();
+        closeAlbum = (NavigationAlbum) requireActivity();
     }
 
     @Override
@@ -143,6 +146,17 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                 ExitSelection();
             }
         });
+
+        exitAlbum = rootView.findViewById(R.id.exit_album_button);
+        exitAlbum.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                closeAlbum.closeAlbum();
+                exitAlbum.setVisibility(View.GONE);
+            }
+        });
+
+        if (album) exitAlbum.setVisibility(View.VISIBLE);
 
         return rootView;
     }

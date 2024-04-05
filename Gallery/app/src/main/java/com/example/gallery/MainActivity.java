@@ -30,7 +30,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import java.util.ArrayList;
 
 @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
-public class MainActivity extends AppCompatActivity implements NavigationChange, OpenAlbum {
+public class MainActivity extends AppCompatActivity implements NavigationChange, NavigationAlbum {
     FragmentTransaction ft;
     HeadBarFragment f_headbar;
     BottomNavigationView bottomNavigationView;
@@ -263,11 +263,7 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
     @Override
     public void onBackPressed() {
         if (insideAlbum) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.mainFragment, albumFragment)
-                    .commit();
-            insideAlbum = false;
+            closeAlbum();
             return;
         }
 
@@ -306,6 +302,15 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
                 .beginTransaction()
                 .replace(R.id.mainFragment, imagesFragment)
                 .commit();
+    }
+
+    @Override
+    public void closeAlbum() {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.mainFragment, albumFragment)
+                .commit();
+        insideAlbum = false;
     }
 }
 
