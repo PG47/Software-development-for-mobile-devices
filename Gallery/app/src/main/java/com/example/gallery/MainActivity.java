@@ -38,6 +38,8 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
     PopupMenu popupMenu;
     ImagesFragment imagesFragment;
     SelectOptions selectOptions;
+    AlbumFragment albumFragment;
+    private boolean insideAlbum = false;
     private boolean isSelectionMode = false;
     private static final String tag = "PERMISSION_TAG";
     private static final int REQUEST_PERMISSIONS = 1234;
@@ -66,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
         ft.commit();
 
         imagesFragment = new ImagesFragment();
-        AlbumFragment albumFragment = new AlbumFragment();
+        albumFragment = new AlbumFragment();
         MapFragment mapFragment = new MapFragment();
         SearchFragment searchFragment = new SearchFragment();
 
@@ -260,10 +262,20 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
 
     @Override
     public void onBackPressed() {
+        if (insideAlbum) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.mainFragment, albumFragment)
+                    .commit();
+            insideAlbum = false;
+            return;
+        }
+
         if (imagesFragment != null) {
             imagesFragment.ExitSelection();
             return;
         }
+
         super.onBackPressed();
     }
 
@@ -288,6 +300,7 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
 
         imagesFragment = new ImagesFragment(images);
         selectOptions = (SelectOptions) imagesFragment;
+        insideAlbum = true;
 
         getSupportFragmentManager()
                 .beginTransaction()
