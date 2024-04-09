@@ -1,5 +1,7 @@
 package com.example.gallery;
 
+import static com.example.gallery.OptionFragment.getAllShownImagesPath;
+
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
@@ -66,15 +68,21 @@ public class ImagesFragment extends Fragment implements SelectOptions {
     NavigationAlbum closeAlbum;
     ImageAdapter adapter;
     Boolean album = false;
+    private static final int DETAILS_ACTIVITY_REQUEST_CODE = 1;
+
     private final int[] sortOrder = {0};
     public ImagesFragment() {
         // Required empty public constructor
     }
 
+
+
     public ImagesFragment(ArrayList<String> _images) {
         album = true;
         images = _images;
     }
+
+
 
     public void setSelectionMode(boolean st) {
         isSelectionMode = st;
@@ -132,7 +140,6 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         }
     }
 
-
     ImageButton sortButton;
 
     @Override
@@ -147,7 +154,8 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                 // Xử lý sự kiện khi click vào một item
                 Intent intent = new Intent(requireContext(), DetailsActivity.class);
                 intent.putExtra("SelectedImage", images.get(position));
-                startActivity(intent);
+                //startActivity(intent);
+                startActivityForResult(intent, DETAILS_ACTIVITY_REQUEST_CODE);
             } else {
                 adapter.toggleSelection(position);
             }
@@ -222,7 +230,16 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
         return rootView;
     }
-
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == DETAILS_ACTIVITY_REQUEST_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                // Handle the result here, such as reloading images
+                adapter.reloadImages();
+            }
+        }
+    }
 
     public class ImageAdapter extends BaseAdapter {
         private final Activity context;
@@ -616,6 +633,12 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                 Toast.makeText(requireActivity(), "No Apps Available", Toast.LENGTH_SHORT).show();
             }
         }
+
+        //Load lại ảnh khi cân thiết
+        public void reloadImages() {
+            images = getAllShownImagesPath(context);
+            adapter.notifyDataSetChanged();
+        }
     }
 
     public ImageAdapter getImageAdapter() {
@@ -673,6 +696,12 @@ public class ImagesFragment extends Fragment implements SelectOptions {
     @Override
     public void delete() {
         adapter.confirmDeleteSelections();
+    }
+
+    public void reloadImages() {
+        if (adapter != null) {
+            adapter.reloadImages();
+        }
     }
 
     public ArrayList<File> getImagesList() {
