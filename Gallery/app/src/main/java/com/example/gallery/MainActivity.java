@@ -10,6 +10,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentTransaction;
+import android.widget.ImageButton;
+
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -22,12 +24,16 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
 public class MainActivity extends AppCompatActivity implements NavigationChange, NavigationAlbum {
@@ -60,6 +66,18 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
             requestPermission();
             loadImages();
         }
+
+//        ImageButton sortButton = findViewById(R.id.sort_button);
+//        sortButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                // Đảo ngược giá trị của biến sortOrder giữa 0 và 1
+//                sortOrder = (sortOrder == 0) ? 1 : 0;
+//                sortImagesByOldestDate(); // Gọi phương thức sắp xếp
+//            }
+//        });
+
+
 
         f_headbar = HeadBarFragment.newInstance("first-headbar");
         ft = getSupportFragmentManager().beginTransaction();
@@ -167,6 +185,39 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
 
         bottomNavigationView.setSelectedItemId(R.id.images);
     }
+//    private int sortOrder = 0; // Biến này lưu trạng thái hiện tại của thứ tự sắp xếp
+//
+//    private void sortImagesByOldestDate() {
+//        if (imagesFragment != null) {
+//            // Lấy danh sách các tệp ảnh từ imagesFragment
+//            ArrayList<File> images = imagesFragment.getImagesList();
+//
+//            // Kiểm tra xem danh sách có null hay không
+//            if (images != null) {
+//                // Sắp xếp danh sách hình ảnh theo thứ tự đã chọn
+//                Collections.sort(images, new Comparator<File>() {
+//                    @Override
+//                    public int compare(File file1, File file2) {
+//                        long lastModified1 = file1.lastModified();
+//                        long lastModified2 = file2.lastModified();
+//
+//                        // So sánh theo trạng thái sắp xếp hiện tại
+//                        if (sortOrder == 0) {
+//                            return Long.compare(lastModified1, lastModified2); // Sắp xếp theo cũ nhất
+//                        } else {
+//                            return Long.compare(lastModified2, lastModified1); // Sắp xếp theo mới nhất
+//                        }
+//                    }
+//                });
+//
+//                // Cập nhật giao diện sau khi sắp xếp
+//                imagesFragment.updateImages(images);
+//            }
+//        }
+//    }
+
+
+
 
     private void requestPermission() {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -313,4 +364,3 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
         insideAlbum = false;
     }
 }
-

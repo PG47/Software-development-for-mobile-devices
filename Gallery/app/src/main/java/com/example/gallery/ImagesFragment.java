@@ -14,6 +14,15 @@ import android.graphics.drawable.Drawable;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
+import java.io.File;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -57,7 +66,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
     NavigationAlbum closeAlbum;
     ImageAdapter adapter;
     Boolean album = false;
-
+    private final int[] sortOrder = {0};
     public ImagesFragment() {
         // Required empty public constructor
     }
@@ -87,9 +96,47 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         }
     }
 
+    private void sortImagesByOldestDate() {
+        // Kiểm tra xem danh sách hình ảnh có tồn tại không
+        if (images != null && images.size() > 0) {
+            // Sử dụng Comparator để so sánh thời gian sửa đổi của hai tệp ảnh
+            Collections.sort(images, new Comparator<String>() {
+                @Override
+                public int compare(String imagePath1, String imagePath2) {
+                    // Lấy thời gian sửa đổi của file 1
+                    File file1 = new File(imagePath1);
+                    long lastModified1 = file1.lastModified();
+
+                    // Lấy thời gian sửa đổi của file 2
+                    File file2 = new File(imagePath2);
+                    long lastModified2 = file2.lastModified();
+
+                    // So sánh thời gian sửa đổi của hai file
+                    // Nếu sortOrder[0] = 0 (mặc định), sắp xếp từ mới nhất đến cũ nhất
+                    // Nếu sortOrder[0] = 1, sắp xếp từ cũ nhất đến mới nhất
+                    if (sortOrder[0] == 0) {
+                        return Long.compare(lastModified2, lastModified1); // Đảo ngược thứ tự sắp xếp
+                    } else {
+                        return Long.compare(lastModified1, lastModified2);
+                    }
+                }
+            });
+
+            // Đảo ngược giá trị sortOrder để thay đổi hướng sắp xếp cho lần sau
+            sortOrder[0] = (sortOrder[0] == 0) ? 1 : 0;
+
+            // Cập nhật lại giao diện sau khi sắp xếp
+            if (adapter != null) {
+                adapter.notifyDataSetChanged();
+            }
+        }
+    }
+
+
+    ImageButton sortButton;
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_images, container, false);
         GridView gallery = rootView.findViewById(R.id.imagesGrid);
         adapter = new ImageAdapter(requireActivity());
@@ -97,7 +144,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
         gallery.setOnItemClickListener((parent, view, position, id) -> {
             if (!isSelectionMode) {
-                // Handle regular item click
+                // Xử lý sự kiện khi click vào một item
                 Intent intent = new Intent(requireContext(), DetailsActivity.class);
                 intent.putExtra("SelectedImage", images.get(position));
                 startActivity(intent);
@@ -106,8 +153,10 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             }
         });
 
+        // Xử lý sự kiện khi long click vào một item
         gallery.setOnItemLongClickListener((parent, view, position, id) -> {
             if (!isSelectionMode) {
+                // Thay đổi trạng thái khi chọn nhiều item
                 active = false;
                 callback.startSelection();
                 selectAll.setVisibility(View.VISIBLE);
@@ -119,6 +168,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             return true;
         });
 
+        // Xử lý khi click vào nút select_all
         selectAll = rootView.findViewById(R.id.select_all);
         selectAll.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -126,19 +176,19 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                 Drawable icon = getResources().getDrawable(R.drawable.ic_select_all_foreground);
                 if (!active) {
                     adapter.toggleSelectAll();
-                    active=true;
+                    active = true;
                     icon.setColorFilter(Color.GREEN, PorterDuff.Mode.SRC_IN);
                     selectAll.setImageDrawable(icon);
                 } else {
                     adapter.toggleDeSelectAll();
-                    active=false;
+                    active = false;
                     icon.clearColorFilter();
                     selectAll.setImageDrawable(icon);
                 }
-
             }
         });
 
+        // Xử lý khi click vào nút select_exit
         selectExit = rootView.findViewById(R.id.select_exit);
         selectExit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -147,6 +197,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             }
         });
 
+        // Xử lý khi click vào nút exit_album_button
         exitAlbum = rootView.findViewById(R.id.exit_album_button);
         exitAlbum.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -156,10 +207,22 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             }
         });
 
+        // Hiển thị nút exit_album_button nếu ở trong album
         if (album) exitAlbum.setVisibility(View.VISIBLE);
+
+        final int[] sortOrder = {0}; // Khai báo biến sortOrder dạng mảng để có thể thay đổi giá trị
+        ImageButton sortButton = rootView.findViewById(R.id.sort_button);
+        sortButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sortOrder[0] = (sortOrder[0] == 0) ? 1 : 0;
+                sortImagesByOldestDate(); // Thực hiện sắp xếp hình ảnh
+            }
+        });
 
         return rootView;
     }
+
 
     public class ImageAdapter extends BaseAdapter {
         private final Activity context;
@@ -248,8 +311,8 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             ArrayList<String> listOfAllImages = new ArrayList<>();
             uri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 
-            String[] projection = { MediaStore.MediaColumns.DATA,
-                    MediaStore.Images.Media.DATE_TAKEN };
+            String[] projection = {MediaStore.MediaColumns.DATA,
+                    MediaStore.Images.Media.DATE_TAKEN};
 
             cursor = activity.getContentResolver().query(uri, projection, null,
                     null, MediaStore.Images.Media.DATE_TAKEN + " DESC");
@@ -290,6 +353,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
             return albumNames;
         }
+
         public void add_to_Album() {
             ArrayList<String> albumNames = getAllAlbums();
 
@@ -374,9 +438,9 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
         // Helper method to get album ID based on the album name
         private boolean CheckAlbum(String albumName) {
-            String[] projection = { MediaStore.Images.Media.BUCKET_ID };
+            String[] projection = {MediaStore.Images.Media.BUCKET_ID};
             String selection = MediaStore.Images.Media.BUCKET_DISPLAY_NAME + "=?";
-            String[] selectionArgs = { albumName };
+            String[] selectionArgs = {albumName};
             Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 
             Cursor cursor = requireActivity().getContentResolver().query(uri, projection, selection, selectionArgs, null);
@@ -476,14 +540,14 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         }
 
         public void deleteSelections() {
-            String[] projection = { MediaStore.Images.Media._ID };
+            String[] projection = {MediaStore.Images.Media._ID};
 
             String selection = MediaStore.Images.Media.DATA + " = ?";
             Uri queryUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
             ContentResolver contentResolver = getActivity().getContentResolver();
 
             for (int i = 0; i < selectedPositions.size(); i++) {
-                String[] selectionArgs = new String[] { images.get(selectedPositions.get(i)) };
+                String[] selectionArgs = new String[]{images.get(selectedPositions.get(i))};
 
                 Cursor cursor = contentResolver.query(queryUri, projection, selection, selectionArgs, null);
 
@@ -533,7 +597,8 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                             }
 
                             @Override
-                            public void onLoadCleared(@Nullable Drawable placeholder) {}
+                            public void onLoadCleared(@Nullable Drawable placeholder) {
+                            }
                         });
             }
         }
@@ -579,7 +644,8 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {}
+            public void onClick(DialogInterface dialog, int which) {
+            }
         });
         return builder;
     }
@@ -608,4 +674,33 @@ public class ImagesFragment extends Fragment implements SelectOptions {
     public void delete() {
         adapter.confirmDeleteSelections();
     }
+
+    public ArrayList<File> getImagesList() {
+        ArrayList<File> fileList = new ArrayList<>();
+        for (String imagePath : images) {
+            File imageFile = new File(imagePath);
+            if (imageFile.exists()) {
+                fileList.add(imageFile);
+            }
+        }
+        return fileList;
+    }
+
+
+
+    public void updateImages(ArrayList<File> sortedImages) {
+        // Cập nhật danh sách ảnh mới
+        this.images.clear();
+        for (File file : sortedImages) {
+            this.images.add(file.getPath()); // Chuyển đổi File thành đường dẫn String
+        }
+
+        // Cập nhật lại giao diện
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
+    }
+
+
+
 }
