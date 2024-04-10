@@ -68,6 +68,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
     NavigationAlbum closeAlbum;
     ImageAdapter adapter;
     Boolean album = false;
+    DatabaseHelper databaseHelper;
     private static final int DETAILS_ACTIVITY_REQUEST_CODE = 1;
 
     private final int[] sortOrder = {0};
@@ -93,6 +94,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         super.onCreate(savedInstanceState);
         callback = (NavigationChange) requireActivity();
         closeAlbum = (NavigationAlbum) requireActivity();
+        databaseHelper = new DatabaseHelper(requireActivity());
     }
 
     @Override
@@ -452,7 +454,6 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             Toast.makeText(requireContext(), "Images moved to album: " + albumName, Toast.LENGTH_SHORT).show();
         }
 
-
         // Helper method to get album ID based on the album name
         private boolean CheckAlbum(String albumName) {
             String[] projection = {MediaStore.Images.Media.BUCKET_ID};
@@ -544,7 +545,6 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         }
 
         public void confirmDeleteSelections() {
-            Log.d("YEAH", "HELLO???");
             int count = selectedPositions.size();
             AlertDialog.Builder builder = getBuilder("Delete selected items?",
                     "This will delete " + count + " item(s) permanently.", new CallbackDialog() {
@@ -634,6 +634,44 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             }
         }
 
+        public void secureEnterPassword() {
+            int count = selectedPositions.size();
+            AlertDialog.Builder builder = getBuilder("Delete selected items?",
+                    "This will delete " + count + " item(s) permanently.", new CallbackDialog() {
+                        @Override
+                        public void onPositiveClick() {
+                            deleteSelections();
+                        }
+                    });
+            builder.show();
+        }
+
+        public void secureSelections() {
+            // databaseHelper.insertData(10, 30);
+            String[] projection = {MediaStore.Images.Media._ID};
+
+            String selection = MediaStore.Images.Media.DATA + " = ?";
+            Uri queryUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+            ContentResolver contentResolver = getActivity().getContentResolver();
+
+            for (int i = 0; i < selectedPositions.size(); i++) {
+                String[] selectionArgs = new String[] {images.get(selectedPositions.get(i))};
+
+                Cursor cursor = contentResolver.query(queryUri, projection, selection, selectionArgs, null);
+
+                assert cursor != null;
+                int column_index_data = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
+
+                if (cursor.moveToFirst()) {
+                    long id = cursor.getLong(column_index_data);
+                    Uri deleteUri = ContentUris.withAppendedId(queryUri, id);
+                    contentResolver.delete(deleteUri, null, null);
+                }
+
+                cursor.close();
+            }
+        }
+
         //Load lại ảnh khi cân thiết
         public void reloadImages() {
             images = getAllShownImagesPath(context);
@@ -690,7 +728,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
     @Override
     public void secure() {
-
+        adapter.secureSelections();
     }
 
     @Override

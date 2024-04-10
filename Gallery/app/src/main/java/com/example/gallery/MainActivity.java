@@ -10,6 +10,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentTransaction;
+
+import android.database.Cursor;
 import android.widget.ImageButton;
 
 
@@ -77,8 +79,6 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
 //            }
 //        });
 
-
-
         f_headbar = HeadBarFragment.newInstance("first-headbar");
         ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.head_bar, f_headbar);
@@ -94,7 +94,6 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
 
         bottomSelectView = findViewById(R.id.selectToolbar);
         bottomSelectView.setOnItemSelectedListener(item -> {
-
             int itemId = item.getItemId();
 
             if (itemId == R.id.share) {
@@ -185,6 +184,7 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
 
         bottomNavigationView.setSelectedItemId(R.id.images);
     }
+
 //    private int sortOrder = 0; // Biến này lưu trạng thái hiện tại của thứ tự sắp xếp
 //
 //    private void sortImagesByOldestDate() {
@@ -215,9 +215,6 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
 //            }
 //        }
 //    }
-
-
-
 
     private void requestPermission() {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
