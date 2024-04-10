@@ -155,18 +155,58 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
         gallery.setOnItemClickListener((parent, view, position, id) -> {
             if (!isSelectionMode) {
+                if (adapter.securedIndices.contains(position)) {
+                    final EditText input = new EditText(requireContext());
+                    AlertDialog.Builder builder = inputPasswordAlert(input,
+                            "Enter password to view image:");
+
+                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            String inputPass = String.valueOf(input.getText());
+                            int index = adapter.securedIndices.indexOf(position);
+                            String password = adapter.securedPasswords.get(index);
+
+                            if (!inputPass.equals(password)) {
+                                AlertDialog.Builder alert = new AlertDialog.Builder(requireContext());
+                                alert.setTitle("Error").setMessage("Incorrect password.");
+                                alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+
+                                    }
+                                });
+                                alert.show();
+                            }
+                            else {
+                                // Xử lý sự kiện khi click vào một item
+                                Intent intent = new Intent(requireContext(), DetailsActivity.class);
+                                intent.putExtra("SelectedImage", images.get(position));
+                                //startActivity(intent);
+                                startActivityForResult(intent, DETAILS_ACTIVITY_REQUEST_CODE);
+                            }
+                        }
+                    });
+
+                    builder.show();
+                    return;
+                }
+                
                 // Xử lý sự kiện khi click vào một item
                 Intent intent = new Intent(requireContext(), DetailsActivity.class);
                 intent.putExtra("SelectedImage", images.get(position));
                 //startActivity(intent);
                 startActivityForResult(intent, DETAILS_ACTIVITY_REQUEST_CODE);
             } else {
+                if (adapter.securedIndices.contains(position)) return;
                 adapter.toggleSelection(position);
             }
         });
 
         // Xử lý sự kiện khi long click vào một item
         gallery.setOnItemLongClickListener((parent, view, position, id) -> {
+            if (adapter.securedIndices.contains(position)) return true;
+
             if (!isSelectionMode) {
                 // Thay đổi trạng thái khi chọn nhiều item
                 active = false;
@@ -234,6 +274,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
         return rootView;
     }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -243,6 +284,31 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                 adapter.reloadImages();
             }
         }
+    }
+
+    public AlertDialog.Builder inputPasswordAlert(EditText input, String title) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle(title);
+
+        input.setTextSize(40);
+        input.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+
+        input.setInputType(InputType.TYPE_CLASS_NUMBER);
+        input.setRawInputType(Configuration.KEYBOARD_12KEY);
+
+        InputFilter[] filterArray = new InputFilter[1];
+        filterArray[0] = new InputFilter.LengthFilter(4);
+        input.setFilters(filterArray);
+
+        builder.setView(input);
+        builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+
+        return builder;
     }
 
     public class ImageAdapter extends BaseAdapter {
@@ -695,22 +761,10 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         public void secureEnterPassword() {
             int count = selectedPositions.size();
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-            builder.setTitle("Enter a 4-digit password to secure " + count + " image(s):");
-
             final EditText input = new EditText(requireContext());
+            AlertDialog.Builder builder = inputPasswordAlert(input,
+                    "Enter a 4-digit password to secure " + count + " image(s):");
 
-            input.setTextSize(40);
-            input.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-
-            input.setInputType(InputType.TYPE_CLASS_NUMBER);
-            input.setRawInputType(Configuration.KEYBOARD_12KEY);
-
-            InputFilter[] filterArray = new InputFilter[1];
-            filterArray[0] = new InputFilter.LengthFilter(4);
-            input.setFilters(filterArray);
-
-            builder.setView(input);
             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
@@ -733,12 +787,6 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                     }
 
                     alert.show();
-                }
-            });
-            builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-
                 }
             });
 
