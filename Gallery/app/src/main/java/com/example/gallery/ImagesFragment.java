@@ -38,6 +38,7 @@ import android.provider.MediaStore;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -81,14 +82,10 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         // Required empty public constructor
     }
 
-
-
     public ImagesFragment(ArrayList<String> _images) {
         album = true;
         images = _images;
     }
-
-
 
     public void setSelectionMode(boolean st) {
         isSelectionMode = st;
@@ -251,11 +248,18 @@ public class ImagesFragment extends Fragment implements SelectOptions {
     public class ImageAdapter extends BaseAdapter {
         private final Activity context;
         private final ArrayList<Integer> selectedPositions;
+        private final ArrayList<Integer> securedIndices;
+        private final ArrayList<String> securedPasswords;
 
         public ImageAdapter(Activity localContext) {
             context = localContext;
             if (!album) images = getAllShownImagesPath(context);
+
             selectedPositions = new ArrayList<>();
+            securedIndices = new ArrayList<>();
+            securedPasswords = new ArrayList<>();
+
+            getAllSecuredIDs();
         }
 
         public int getCount() {
@@ -295,9 +299,58 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                 imageView.setBackgroundResource(R.drawable.selected_chosen_image_background);
             }
 
-            Glide.with(context).load(images.get(position)).centerCrop().into(imageView);
+            if (securedIndices.contains(position)) {
+                imageView.setBackgroundResource(R.drawable.selected_image_background);
+                Glide.with(context).load(R.drawable.ic_lock_foreground).centerCrop().into(imageView);
+            }
+            else {
+                Glide.with(context).load(images.get(position)).centerCrop().into(imageView);
+            }
+
+            Log.d("TEST", String.valueOf(securedIndices));
 
             return imageView;
+        }
+
+        public void getAllSecuredIDs() {
+            securedIndices.clear();
+            securedPasswords.clear();
+
+            Cursor cursor = databaseHelper.getData();
+
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    int column_index_id = cursor.getColumnIndex("media_id");
+                    int column_index_password = cursor.getColumnIndex("password");
+
+                    long media_id = cursor.getLong(column_index_id);
+                    String password = cursor.getString(column_index_password);
+
+                    String[] projection = {MediaStore.Images.Media.DATA};
+
+                    String selection = MediaStore.Images.Media._ID + " = ?";
+                    Uri queryUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                    ContentResolver contentResolver = requireActivity().getContentResolver();
+
+                    String[] selectionArgs = new String[] {String.valueOf(media_id)};
+
+                    Cursor cursorToData = contentResolver.query(queryUri, projection, selection, selectionArgs, null);
+
+                    assert cursorToData != null;
+                    int column_index_data = cursorToData.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+
+                    if (cursorToData.moveToFirst()) {
+                        String path = cursorToData.getString(column_index_data);
+                        int index = images.indexOf(path);
+                        securedIndices.add(index);
+                        securedPasswords.add(password);
+                    }
+
+                    cursorToData.close();
+                } while (cursor.moveToNext());
+
+                cursor.close();
+            }
         }
 
         public void toggleSelection(int position) {
@@ -640,21 +693,6 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         }
 
         public void secureEnterPassword() {
-            Cursor cursor = databaseHelper.getData();
-            if (cursor != null && cursor.moveToFirst()) {
-                do {
-                    int column_index_id = cursor.getColumnIndex("media_id");
-                    int column_index_password = cursor.getColumnIndex("password");
-
-                    long media_id = cursor.getLong(column_index_id);
-                    String password = cursor.getString(column_index_password);
-
-                    Log.d("DATABASE", String.valueOf(media_id));
-                    Log.d("DATABASE", password);
-                } while (cursor.moveToNext());
-                cursor.close();
-            }
-
             int count = selectedPositions.size();
 
             AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
@@ -712,7 +750,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
             String selection = MediaStore.Images.Media.DATA + " = ?";
             Uri queryUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-            ContentResolver contentResolver = getActivity().getContentResolver();
+            ContentResolver contentResolver = requireActivity().getContentResolver();
 
             for (int i = 0; i < selectedPositions.size(); i++) {
                 String[] selectionArgs = new String[] {images.get(selectedPositions.get(i))};
@@ -738,6 +776,9 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
                 cursor.close();
             }
+
+            getAllSecuredIDs();
+            notifyDataSetChanged();
         }
 
         //Load lại ảnh khi cân thiết
