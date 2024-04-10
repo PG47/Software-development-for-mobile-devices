@@ -39,9 +39,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+    public void updateData(long id, String password) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String sql = "UPDATE " + TABLE_NAME + " SET " + COLUMN_PASSWORD + " = '" + password +
+                "' WHERE " + COLUMN_MEDIA_ID + " = " + id;
+        db.execSQL(sql);
+        db.close();
+    }
+
     public Cursor getData() {
         SQLiteDatabase db = this.getReadableDatabase();
         String sql = "SELECT * FROM " + TABLE_NAME;
+        return db.rawQuery(sql, null);
+    }
+
+    public Cursor findID(long id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String sql = "SELECT * FROM " + TABLE_NAME + " WHERE " + COLUMN_MEDIA_ID + " = " + id;
         return db.rawQuery(sql, null);
     }
 }

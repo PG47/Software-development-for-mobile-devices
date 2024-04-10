@@ -690,6 +690,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                         alert.setTitle("Error").setMessage("Password must be exactly 4-digit long.");
                     }
                     else {
+                        secureSelections(password);
                         alert.setTitle("Success").setMessage("Your images have been secured.");
                     }
 
@@ -723,7 +724,16 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
                 if (cursor.moveToFirst()) {
                     long id = cursor.getLong(column_index_data);
-                    databaseHelper.insertData(id, password);
+
+                    Cursor cursorID = databaseHelper.findID(id);
+                    if (cursorID != null && cursorID.moveToFirst()) {
+                        databaseHelper.updateData(id, password);
+                        cursorID.close();
+                    }
+
+                    else {
+                        databaseHelper.insertData(id, password);
+                    }
                 }
 
                 cursor.close();
