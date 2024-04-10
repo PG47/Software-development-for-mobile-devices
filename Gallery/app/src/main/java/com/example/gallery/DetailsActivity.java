@@ -109,7 +109,7 @@ public class DetailsActivity extends AppCompatActivity {
                 if(onImageNewChangeListener != null) {
                     onImageNewChangeListener.onChange();
                 }
-                setResult(Activity.RESULT_OK);.
+                setResult(Activity.RESULT_OK);
                 finish();
             }
         });
