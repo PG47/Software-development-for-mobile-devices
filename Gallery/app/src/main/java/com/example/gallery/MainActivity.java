@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.database.Cursor;
+import android.provider.MediaStore;
 import android.widget.ImageButton;
 
 
@@ -40,6 +41,7 @@ import java.util.Comparator;
 @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
 public class MainActivity extends AppCompatActivity implements NavigationChange, NavigationAlbum {
     FragmentTransaction ft;
+    public static final int REQUEST_IMAGE_CAPTURE = 3;
     HeadBarFragment f_headbar;
     BottomNavigationView bottomNavigationView;
     BottomNavigationView bottomSelectView;
@@ -54,8 +56,17 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
     private static final String [] PERMISSIONS = {
             Manifest.permission.READ_MEDIA_IMAGES,
             Manifest.permission.MANAGE_EXTERNAL_STORAGE
+            //,Manifest.permission.CAMERA
     };
     private static final int PERMISSION_COUNT = 2;
+
+    private void checkCameraPermission() {
+        if(ActivityCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this,
+                    new String[]{Manifest.permission.CAMERA}, 1);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
             // do later
         } else {
             requestPermission();
+            checkCameraPermission();
             loadImages();
         }
 
@@ -216,6 +228,20 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
 //        }
 //    }
 
+    public void refreshImages() {
+        if (imagesFragment != null && imagesFragment.adapter != null) {
+            imagesFragment.adapter.reloadImages();
+        }
+    }
+    public void takePicture() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            cameraActivityResultLauncher.launch(takePictureIntent);
+        } else {
+            Toast.makeText(this, "No camera app available", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void requestPermission() {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             try {
@@ -241,12 +267,16 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
     }
 
     public boolean checkPermission() {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            return Environment.isExternalStorageManager();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            return Environment.isExternalStorageManager() &&
+                    ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
         } else {
             int write = ContextCompat.checkSelfPermission(this, Manifest.permission.MANAGE_EXTERNAL_STORAGE);
             int read = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES);
-            return write == PackageManager.PERMISSION_GRANTED && read == PackageManager.PERMISSION_GRANTED;
+            int camera = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
+            return write == PackageManager.PERMISSION_GRANTED &&
+                    read == PackageManager.PERMISSION_GRANTED &&
+                    camera == PackageManager.PERMISSION_GRANTED;
         }
     }
 
@@ -264,6 +294,23 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
                         }
                     } else {
 
+                    }
+                }
+            }
+    );
+
+    private final ActivityResultLauncher<Intent> cameraActivityResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        // Image captured successfully, notify ImagesFragment to refresh
+                        if (imagesFragment != null) {
+                            imagesFragment.adapter.reloadImages();
+                        }
+                    } else {
+                        Toast.makeText(MainActivity.this, "Failed to capture image", Toast.LENGTH_SHORT).show();
                     }
                 }
             }
@@ -300,6 +347,7 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
     protected void onResume() {
         super.onResume();
         // Check if images fragment is not loaded yet
+        refreshImages();
         /*if (bottomNavigationView.getSelectedItemId() == R.id.images) {
             ImagesFragment imagesFragment = (ImagesFragment) getSupportFragmentManager().findFragmentById(R.id.mainFragment);
             if (imagesFragment == null) {
