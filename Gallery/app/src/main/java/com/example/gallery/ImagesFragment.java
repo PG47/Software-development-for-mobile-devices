@@ -1,13 +1,13 @@
 package com.example.gallery;
 
-import static com.example.gallery.OptionFragment.getAllShownImagesPath;
-
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -29,11 +29,14 @@ import java.util.List;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.text.InputFilter;
+import android.text.InputType;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -46,6 +49,8 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -635,19 +640,73 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         }
 
         public void secureEnterPassword() {
+            Cursor cursor = databaseHelper.getData();
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    int column_index_id = cursor.getColumnIndex("media_id");
+                    int column_index_password = cursor.getColumnIndex("password");
+
+                    long media_id = cursor.getLong(column_index_id);
+                    String password = cursor.getString(column_index_password);
+
+                    Log.d("DATABASE", String.valueOf(media_id));
+                    Log.d("DATABASE", password);
+                } while (cursor.moveToNext());
+                cursor.close();
+            }
+
             int count = selectedPositions.size();
-            AlertDialog.Builder builder = getBuilder("Delete selected items?",
-                    "This will delete " + count + " item(s) permanently.", new CallbackDialog() {
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+            builder.setTitle("Enter a 4-digit password to secure " + count + " image(s):");
+
+            final EditText input = new EditText(requireContext());
+
+            input.setTextSize(40);
+            input.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+
+            input.setInputType(InputType.TYPE_CLASS_NUMBER);
+            input.setRawInputType(Configuration.KEYBOARD_12KEY);
+
+            InputFilter[] filterArray = new InputFilter[1];
+            filterArray[0] = new InputFilter.LengthFilter(4);
+            input.setFilters(filterArray);
+
+            builder.setView(input);
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    String password = String.valueOf(input.getText());
+
+                    AlertDialog.Builder alert = new AlertDialog.Builder(requireContext());
+                    alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         @Override
-                        public void onPositiveClick() {
-                            deleteSelections();
+                        public void onClick(DialogInterface dialog, int which) {
+
                         }
                     });
+
+                    if (password.length() != 4) {
+                        alert.setTitle("Error").setMessage("Password must be exactly 4-digit long.");
+                    }
+                    else {
+                        alert.setTitle("Success").setMessage("Your images have been secured.");
+                    }
+
+                    alert.show();
+                }
+            });
+            builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                }
+            });
+
             builder.show();
         }
 
-        public void secureSelections() {
-            // databaseHelper.insertData(10, 30);
+        public void secureSelections(String password) {
             String[] projection = {MediaStore.Images.Media._ID};
 
             String selection = MediaStore.Images.Media.DATA + " = ?";
@@ -664,8 +723,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
                 if (cursor.moveToFirst()) {
                     long id = cursor.getLong(column_index_data);
-                    Uri deleteUri = ContentUris.withAppendedId(queryUri, id);
-                    contentResolver.delete(deleteUri, null, null);
+                    databaseHelper.insertData(id, password);
                 }
 
                 cursor.close();
@@ -728,7 +786,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
     @Override
     public void secure() {
-        adapter.secureSelections();
+        adapter.secureEnterPassword();
     }
 
     @Override
@@ -753,8 +811,6 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         return fileList;
     }
 
-
-
     public void updateImages(ArrayList<File> sortedImages) {
         // Cập nhật danh sách ảnh mới
         this.images.clear();
@@ -767,7 +823,4 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             adapter.notifyDataSetChanged();
         }
     }
-
-
-
 }
