@@ -17,8 +17,8 @@ public class MainActivity extends AppCompatActivity {
 
     ImageAdapter adapterMainSubjects;
     GridView myMainGridView;
-    Integer[] images = {R.mipmap.ic_news_vne_foreground, R.mipmap.ic_news_dt_foreground, R.mipmap.ic_news_tn_foreground, R.mipmap.ic_news_bm_foreground};
-    String[] titles = {"VNEXPRESS", "DAN TRI", "THANH NIEN", "BAO MOI"};
+    Integer[] images = {R.mipmap.ic_news_vne_foreground, R.mipmap.ic_news_dt_foreground, R.mipmap.ic_news_tn_foreground, R.mipmap.ic_news_tt_foreground};
+    String[] titles = {"VNEXPRESS", "DAN TRI", "THANH NIEN", "TUOI TRE"};
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -1,11 +1,13 @@
 package com.example.gallery;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -14,16 +16,29 @@ import android.graphics.drawable.Drawable;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
+import java.io.File;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.text.InputFilter;
+import android.text.InputType;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,6 +50,8 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -57,7 +74,10 @@ public class ImagesFragment extends Fragment implements SelectOptions {
     NavigationAlbum closeAlbum;
     ImageAdapter adapter;
     Boolean album = false;
+    DatabaseHelper databaseHelper;
+    private static final int DETAILS_ACTIVITY_REQUEST_CODE = 1;
 
+    private final int[] sortOrder = {0};
     public ImagesFragment() {
         // Required empty public constructor
     }
@@ -76,6 +96,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         super.onCreate(savedInstanceState);
         callback = (NavigationChange) requireActivity();
         closeAlbum = (NavigationAlbum) requireActivity();
+        databaseHelper = new DatabaseHelper(requireActivity());
     }
 
     @Override
@@ -87,9 +108,46 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         }
     }
 
+    private void sortImagesByOldestDate() {
+        // Kiểm tra xem danh sách hình ảnh có tồn tại không
+        if (images != null && images.size() > 0) {
+            // Sử dụng Comparator để so sánh thời gian sửa đổi của hai tệp ảnh
+            Collections.sort(images, new Comparator<String>() {
+                @Override
+                public int compare(String imagePath1, String imagePath2) {
+                    // Lấy thời gian sửa đổi của file 1
+                    File file1 = new File(imagePath1);
+                    long lastModified1 = file1.lastModified();
+
+                    // Lấy thời gian sửa đổi của file 2
+                    File file2 = new File(imagePath2);
+                    long lastModified2 = file2.lastModified();
+
+                    // So sánh thời gian sửa đổi của hai file
+                    // Nếu sortOrder[0] = 0 (mặc định), sắp xếp từ mới nhất đến cũ nhất
+                    // Nếu sortOrder[0] = 1, sắp xếp từ cũ nhất đến mới nhất
+                    if (sortOrder[0] == 0) {
+                        return Long.compare(lastModified2, lastModified1); // Đảo ngược thứ tự sắp xếp
+                    } else {
+                        return Long.compare(lastModified1, lastModified2);
+                    }
+                }
+            });
+
+            // Đảo ngược giá trị sortOrder để thay đổi hướng sắp xếp cho lần sau
+            sortOrder[0] = (sortOrder[0] == 0) ? 1 : 0;
+
+            // Cập nhật lại giao diện sau khi sắp xếp
+            if (adapter != null) {
+                adapter.notifyDataSetChanged();
+            }
+        }
+    }
+
+    ImageButton sortButton;
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_images, container, false);
         GridView gallery = rootView.findViewById(R.id.imagesGrid);
         adapter = new ImageAdapter(requireActivity());
@@ -97,17 +155,60 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
         gallery.setOnItemClickListener((parent, view, position, id) -> {
             if (!isSelectionMode) {
-                // Handle regular item click
+                if (adapter.securedIndices.contains(position)) {
+                    final EditText input = new EditText(requireContext());
+                    AlertDialog.Builder builder = inputPasswordAlert(input,
+                            "Enter password to view image:");
+
+                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            String inputPass = String.valueOf(input.getText());
+                            int index = adapter.securedIndices.indexOf(position);
+                            String password = adapter.securedPasswords.get(index);
+
+                            if (!inputPass.equals(password)) {
+                                AlertDialog.Builder alert = new AlertDialog.Builder(requireContext());
+                                alert.setTitle("Error").setMessage("Incorrect password.");
+                                alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+
+                                    }
+                                });
+                                alert.show();
+                            }
+                            else {
+                                // Xử lý sự kiện khi click vào một item
+                                Intent intent = new Intent(requireContext(), DetailsActivity.class);
+                                intent.putExtra("SelectedImage", images.get(position));
+                                //startActivity(intent);
+                                startActivityForResult(intent, DETAILS_ACTIVITY_REQUEST_CODE);
+                            }
+                        }
+                    });
+
+                    builder.show();
+                    return;
+                }
+                
+                // Xử lý sự kiện khi click vào một item
                 Intent intent = new Intent(requireContext(), DetailsActivity.class);
                 intent.putExtra("SelectedImage", images.get(position));
-                startActivity(intent);
+                //startActivity(intent);
+                startActivityForResult(intent, DETAILS_ACTIVITY_REQUEST_CODE);
             } else {
+                if (adapter.securedIndices.contains(position)) return;
                 adapter.toggleSelection(position);
             }
         });
 
+        // Xử lý sự kiện khi long click vào một item
         gallery.setOnItemLongClickListener((parent, view, position, id) -> {
+            if (adapter.securedIndices.contains(position)) return true;
+
             if (!isSelectionMode) {
+                // Thay đổi trạng thái khi chọn nhiều item
                 active = false;
                 callback.startSelection();
                 selectAll.setVisibility(View.VISIBLE);
@@ -119,6 +220,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             return true;
         });
 
+        // Xử lý khi click vào nút select_all
         selectAll = rootView.findViewById(R.id.select_all);
         selectAll.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -126,19 +228,19 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                 Drawable icon = getResources().getDrawable(R.drawable.ic_select_all_foreground);
                 if (!active) {
                     adapter.toggleSelectAll();
-                    active=true;
+                    active = true;
                     icon.setColorFilter(Color.GREEN, PorterDuff.Mode.SRC_IN);
                     selectAll.setImageDrawable(icon);
                 } else {
                     adapter.toggleDeSelectAll();
-                    active=false;
+                    active = false;
                     icon.clearColorFilter();
                     selectAll.setImageDrawable(icon);
                 }
-
             }
         });
 
+        // Xử lý khi click vào nút select_exit
         selectExit = rootView.findViewById(R.id.select_exit);
         selectExit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -147,6 +249,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             }
         });
 
+        // Xử lý khi click vào nút exit_album_button
         exitAlbum = rootView.findViewById(R.id.exit_album_button);
         exitAlbum.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -156,19 +259,73 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             }
         });
 
+        // Hiển thị nút exit_album_button nếu ở trong album
         if (album) exitAlbum.setVisibility(View.VISIBLE);
 
+        final int[] sortOrder = {0}; // Khai báo biến sortOrder dạng mảng để có thể thay đổi giá trị
+        ImageButton sortButton = rootView.findViewById(R.id.sort_button);
+        sortButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sortOrder[0] = (sortOrder[0] == 0) ? 1 : 0;
+                sortImagesByOldestDate(); // Thực hiện sắp xếp hình ảnh
+            }
+        });
+
         return rootView;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == DETAILS_ACTIVITY_REQUEST_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                // Handle the result here, such as reloading images
+                adapter.reloadImages();
+            }
+        }
+    }
+
+    public AlertDialog.Builder inputPasswordAlert(EditText input, String title) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle(title);
+
+        input.setTextSize(40);
+        input.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+
+        input.setInputType(InputType.TYPE_CLASS_NUMBER);
+        input.setRawInputType(Configuration.KEYBOARD_12KEY);
+
+        InputFilter[] filterArray = new InputFilter[1];
+        filterArray[0] = new InputFilter.LengthFilter(4);
+        input.setFilters(filterArray);
+
+        builder.setView(input);
+        builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+
+        return builder;
     }
 
     public class ImageAdapter extends BaseAdapter {
         private final Activity context;
         private final ArrayList<Integer> selectedPositions;
+        private final ArrayList<Integer> securedIndices;
+        private final ArrayList<String> securedPasswords;
 
         public ImageAdapter(Activity localContext) {
             context = localContext;
             if (!album) images = getAllShownImagesPath(context);
+
             selectedPositions = new ArrayList<>();
+            securedIndices = new ArrayList<>();
+            securedPasswords = new ArrayList<>();
+
+            getAllSecuredIDs();
         }
 
         public int getCount() {
@@ -208,9 +365,58 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                 imageView.setBackgroundResource(R.drawable.selected_chosen_image_background);
             }
 
-            Glide.with(context).load(images.get(position)).centerCrop().into(imageView);
+            if (securedIndices.contains(position)) {
+                imageView.setBackgroundResource(R.drawable.selected_image_background);
+                Glide.with(context).load(R.drawable.ic_lock_foreground).centerCrop().into(imageView);
+            }
+            else {
+                Glide.with(context).load(images.get(position)).centerCrop().into(imageView);
+            }
+
+            Log.d("TEST", String.valueOf(securedIndices));
 
             return imageView;
+        }
+
+        public void getAllSecuredIDs() {
+            securedIndices.clear();
+            securedPasswords.clear();
+
+            Cursor cursor = databaseHelper.getData();
+
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    int column_index_id = cursor.getColumnIndex("media_id");
+                    int column_index_password = cursor.getColumnIndex("password");
+
+                    long media_id = cursor.getLong(column_index_id);
+                    String password = cursor.getString(column_index_password);
+
+                    String[] projection = {MediaStore.Images.Media.DATA};
+
+                    String selection = MediaStore.Images.Media._ID + " = ?";
+                    Uri queryUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                    ContentResolver contentResolver = requireActivity().getContentResolver();
+
+                    String[] selectionArgs = new String[] {String.valueOf(media_id)};
+
+                    Cursor cursorToData = contentResolver.query(queryUri, projection, selection, selectionArgs, null);
+
+                    assert cursorToData != null;
+                    int column_index_data = cursorToData.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+
+                    if (cursorToData.moveToFirst()) {
+                        String path = cursorToData.getString(column_index_data);
+                        int index = images.indexOf(path);
+                        securedIndices.add(index);
+                        securedPasswords.add(password);
+                    }
+
+                    cursorToData.close();
+                } while (cursor.moveToNext());
+
+                cursor.close();
+            }
         }
 
         public void toggleSelection(int position) {
@@ -248,8 +454,8 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             ArrayList<String> listOfAllImages = new ArrayList<>();
             uri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 
-            String[] projection = { MediaStore.MediaColumns.DATA,
-                    MediaStore.Images.Media.DATE_TAKEN };
+            String[] projection = {MediaStore.MediaColumns.DATA,
+                    MediaStore.Images.Media.DATE_TAKEN};
 
             cursor = activity.getContentResolver().query(uri, projection, null,
                     null, MediaStore.Images.Media.DATE_TAKEN + " DESC");
@@ -290,6 +496,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
             return albumNames;
         }
+
         public void add_to_Album() {
             ArrayList<String> albumNames = getAllAlbums();
 
@@ -371,12 +578,11 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             Toast.makeText(requireContext(), "Images moved to album: " + albumName, Toast.LENGTH_SHORT).show();
         }
 
-
         // Helper method to get album ID based on the album name
         private boolean CheckAlbum(String albumName) {
-            String[] projection = { MediaStore.Images.Media.BUCKET_ID };
+            String[] projection = {MediaStore.Images.Media.BUCKET_ID};
             String selection = MediaStore.Images.Media.BUCKET_DISPLAY_NAME + "=?";
-            String[] selectionArgs = { albumName };
+            String[] selectionArgs = {albumName};
             Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 
             Cursor cursor = requireActivity().getContentResolver().query(uri, projection, selection, selectionArgs, null);
@@ -463,7 +669,6 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         }
 
         public void confirmDeleteSelections() {
-            Log.d("YEAH", "HELLO???");
             int count = selectedPositions.size();
             AlertDialog.Builder builder = getBuilder("Delete selected items?",
                     "This will delete " + count + " item(s) permanently.", new CallbackDialog() {
@@ -476,14 +681,14 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         }
 
         public void deleteSelections() {
-            String[] projection = { MediaStore.Images.Media._ID };
+            String[] projection = {MediaStore.Images.Media._ID};
 
             String selection = MediaStore.Images.Media.DATA + " = ?";
             Uri queryUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
             ContentResolver contentResolver = getActivity().getContentResolver();
 
             for (int i = 0; i < selectedPositions.size(); i++) {
-                String[] selectionArgs = new String[] { images.get(selectedPositions.get(i)) };
+                String[] selectionArgs = new String[]{images.get(selectedPositions.get(i))};
 
                 Cursor cursor = contentResolver.query(queryUri, projection, selection, selectionArgs, null);
 
@@ -533,7 +738,8 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                             }
 
                             @Override
-                            public void onLoadCleared(@Nullable Drawable placeholder) {}
+                            public void onLoadCleared(@Nullable Drawable placeholder) {
+                            }
                         });
             }
         }
@@ -550,6 +756,83 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             } catch (ActivityNotFoundException e) {
                 Toast.makeText(requireActivity(), "No Apps Available", Toast.LENGTH_SHORT).show();
             }
+        }
+
+        public void secureEnterPassword() {
+            int count = selectedPositions.size();
+
+            final EditText input = new EditText(requireContext());
+            AlertDialog.Builder builder = inputPasswordAlert(input,
+                    "Enter a 4-digit password to secure " + count + " image(s):");
+
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    String password = String.valueOf(input.getText());
+
+                    AlertDialog.Builder alert = new AlertDialog.Builder(requireContext());
+                    alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    });
+
+                    if (password.length() != 4) {
+                        alert.setTitle("Error").setMessage("Password must be exactly 4-digit long.");
+                    }
+                    else {
+                        secureSelections(password);
+                        alert.setTitle("Success").setMessage("Your images have been secured.");
+                    }
+
+                    alert.show();
+                }
+            });
+
+            builder.show();
+        }
+
+        public void secureSelections(String password) {
+            String[] projection = {MediaStore.Images.Media._ID};
+
+            String selection = MediaStore.Images.Media.DATA + " = ?";
+            Uri queryUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+            ContentResolver contentResolver = requireActivity().getContentResolver();
+
+            for (int i = 0; i < selectedPositions.size(); i++) {
+                String[] selectionArgs = new String[] {images.get(selectedPositions.get(i))};
+
+                Cursor cursor = contentResolver.query(queryUri, projection, selection, selectionArgs, null);
+
+                assert cursor != null;
+                int column_index_data = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
+
+                if (cursor.moveToFirst()) {
+                    long id = cursor.getLong(column_index_data);
+
+                    Cursor cursorID = databaseHelper.findID(id);
+                    if (cursorID != null && cursorID.moveToFirst()) {
+                        databaseHelper.updateData(id, password);
+                        cursorID.close();
+                    }
+
+                    else {
+                        databaseHelper.insertData(id, password);
+                    }
+                }
+
+                cursor.close();
+            }
+
+            getAllSecuredIDs();
+            notifyDataSetChanged();
+        }
+
+        //Load lại ảnh khi cân thiết
+        public void reloadImages() {
+            images = getAllShownImagesPath(context);
+            adapter.notifyDataSetChanged();
         }
     }
 
@@ -579,7 +862,8 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {}
+            public void onClick(DialogInterface dialog, int which) {
+            }
         });
         return builder;
     }
@@ -601,11 +885,41 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
     @Override
     public void secure() {
-
+        adapter.secureEnterPassword();
     }
 
     @Override
     public void delete() {
         adapter.confirmDeleteSelections();
+    }
+
+    public void reloadImages() {
+        if (adapter != null) {
+            adapter.reloadImages();
+        }
+    }
+
+    public ArrayList<File> getImagesList() {
+        ArrayList<File> fileList = new ArrayList<>();
+        for (String imagePath : images) {
+            File imageFile = new File(imagePath);
+            if (imageFile.exists()) {
+                fileList.add(imageFile);
+            }
+        }
+        return fileList;
+    }
+
+    public void updateImages(ArrayList<File> sortedImages) {
+        // Cập nhật danh sách ảnh mới
+        this.images.clear();
+        for (File file : sortedImages) {
+            this.images.add(file.getPath()); // Chuyển đổi File thành đường dẫn String
+        }
+
+        // Cập nhật lại giao diện
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
     }
 }

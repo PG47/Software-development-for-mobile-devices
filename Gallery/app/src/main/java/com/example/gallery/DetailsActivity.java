@@ -1,6 +1,7 @@
 package com.example.gallery;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -31,10 +32,21 @@ public class DetailsActivity extends AppCompatActivity {
     OptionFragment fragmentOption;
     Boolean optionsHidden;
 
+    private OnImageChangeListener onImageNewChangeListener;
+
+    public void setOnImageChangeListener(OnImageChangeListener onImageChangeListener) {
+        this.onImageNewChangeListener = onImageChangeListener;
+    }
+
+    public interface OnImageChangeListener {
+        void onChange();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
+        onImageNewChangeListener = getIntent().getParcelableExtra("ImageChangeListener");
 
         headDetailsFragment = HeadDetailsFragment.newInstance("header");
         fragmentImage = LargeImageFragment.newInstance("image");
@@ -90,9 +102,14 @@ public class DetailsActivity extends AppCompatActivity {
                 optionsHidden = !optionsHidden;
             }
         });
+
         fragmentOption.setOnImageDeleteListener(new OptionFragment.OnImageDeleteListener() {
             @Override
             public void onImageDeleted() {
+                if(onImageNewChangeListener != null) {
+                    onImageNewChangeListener.onChange();
+                }
+                setResult(Activity.RESULT_OK);
                 finish();
             }
         });

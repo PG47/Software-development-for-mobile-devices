@@ -31,8 +31,8 @@ import java.util.ArrayList;
 public class OptionFragment extends Fragment {
     DetailsActivity mainActivity;
     BottomNavigationView bottomOptionView;
-    private OnImageDeleteListener onImageDeleteListener;
     String selectedImage;
+    private OnImageDeleteListener onImageDeleteListener;
 
     public void setOnImageDeleteListener(OnImageDeleteListener listener) {
         this.onImageDeleteListener = listener;
@@ -156,8 +156,8 @@ public class OptionFragment extends Fragment {
             } finally {
                 cursor.close();
             }
-            ArrayList<String> images = getAllShownImagesPath(requireActivity());
 
+            //Thông báo đã xóa ảnh
             if (onImageDeleteListener != null) {
                 onImageDeleteListener.onImageDeleted();
             }
