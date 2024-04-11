@@ -21,7 +21,7 @@ public class RotateFragment extends Fragment {
     EditActivity editActivity;
     Context context;
     FragmentTransaction transaction;
-    Button finishRotate;
+    Button finishRotate, rotate30deg, rotate45deg, rotate90deg, rotate180deg;
     SeekBar changeValue;
     TextView rotateAngle;
 
@@ -53,7 +53,6 @@ public class RotateFragment extends Fragment {
         super.onAttach(context);
         if (context instanceof EditActivity) {
             editActivity = (EditActivity) context;
-            Log.d("test attach", "st" + context);
         } else {
             throw new IllegalStateException("EditActivity must implement callbacks");
         }
@@ -74,7 +73,10 @@ public class RotateFragment extends Fragment {
         finishRotate = (Button) rotateOption.findViewById(R.id.actionDone);
         changeValue = (SeekBar) rotateOption.findViewById(R.id.testSeekBar);
         rotateAngle = (TextView) rotateOption.findViewById(R.id.rotateAngle);
-
+        rotate30deg = (Button) rotateOption.findViewById(R.id.rotate30deg);
+        rotate45deg = (Button) rotateOption.findViewById(R.id.rotate45deg);
+        rotate90deg = (Button) rotateOption.findViewById(R.id.rotate90deg);
+        rotate180deg = (Button) rotateOption.findViewById(R.id.rotate180deg);
         finishRotate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -85,11 +87,10 @@ public class RotateFragment extends Fragment {
                 transaction.commit();
             }
         });
-
         changeValue.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                rotateAngle.setText((i - 45) + "°");
+                rotateAngle.setText((i - 180) + "°");
                 editActivity.updateRotate(i);
             }
 
@@ -101,6 +102,38 @@ public class RotateFragment extends Fragment {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 editActivity.startToZoom();
+            }
+        });
+        rotate30deg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                rotateAngle.setText("30°");
+                editActivity.fastRotate(30);
+                changeValue.setProgress(180 + 30);
+            }
+        });
+        rotate45deg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                rotateAngle.setText("45°");
+                editActivity.fastRotate(45);
+                changeValue.setProgress(180 + 45);
+            }
+        });
+        rotate90deg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                rotateAngle.setText("90°");
+                editActivity.fastRotate(90);
+                changeValue.setProgress(180 + 90);
+            }
+        });
+        rotate180deg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                rotateAngle.setText("180°");
+                editActivity.fastRotate(180);
+                changeValue.setProgress(180 + 180);
             }
         });
 

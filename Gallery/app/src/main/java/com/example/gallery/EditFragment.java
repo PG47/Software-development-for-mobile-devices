@@ -111,28 +111,6 @@ public class EditFragment extends Fragment {
             return false;
         });
 
-//        brightness.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                ChangeFragment changeFragment = ChangeFragment.newInstance("Brightness");
-//                transaction = getActivity().getSupportFragmentManager().beginTransaction();
-//                transaction.replace(R.id.AllOptions, changeFragment);
-//                transaction.addToBackStack(null);
-//                transaction.commit();
-//            }
-//        });
-//
-//        contrast.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                ChangeFragment changeFragment = ChangeFragment.newInstance("Contrast");
-//                transaction = getActivity().getSupportFragmentManager().beginTransaction();
-//                transaction.replace(R.id.AllOptions, changeFragment);
-//                transaction.addToBackStack(null);
-//                transaction.commit();
-//            }
-//        });
-
         return layoutOption;
     }
 }
