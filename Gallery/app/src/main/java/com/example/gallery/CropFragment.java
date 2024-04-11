@@ -10,7 +10,7 @@ import android.widget.RelativeLayout;
 
 import androidx.fragment.app.Fragment;
 
-public class CropMenuFragment extends Fragment {
+public class CropFragment extends Fragment {
     EditActivity editActivity;
     Context context;
     public static CropMenuFragment newInstance(String strArg) {
@@ -47,7 +47,7 @@ public class CropMenuFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        RelativeLayout cropOption = (RelativeLayout) inflater.inflate(R.layout.fragment_cropmenu, null);
+        RelativeLayout cropOption = (RelativeLayout) inflater.inflate(R.layout.fragment_crop, null);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (getActivity() instanceof EditActivity) {

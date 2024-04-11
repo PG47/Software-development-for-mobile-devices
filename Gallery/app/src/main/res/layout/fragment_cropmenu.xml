@@ -15,7 +15,7 @@
         app:itemPaddingTop="0dp"
         app:labelVisibilityMode="unlabeled"
         app:itemActiveIndicatorStyle="@color/white"
-        app:menu="@menu/bottom_resize_menu">
+        app:menu="@menu/bottom_crop_menu">
 
     </com.google.android.material.bottomnavigation.BottomNavigationView>
 
