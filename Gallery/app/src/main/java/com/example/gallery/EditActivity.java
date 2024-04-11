@@ -35,7 +35,7 @@ public class EditActivity extends AppCompatActivity {
         ft.replace(R.id.Image, fragmentImage);
         ft.replace(R.id.AllOptions, fragmentOptions);
 
-        ft.addToBackStack(null); // Add transaction to the back stack
+        ft.addToBackStack(null);
         ft.commit();
 
         OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) {
@@ -50,6 +50,7 @@ public class EditActivity extends AppCompatActivity {
     public void updateRotate(int value) {
         fragmentImage.executeRotate(value);
     }
+    public void fastRotate(int value) { fragmentImage.executeFastRotate(value); }
     public void startToZoom() {fragmentImage.executeZoom();}
     public void changeBrightness(int value) { fragmentImage.executeChangeBrightness(value); }
     public void changeContrast(int value) { fragmentImage.executeChangeContrast(value); }

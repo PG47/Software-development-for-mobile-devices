@@ -12,6 +12,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -53,6 +54,7 @@ public class ImageFragment extends Fragment {
     private ImageView myImage;
     private Bitmap originalBitmap;
     private Bitmap adjustedBitmap;
+    private int bitmapWidth, bitmapHeight;
     String selectedImage;
     RelativeLayout layoutImage;
     EditText editText;
@@ -77,7 +79,6 @@ public class ImageFragment extends Fragment {
             throw new IllegalStateException("EditActivity must implement callbacks");
         }
     }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -87,8 +88,6 @@ public class ImageFragment extends Fragment {
             throw new IllegalStateException("EditActivity must implement callbacks");
         }
     }
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         layoutImage = (RelativeLayout)inflater.inflate(R.layout.fragment_image, null);
@@ -104,6 +103,8 @@ public class ImageFragment extends Fragment {
         selectedImage = getArguments().getString("selectedImage");
         originalBitmap = BitmapFactory.decodeFile(selectedImage);
         adjustedBitmap = originalBitmap;
+        bitmapWidth = originalBitmap.getWidth();
+        bitmapHeight = originalBitmap.getHeight();
 
         myImage = (ImageView) layoutImage.findViewById(R.id.showImageView);
         myImage.setImageBitmap(originalBitmap);
@@ -144,16 +145,30 @@ public class ImageFragment extends Fragment {
 
         return layoutImage;
     }
-
     public void executeRotate(int value) {
-        float scaleFactor = calculateScaleFactor(value);
-        Matrix matrix = new Matrix();
-        matrix.postRotate(value - 45);
-        matrix.postScale(scaleFactor, scaleFactor);
-        Bitmap rotatedAndScaled = Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.getWidth(), originalBitmap.getHeight(), matrix, true);
-        myImage.setImageBitmap(rotatedAndScaled);
-    }
+        BitmapDrawable drawable = new BitmapDrawable(getResources(), originalBitmap);
+        drawable.setBounds(0, 0, originalBitmap.getWidth(), originalBitmap.getHeight());
 
+        Bitmap rotatedBitmap = Bitmap.createBitmap(originalBitmap.getWidth(), originalBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+
+        Canvas canvas = new Canvas(rotatedBitmap);
+        canvas.rotate(value - 180, originalBitmap.getWidth() / 2f, originalBitmap.getHeight() / 2f);
+        drawable.draw(canvas);
+
+        myImage.setImageBitmap(rotatedBitmap);
+    }
+    public void executeFastRotate(int value) {
+        BitmapDrawable drawable = new BitmapDrawable(getResources(), originalBitmap);
+        drawable.setBounds(0, 0, originalBitmap.getWidth(), originalBitmap.getHeight());
+
+        Bitmap rotatedBitmap = Bitmap.createBitmap(originalBitmap.getWidth(), originalBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+
+        Canvas canvas = new Canvas(rotatedBitmap);
+        canvas.rotate(value, originalBitmap.getWidth() / 2f, originalBitmap.getHeight() / 2f);
+        drawable.draw(canvas);
+
+        myImage.setImageBitmap(rotatedBitmap);
+    }
     public void executeChangeBrightness(int value) {
         float brightnessFactor = Math.max(0, Math.min(100, value));;
         int width = adjustedBitmap.getWidth();
@@ -182,7 +197,6 @@ public class ImageFragment extends Fragment {
         adjustedBitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
         myImage.setImageBitmap(adjustedBitmap);
     }
-
     public void executeChangeContrast(int value) {
         float contrastLevel = value / 10F;
         int width = adjustedBitmap.getWidth();
@@ -211,7 +225,6 @@ public class ImageFragment extends Fragment {
         adjustedBitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
         myImage.setImageBitmap(adjustedBitmap);
     }
-
     public void executeAddEditText() {
         editText = new EditText(context);
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
@@ -259,9 +272,7 @@ public class ImageFragment extends Fragment {
 
         layoutImage.addView(editText);
     }
-
     public void updateEditText(String strFontFamily, String strFontSize, boolean isItalic, boolean isBold, int textColor) {
-        Log.d("test", strFontFamily + ", " + strFontSize + ", " + isItalic + ", " + isBold + ", " + textColor);
         textColor = ContextCompat.getColor(context, textColor);
         Typeface typeface;
         switch (strFontFamily) {
@@ -298,24 +309,25 @@ public class ImageFragment extends Fragment {
         editText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, Float.parseFloat(strFontSize));
         editText.setTextColor(textColor);
     }
+    public void executeUnableEditText() {
+        if (editText != null) {
+            editText.clearFocus();
+            editText.setEnabled(false);
+
+            
+        }
+    }
+    public void executeEnableEditText() {
+        if (editText != null) {
+            editText.setEnabled(true);
+        }
+    }
 
     public void executeZoom() {
-//        int cropWidth = 450; // Width of the crop rectangle
-//        int cropHeight = 300; // Height of the crop rectangle
-//
-//// Calculate the position of the crop rectangle relative to the center of the cropImageView
-//        int centerX = 1000 / 2; // X-coordinate of the center of the cropImageView
-//        int centerY = 1500 / 2; // Y-coordinate of the center of the cropImageView
-//        int left = centerX - (cropWidth / 2); // X-coordinate of the left edge of the crop rectangle
-//        int top = centerY - (cropHeight / 2); // Y-coordinate of the top edge of the crop rectangle
-//        int right = left + cropWidth; // X-coordinate of the right edge of the crop rectangle
-//        int bottom = top + cropHeight;
-//        Log.d("test value", "width: " + cropImageView.getWidth() + "height: " + cropImageView.getHeight() + ", " + left + ", " + top + ", " + right + ", " + bottom);
-//        cropImageView.setCropRect(new Rect(left, top, right, bottom));
-//        cropImageView.setAutoZoomEnabled(true);
+
     }
     private float calculateScaleFactor(float angle) {
-        if (angle > 45) {
+        if (angle > 180) {
             return (float) Math.sin(Math.toRadians(angle)) * zoomLevel;
         }
         return (float) Math.cos(Math.toRadians(angle)) * zoomLevel;

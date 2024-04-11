@@ -5,13 +5,46 @@
     android:layout_centerVertical="true">
 
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="70dp"
+        android:layout_height="30dp"
+        android:text="30°"
+        android:textSize="9dp"
+        android:id="@+id/rotate30deg"/>
+
+    <Button
+        android:layout_width="70dp"
+        android:layout_height="30dp"
+        android:text="45°"
+        android:textSize="9dp"
+        android:id="@+id/rotate45deg"
+        android:layout_marginLeft="2dp"
+        android:layout_toRightOf="@id/rotate30deg"/>
+
+    <Button
+        android:layout_width="70dp"
         android:layout_height="30dp"
         android:text="Done"
         android:id="@+id/actionDone"
         android:layout_centerHorizontal="true"
         android:backgroundTint="#9BCF53"
         android:textSize="9dp"/>
+
+    <Button
+        android:layout_width="70dp"
+        android:layout_height="30dp"
+        android:text="90°"
+        android:textSize="9dp"
+        android:id="@+id/rotate90deg"
+        android:layout_marginRight="2dp"
+        android:layout_toLeftOf="@id/rotate180deg"/>
+
+    <Button
+        android:layout_width="70dp"
+        android:layout_height="30dp"
+        android:text="180°"
+        android:textSize="9dp"
+        android:id="@+id/rotate180deg"
+        android:layout_alignParentEnd="true"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -26,12 +59,12 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/rotateAngle"
         android:layout_marginHorizontal="10dp"
-        android:max="90"
-        android:progress="45"
+        android:max="360"
+        android:progress="180"
         android:progressBackgroundTint="@color/black"
+        android:tickMark="@drawable/tick_mark"
         android:progressTint="#0000"
         android:thumb="@drawable/custom_thumb"
-        android:tickMark="@drawable/tick_mark"
         android:tickMarkTintMode="multiply"
         android:id="@+id/testSeekBar"/>
 
