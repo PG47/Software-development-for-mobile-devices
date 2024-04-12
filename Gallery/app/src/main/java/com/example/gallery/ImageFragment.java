@@ -121,12 +121,8 @@ public class ImageFragment extends Fragment {
         bitmapWidth = originalBitmap.getWidth();
         bitmapHeight = originalBitmap.getHeight();
 
-//        myImage = (ImageView) layoutImage.findViewById(R.id.showImageView);
         cropImageView = (CropImageView) layoutImage.findViewById(com.theartofdev.edmodo.cropper.R.id.cropImageView);
 
-//        File file = new File(selectedImage);
-//        imageUri = FileProvider.getUriForFile(context, context.getPackageName() + ".provider", file);
-//        cropImageView.setImageUriAsync(imageUri);
         cropImageView.setImageBitmap(originalBitmap);
         cropImageView.setShowCropOverlay(false);
         cropImageView.setOnSetImageUriCompleteListener(new CropImageView.OnSetImageUriCompleteListener() {
@@ -256,12 +252,6 @@ public class ImageFragment extends Fragment {
                 return true;
             }
         });
-        editText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                view.requestFocus();
-            }
-        });
         editText.setOnTouchListener(new View.OnTouchListener() {
             float dX, dY;
             @Override
@@ -279,7 +269,7 @@ public class ImageFragment extends Fragment {
                         v.setVisibility(View.VISIBLE);
                         break;
                 }
-                return false;
+                return true;
             }
         });
 
