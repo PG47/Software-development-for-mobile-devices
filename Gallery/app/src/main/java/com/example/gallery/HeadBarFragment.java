@@ -1,5 +1,6 @@
 package com.example.gallery;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -84,8 +85,15 @@ public class HeadBarFragment extends Fragment {
     }
 
     private void openCamera() {
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.TITLE,"new image");
+        values.put(MediaStore.Images.Media.DESCRIPTION,"From the Gallery");
+
+        imageUri = getActivity().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
             startActivityForResult(takePictureIntent, MainActivity.REQUEST_IMAGE_CAPTURE);
         } else {
             Toast.makeText(getActivity(), "No camera app available", Toast.LENGTH_SHORT).show();
@@ -98,16 +106,7 @@ public class HeadBarFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == MainActivity.REQUEST_IMAGE_CAPTURE && resultCode == getActivity().RESULT_OK) {
             // Image captured, create the image file
-            try {
-                File photoFile = createImageFile();
-                if (photoFile != null) {
-                    imageUri = FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".provider", photoFile);
-                    // Handle the imageUri as needed
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-                // Handle the exception
-            }
+            
         }
     }
 
