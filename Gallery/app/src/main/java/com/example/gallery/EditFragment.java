@@ -80,7 +80,6 @@ public class EditFragment extends Fragment {
                 transaction.replace(R.id.AllOptions, addTextFragment);
                 transaction.addToBackStack(null);
                 transaction.commit();
-                editActivity.enableEditText();
                 return true;
             } else if (itemId == R.id.filter) {
                 FilterFragment filterFragment = FilterFragment.newInstance("Filter");

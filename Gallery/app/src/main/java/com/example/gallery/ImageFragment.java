@@ -135,13 +135,6 @@ public class ImageFragment extends Fragment {
                 }
             }
         });
-        cropImageView.setOnCropImageCompleteListener(new CropImageView.OnCropImageCompleteListener() {
-            @Override
-            public void onCropImageComplete(CropImageView view, CropImageView.CropResult result) {
-                Bitmap croppedBitmap = result.getBitmap();
-                cropImageView.setImageBitmap(croppedBitmap);
-            }
-        });
 
         return layoutImage;
     }
@@ -173,6 +166,9 @@ public class ImageFragment extends Fragment {
     }
     public void executeCropImage() {
         cropImageView.setShowCropOverlay(false);
+        Bitmap rotatedImage = cropImageView.getCroppedImage();
+        cropImageView.setImageBitmap(rotatedImage);
+        saveImageToDevices(rotatedImage);
     }
     public void executeChangeBrightness(int value) {
         float brightnessFactor = Math.max(0, Math.min(100, value));;
@@ -231,19 +227,15 @@ public class ImageFragment extends Fragment {
         myImage.setImageBitmap(adjustedBitmap);
     }
     public void executeAddEditText() {
-        if (editText == null) {
-            editText = new EditText(context);
-            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-            );
-            layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
-            editText.setLayoutParams(layoutParams);
-            editText.setHint("Enter text here");
-            editText.setInputType(InputType.TYPE_CLASS_TEXT);
-        } else {
-            editText.setVisibility(View.VISIBLE);
-        }
+        editText = new EditText(context);
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+        editText.setLayoutParams(layoutParams);
+        editText.setHint("Enter text here");
+        editText.setInputType(InputType.TYPE_CLASS_TEXT);
 
         editText.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -260,13 +252,16 @@ public class ImageFragment extends Fragment {
                     case MotionEvent.ACTION_DOWN:
                         dX = v.getX() - event.getRawX();
                         dY = v.getY() - event.getRawY();
+                        v.clearFocus();
                         break;
                     case MotionEvent.ACTION_MOVE:
                         v.setX(event.getRawX() + dX);
                         v.setY(event.getRawY() + dY);
                         break;
                     case MotionEvent.ACTION_UP:
-                        v.setVisibility(View.VISIBLE);
+                        v.requestFocus();
+                        InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+                        imm.showSoftInput(v, InputMethodManager.SHOW_IMPLICIT);
                         break;
                 }
                 return true;
@@ -318,19 +313,43 @@ public class ImageFragment extends Fragment {
         editText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, Float.parseFloat(strFontSize));
         editText.setTextColor(textColor);
     }
-    public void executeUnableEditText() {
-        if (editText != null) {
-            editText.clearFocus();
-            editText.setEnabled(false);
-        }
-    }
-    public void executeEnableEditText() {
-        if (editText != null) {
-            editText.setEnabled(true);
-        }
-    }
     public void executeZoom() {
 
+    }
+    public void saveImageToDevices(Bitmap imageBitmap) {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            String imageName = UUID.randomUUID().toString() + ".jpg";
+            File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+            dir.mkdirs();
+            File imagePath = new File(dir, imageName);
+
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.Images.Media.DISPLAY_NAME, imageName);
+            values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+            values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES);
+
+            ContentResolver resolver = context.getContentResolver();
+            Uri imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
+            try {
+                OutputStream outputStream = resolver.openOutputStream(imageUri);
+                imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+                outputStream.close();
+
+                MediaScannerConnection.scanFile(requireContext(),
+                        new String[]{imagePath.getAbsolutePath()},
+                        new String[]{"image/jpeg"},
+                        null);
+
+                Toast.makeText(requireContext(), "Image saved successfully", Toast.LENGTH_SHORT).show();
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(requireContext(), "Failed to save image", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Toast.makeText(requireContext(), "Failed to save image", Toast.LENGTH_SHORT).show();
+        }
     }
     public void executeAddTextToImage() {
         editText.setVisibility(View.INVISIBLE);
@@ -352,40 +371,7 @@ public class ImageFragment extends Fragment {
         }
         canvas.drawText(String.valueOf(editText.getText()), mutableBitmap.getWidth() / 10f, mutableBitmap.getHeight() / 2f, paint);
         cropImageView.setImageBitmap(mutableBitmap);
-
-        String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            String imageName = UUID.randomUUID().toString() + ".jpg";
-            File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-            dir.mkdirs();
-            File imagePath = new File(dir, imageName);
-
-            ContentValues values = new ContentValues();
-            values.put(MediaStore.Images.Media.DISPLAY_NAME, imageName);
-            values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
-            values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES);
-
-            ContentResolver resolver = context.getContentResolver();
-            Uri imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-
-            try {
-                OutputStream outputStream = resolver.openOutputStream(imageUri);
-                mutableBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
-                outputStream.close();
-
-                MediaScannerConnection.scanFile(requireContext(),
-                        new String[]{imagePath.getAbsolutePath()},
-                        new String[]{"image/jpeg"},
-                        null);
-
-                Toast.makeText(requireContext(), "Image saved successfully", Toast.LENGTH_SHORT).show();
-            } catch (IOException e) {
-                e.printStackTrace();
-                Toast.makeText(requireContext(), "Failed to save image", Toast.LENGTH_SHORT).show();
-            }
-        } else {
-            Toast.makeText(requireContext(), "Failed to save image", Toast.LENGTH_SHORT).show();
-        }
+        saveImageToDevices(mutableBitmap);
     }
     private float calculateScaleFactor(float angle) {
         if (angle > 180) {

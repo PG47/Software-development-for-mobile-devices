@@ -210,7 +210,6 @@ public class AddTextFragment extends Fragment {
                 transaction.replace(R.id.AllOptions, editFragment);
                 transaction.addToBackStack(null);
                 transaction.commit();
-                editActivity.unableEditText();
                 editActivity.addTextToImage();
             }
         });
