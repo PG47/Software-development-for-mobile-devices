@@ -9,8 +9,8 @@
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/editToolbar"
         android:layout_width="match_parent"
-        android:layout_height="90dp"
-        app:itemIconSize="70dp"
+        android:layout_height="50dp"
+        app:itemIconSize="30dp"
         app:itemPaddingTop="0dp"
         app:labelVisibilityMode="labeled"
         app:itemActiveIndicatorStyle="@color/white"

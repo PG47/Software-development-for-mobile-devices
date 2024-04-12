@@ -59,7 +59,17 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
             //,Manifest.permission.CAMERA
     };
     private static final int PERMISSION_COUNT = 2;
+    private static final int REQUEST_WRITE_EXTERNAL_STORAGE = 1;
+    private void requestStoragePermission() {
+        if (ActivityCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
 
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    REQUEST_WRITE_EXTERNAL_STORAGE);
+        }
+    }
     private void checkCameraPermission() {
         if(ActivityCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -67,7 +77,6 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
                     new String[]{Manifest.permission.CAMERA}, 1);
         }
     }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
         } else {
             requestPermission();
             checkCameraPermission();
+            requestStoragePermission();
             loadImages();
         }
 
@@ -274,9 +284,11 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
             int write = ContextCompat.checkSelfPermission(this, Manifest.permission.MANAGE_EXTERNAL_STORAGE);
             int read = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES);
             int camera = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
+            int save = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
             return write == PackageManager.PERMISSION_GRANTED &&
                     read == PackageManager.PERMISSION_GRANTED &&
-                    camera == PackageManager.PERMISSION_GRANTED;
+                    camera == PackageManager.PERMISSION_GRANTED &&
+                    save == PackageManager.PERMISSION_GRANTED;
         }
     }
 

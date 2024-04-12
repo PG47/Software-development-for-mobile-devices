@@ -51,6 +51,7 @@ public class EditActivity extends AppCompatActivity {
         fragmentImage.executeRotate(value);
     }
     public void fastRotate(int value) { fragmentImage.executeFastRotate(value); }
+    public void cropTheImage() { fragmentImage.executeCropImage(); }
     public void startToZoom() {fragmentImage.executeZoom();}
     public void changeBrightness(int value) { fragmentImage.executeChangeBrightness(value); }
     public void changeContrast(int value) { fragmentImage.executeChangeContrast(value); }
@@ -60,4 +61,5 @@ public class EditActivity extends AppCompatActivity {
     }
     public void unableEditText() { fragmentImage.executeUnableEditText(); }
     public void enableEditText() { fragmentImage.executeEnableEditText(); }
+    public void addTextToImage() { fragmentImage.executeAddTextToImage(); }
 }

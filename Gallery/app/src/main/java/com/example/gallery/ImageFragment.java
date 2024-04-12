@@ -2,6 +2,8 @@ package com.example.gallery;
 
 import static androidx.core.content.ContextCompat.getSystemService;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -13,10 +15,13 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.ContactsContract;
+import android.provider.MediaStore;
 import android.text.InputType;
 import android.util.Log;
 import android.util.TypedValue;
@@ -33,6 +38,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
@@ -45,6 +51,10 @@ import com.theartofdev.edmodo.cropper.CropImageOptions;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.UUID;
 
 
 public class ImageFragment extends Fragment {
@@ -58,6 +68,11 @@ public class ImageFragment extends Fragment {
     String selectedImage;
     RelativeLayout layoutImage;
     EditText editText;
+    CropImageView cropImageView;
+    Uri imageUri;
+    String fontFamily, fontSize = "11";
+    Boolean italic, bold;
+    Integer color;
     public static ImageFragment newInstance(String strArg) {
         ImageFragment fragment = new ImageFragment();
         Bundle args = new Bundle();
@@ -106,46 +121,36 @@ public class ImageFragment extends Fragment {
         bitmapWidth = originalBitmap.getWidth();
         bitmapHeight = originalBitmap.getHeight();
 
-        myImage = (ImageView) layoutImage.findViewById(R.id.showImageView);
-        myImage.setImageBitmap(originalBitmap);
+//        myImage = (ImageView) layoutImage.findViewById(R.id.showImageView);
+        cropImageView = (CropImageView) layoutImage.findViewById(com.theartofdev.edmodo.cropper.R.id.cropImageView);
 
-//        if (selectedImage != null) {
-//            Glide.with(context).load(selectedImage).centerCrop().into(this.myImage);
-//        }
-//        cropImageView = (CropImageView) layoutImage.findViewById(com.theartofdev.edmodo.cropper.R.id.cropImageView);
-//        originalBitmap = BitmapFactory.decodeFile(selectedImage);
-//
 //        File file = new File(selectedImage);
 //        imageUri = FileProvider.getUriForFile(context, context.getPackageName() + ".provider", file);
 //        cropImageView.setImageUriAsync(imageUri);
-//        cropImageView.setAspectRatio(1, 1);
-//        cropImageView.setOnSetImageUriCompleteListener(new CropImageView.OnSetImageUriCompleteListener() {
-//            @Override
-//            public void onSetImageUriComplete(CropImageView view, Uri uri, Exception error) {
-//                if (error != null) {
-//                    // Handle error
-//                    Log.e("ImageLoadError", "Error loading image: " + error.getMessage());
-//                } else {
-//                    // Image loaded successfully
-//                    Log.d("ImageLoadSuccess", "Image loaded successfully!");
-//                }
-//            }
-//        });
-//
-//        cropImageView.setVisibility(View.VISIBLE);
-//        cropImageView.setFixedAspectRatio(true);
-//        cropImageView.setAutoZoomEnabled(false);
-//        cropImageView.setOnCropImageCompleteListener(new CropImageView.OnCropImageCompleteListener() {
-//            @Override
-//            public void onCropImageComplete(CropImageView view, CropImageView.CropResult result) {
-//                Uri croppedImageUri = result.getUri();
-//                cropImageView.setImageUriAsync(croppedImageUri);
-//            }
-//        });
+        cropImageView.setImageBitmap(originalBitmap);
+        cropImageView.setShowCropOverlay(false);
+        cropImageView.setOnSetImageUriCompleteListener(new CropImageView.OnSetImageUriCompleteListener() {
+            @Override
+            public void onSetImageUriComplete(CropImageView view, Uri uri, Exception error) {
+                if (error != null) {
+                    Log.e("ImageLoadError", "Error loading image: " + error.getMessage());
+                } else {
+                    Log.d("ImageLoadSuccess", "Image loaded successfully!");
+                }
+            }
+        });
+        cropImageView.setOnCropImageCompleteListener(new CropImageView.OnCropImageCompleteListener() {
+            @Override
+            public void onCropImageComplete(CropImageView view, CropImageView.CropResult result) {
+                Bitmap croppedBitmap = result.getBitmap();
+                cropImageView.setImageBitmap(croppedBitmap);
+            }
+        });
 
         return layoutImage;
     }
     public void executeRotate(int value) {
+        cropImageView.setShowCropOverlay(true);
         BitmapDrawable drawable = new BitmapDrawable(getResources(), originalBitmap);
         drawable.setBounds(0, 0, originalBitmap.getWidth(), originalBitmap.getHeight());
 
@@ -155,9 +160,10 @@ public class ImageFragment extends Fragment {
         canvas.rotate(value - 180, originalBitmap.getWidth() / 2f, originalBitmap.getHeight() / 2f);
         drawable.draw(canvas);
 
-        myImage.setImageBitmap(rotatedBitmap);
+        cropImageView.setImageBitmap(rotatedBitmap);
     }
     public void executeFastRotate(int value) {
+        cropImageView.setShowCropOverlay(true);
         BitmapDrawable drawable = new BitmapDrawable(getResources(), originalBitmap);
         drawable.setBounds(0, 0, originalBitmap.getWidth(), originalBitmap.getHeight());
 
@@ -167,7 +173,10 @@ public class ImageFragment extends Fragment {
         canvas.rotate(value, originalBitmap.getWidth() / 2f, originalBitmap.getHeight() / 2f);
         drawable.draw(canvas);
 
-        myImage.setImageBitmap(rotatedBitmap);
+        cropImageView.setImageBitmap(rotatedBitmap);
+    }
+    public void executeCropImage() {
+        cropImageView.setShowCropOverlay(false);
     }
     public void executeChangeBrightness(int value) {
         float brightnessFactor = Math.max(0, Math.min(100, value));;
@@ -226,15 +235,19 @@ public class ImageFragment extends Fragment {
         myImage.setImageBitmap(adjustedBitmap);
     }
     public void executeAddEditText() {
-        editText = new EditText(context);
-        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-        layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
-        editText.setLayoutParams(layoutParams);
-        editText.setHint("Enter text here");
-        editText.setInputType(InputType.TYPE_CLASS_TEXT);
+        if (editText == null) {
+            editText = new EditText(context);
+            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+            editText.setLayoutParams(layoutParams);
+            editText.setHint("Enter text here");
+            editText.setInputType(InputType.TYPE_CLASS_TEXT);
+        } else {
+            editText.setVisibility(View.VISIBLE);
+        }
 
         editText.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -273,7 +286,13 @@ public class ImageFragment extends Fragment {
         layoutImage.addView(editText);
     }
     public void updateEditText(String strFontFamily, String strFontSize, boolean isItalic, boolean isBold, int textColor) {
+        fontFamily = strFontFamily;
+        fontSize = strFontSize;
+        italic = isItalic;
+        bold = isBold;
+
         textColor = ContextCompat.getColor(context, textColor);
+        color = textColor;
         Typeface typeface;
         switch (strFontFamily) {
             case "MONOSPACE": {
@@ -313,8 +332,6 @@ public class ImageFragment extends Fragment {
         if (editText != null) {
             editText.clearFocus();
             editText.setEnabled(false);
-
-            
         }
     }
     public void executeEnableEditText() {
@@ -322,9 +339,63 @@ public class ImageFragment extends Fragment {
             editText.setEnabled(true);
         }
     }
-
     public void executeZoom() {
 
+    }
+    public void executeAddTextToImage() {
+        editText.setVisibility(View.INVISIBLE);
+        Bitmap mutableBitmap = originalBitmap.copy(Bitmap.Config.ARGB_8888, true);
+        Canvas canvas = new Canvas(mutableBitmap);
+        canvas.drawBitmap(originalBitmap, 0, 0, null);
+
+        Paint paint = new Paint();
+        paint.setTextSize(Integer.parseInt(fontSize) * 10);
+        paint.setColor(color);
+
+        Typeface typeface = Typeface.create(fontFamily, Typeface.NORMAL);
+        if (italic && bold) {
+            paint.setTypeface(Typeface.create(typeface, Typeface.BOLD_ITALIC));
+        } else if (italic) {
+            paint.setTypeface(Typeface.create(typeface, Typeface.ITALIC));
+        } else if (bold) {
+            paint.setTypeface(Typeface.create(typeface, Typeface.BOLD));
+        }
+        canvas.drawText(String.valueOf(editText.getText()), mutableBitmap.getWidth() / 10f, mutableBitmap.getHeight() / 2f, paint);
+        cropImageView.setImageBitmap(mutableBitmap);
+
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            String imageName = UUID.randomUUID().toString() + ".jpg";
+            File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+            dir.mkdirs();
+            File imagePath = new File(dir, imageName);
+
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.Images.Media.DISPLAY_NAME, imageName);
+            values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+            values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES);
+
+            ContentResolver resolver = context.getContentResolver();
+            Uri imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
+            try {
+                OutputStream outputStream = resolver.openOutputStream(imageUri);
+                mutableBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+                outputStream.close();
+
+                MediaScannerConnection.scanFile(requireContext(),
+                        new String[]{imagePath.getAbsolutePath()},
+                        new String[]{"image/jpeg"},
+                        null);
+
+                Toast.makeText(requireContext(), "Image saved successfully", Toast.LENGTH_SHORT).show();
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(requireContext(), "Failed to save image", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Toast.makeText(requireContext(), "Failed to save image", Toast.LENGTH_SHORT).show();
+        }
     }
     private float calculateScaleFactor(float angle) {
         if (angle > 180) {
