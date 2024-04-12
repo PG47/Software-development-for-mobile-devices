@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/contrast"
+        android:icon="@drawable/ic_cropmenu_foreground"/>
+    <item
+        android:id="@+id/fliphorizontally"
+        android:icon="@drawable/ic_fliphorizontally_foreground"/>
+    <item
+        android:id="@+id/flipvertically"
+        android:icon="@drawable/ic_flipvertically_foreground"/>
+</menu>

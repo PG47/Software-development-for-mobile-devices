@@ -1,13 +1,16 @@
 package com.example.gallery;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -82,20 +85,16 @@ public class HeadBarFragment extends Fragment {
     }
 
     private void openCamera() {
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.TITLE,"new image");
+        values.put(MediaStore.Images.Media.DESCRIPTION,"From the Gallery");
+
+        imageUri = getActivity().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
-            File photoFile = null;
-            try {
-                photoFile = createImageFile();
-            } catch (IOException ex) {
-                // Error occurred while creating the File
-                ex.printStackTrace();
-            }
-            if (photoFile != null) {
-                imageUri = FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".provider", photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
-                startActivityForResult(takePictureIntent, MainActivity.REQUEST_IMAGE_CAPTURE);
-            }
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+            startActivityForResult(takePictureIntent, MainActivity.REQUEST_IMAGE_CAPTURE);
         } else {
             Toast.makeText(getActivity(), "No camera app available", Toast.LENGTH_SHORT).show();
         }
@@ -106,26 +105,39 @@ public class HeadBarFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == MainActivity.REQUEST_IMAGE_CAPTURE && resultCode == getActivity().RESULT_OK) {
-            // Image captured, notify MainActivity to refresh images
-            if (mainActivity != null) {
-                mainActivity.refreshImages();
-            }
+            // Image captured, create the image file
+            
         }
     }
 
-    private File createImageFile() throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File imageFile = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
+    private static final int PERMISSION_REQUEST_MANAGE_EXTERNAL_STORAGE = 1;
 
-        // Save a file: path for use with ACTION_VIEW intents
-        String currentPhotoPath = imageFile.getAbsolutePath();
-        return imageFile;
+    private File createImageFile() throws IOException {
+        // Check for permission to manage external storage
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+                Environment.isExternalStorageManager()) {
+            // Permission granted, continue with creating the image file
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+            String imageFileName = "JPEG_" + timeStamp + "_";
+
+            File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM + "/Camera");
+            if (!storageDir.exists()) {
+                storageDir.mkdirs();
+            }
+
+            File imageFile = new File(storageDir, imageFileName + ".jpg");
+
+            String currentPhotoPath = imageFile.getAbsolutePath();
+            return imageFile;
+        } else {
+            // Permission not granted, request it
+            Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+            Uri uri = Uri.fromParts("package", getActivity().getPackageName(), null);
+            intent.setData(uri);
+            startActivityForResult(intent, PERMISSION_REQUEST_MANAGE_EXTERNAL_STORAGE);
+            return null;
+        }
     }
+
+
 }

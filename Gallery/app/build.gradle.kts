@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.gallery"
-        minSdk = 23
+        minSdk = 24
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -34,8 +34,10 @@ android {
 dependencies {
     implementation("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
+
     implementation("com.github.bumptech.glide:glide:4.12.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
+
     implementation("com.github.bumptech.glide:compose:1.0.0-beta01")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
@@ -45,4 +47,5 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     implementation("com.github.bfrachia:android-image-cropper:2.7.0")
 
+    implementation("com.squareup.retrofit2:adapter-rxjava2:2.3.0")
 }

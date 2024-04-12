@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
     private static final int REQUEST_PERMISSIONS = 1234;
     private static final String [] PERMISSIONS = {
             Manifest.permission.READ_MEDIA_IMAGES,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.MANAGE_EXTERNAL_STORAGE
             //,Manifest.permission.CAMERA
     };
@@ -243,14 +244,6 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
             imagesFragment.adapter.reloadImages();
         }
     }
-    public void takePicture() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            cameraActivityResultLauncher.launch(takePictureIntent);
-        } else {
-            Toast.makeText(this, "No camera app available", Toast.LENGTH_SHORT).show();
-        }
-    }
 
     private void requestPermission() {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -281,11 +274,14 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
             return Environment.isExternalStorageManager() &&
                     ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
         } else {
-            int write = ContextCompat.checkSelfPermission(this, Manifest.permission.MANAGE_EXTERNAL_STORAGE);
+            int manage = ContextCompat.checkSelfPermission(this, Manifest.permission.MANAGE_EXTERNAL_STORAGE);
+            int write = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
             int read = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES);
             int camera = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
             int save = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-            return write == PackageManager.PERMISSION_GRANTED &&
+
+            return manage == PackageManager.PERMISSION_GRANTED &&
+                    write == PackageManager.PERMISSION_GRANTED &&
                     read == PackageManager.PERMISSION_GRANTED &&
                     camera == PackageManager.PERMISSION_GRANTED &&
                     save == PackageManager.PERMISSION_GRANTED;

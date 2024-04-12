@@ -1,14 +1,11 @@
 package com.example.gallery;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 
 import androidx.fragment.app.Fragment;
@@ -100,9 +97,9 @@ public class EditFragment extends Fragment {
                 transaction.commit();
                 return true;
             } else if (itemId == R.id.crop) {
-                CropFragment cropFragment = CropFragment.newInstance("Crop");
+                CropMenuFragment cropMenuFragment = CropMenuFragment.newInstance("Crop");
                 transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.AllOptions, cropFragment);
+                transaction.replace(R.id.AllOptions, cropMenuFragment);
                 transaction.addToBackStack(null);
                 transaction.commit();
                 return true;

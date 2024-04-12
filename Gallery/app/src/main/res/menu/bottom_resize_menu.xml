@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<item
+    android:id="@+id/crop_original"
+    android:title="Original"
+    android:icon="@drawable/ic_crop_original_foreground"/>
+<item
+    android:id="@+id/crop_square"
+    android:title="Square"
+    android:icon="@drawable/ic_crop_square_foreground"/>
+<item
+    android:id="@+id/crop_169"
+    android:title="16:9"
+    android:icon="@drawable/ic_crop_169_foreground"/>
+<item
+    android:id="@+id/crop_43"
+    android:title="4:3"
+    android:icon="@drawable/ic_crop_43_foreground"/>
+<item
+    android:id="@+id/crop_34"
+    android:title="3:4"
+    android:icon="@drawable/ic_crop_34_foreground"/>
+</menu>
