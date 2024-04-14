@@ -11,6 +11,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.annotation.SuppressLint;
 import android.database.Cursor;
 import android.provider.MediaStore;
 import android.widget.ImageButton;
@@ -39,7 +40,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
-public class MainActivity extends AppCompatActivity implements NavigationChange, NavigationAlbum {
+public class MainActivity extends AppCompatActivity implements NavigationChange, NavigationAlbum, NavigationSearch {
     FragmentTransaction ft;
     public static final int REQUEST_IMAGE_CAPTURE = 3;
     HeadBarFragment f_headbar;
@@ -50,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
     SelectOptions selectOptions;
     AlbumFragment albumFragment;
     private boolean insideAlbum = false;
+    private boolean insideSearch = false;
     private boolean isSelectionMode = false;
     private static final String tag = "PERMISSION_TAG";
     private static final int REQUEST_PERMISSIONS = 1234;
@@ -415,5 +417,40 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
                 .replace(R.id.mainFragment, albumFragment)
                 .commit();
         insideAlbum = false;
+    }
+
+    @Override
+    public void openSearch(String keyword){
+        // Query the media store to get images with names containing the keyword
+        Cursor cursor = getContentResolver().query(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                new String[]{MediaStore.Images.Media.DATA},
+                MediaStore.Images.Media.DISPLAY_NAME + " LIKE ?",
+                new String[]{"%" + keyword + "%"},
+                null
+        );
+
+        ArrayList<String> imagePaths = new ArrayList<>();
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                @SuppressLint("Range") String imagePath = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+                imagePaths.add(imagePath);
+            }
+            cursor.close();
+        }
+
+        // Create a new instance of ImagesFragment with the image paths
+        ImagesFragment searchImagesFragment = new ImagesFragment(imagePaths, true);
+
+        // Replace the current fragment with the searchImagesFragment
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.mainFragment, searchImagesFragment)
+                .commit();
+    }
+
+    @Override
+    public void closeSearch(){
+
     }
 }

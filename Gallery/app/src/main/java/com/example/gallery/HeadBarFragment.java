@@ -106,7 +106,7 @@ public class HeadBarFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == MainActivity.REQUEST_IMAGE_CAPTURE && resultCode == getActivity().RESULT_OK) {
             // Image captured, create the image file
-            /* This one will crash if turn on
+            /* This one will crash if turn on222
             try {
                 File photoFile = createImageFile();
                 if (photoFile != null) {

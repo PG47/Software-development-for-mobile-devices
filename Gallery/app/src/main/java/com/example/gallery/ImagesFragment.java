@@ -74,6 +74,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
     NavigationAlbum closeAlbum;
     ImageAdapter adapter;
     Boolean album = false;
+    Boolean search = false;
     DatabaseHelper databaseHelper;
     private static final int DETAILS_ACTIVITY_REQUEST_CODE = 1;
 
@@ -84,6 +85,11 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
     public ImagesFragment(ArrayList<String> _images) {
         album = true;
+        images = _images;
+    }
+
+    public ImagesFragment(ArrayList<String> _images, Boolean srh) {
+        search = srh;
         images = _images;
     }
 
@@ -143,8 +149,6 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             }
         }
     }
-
-    ImageButton sortButton;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
