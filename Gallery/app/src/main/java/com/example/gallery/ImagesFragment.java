@@ -1,6 +1,5 @@
 package com.example.gallery;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
@@ -17,19 +16,13 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import java.io.File;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
 
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
@@ -38,7 +31,6 @@ import android.provider.MediaStore;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.util.Log;
-import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,15 +42,12 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -72,6 +61,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
     private boolean isSelectionMode;
     NavigationChange callback;
     NavigationAlbum closeAlbum;
+    NavigationSearch closeSearch;
     ImageAdapter adapter;
     Boolean album = false;
     Boolean search = false;
@@ -102,6 +92,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         super.onCreate(savedInstanceState);
         callback = (NavigationChange) requireActivity();
         closeAlbum = (NavigationAlbum) requireActivity();
+        closeSearch = (NavigationSearch) requireActivity();
         databaseHelper = new DatabaseHelper(requireActivity());
     }
 
@@ -254,17 +245,25 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         });
 
         // Xử lý khi click vào nút exit_album_button
-        exitAlbum = rootView.findViewById(R.id.exit_album_button);
+        exitAlbum = rootView.findViewById(R.id.exit_button);
         exitAlbum.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                closeAlbum.closeAlbum();
-                exitAlbum.setVisibility(View.GONE);
+                if(album) {
+                    closeAlbum.closeAlbum();
+                    exitAlbum.setVisibility(View.GONE);
+                    album = false;
+                } else if (search) {
+                    closeSearch.closeSearch();
+                    exitAlbum.setVisibility(View.GONE);
+                    search = false;
+                }
             }
         });
 
         // Hiển thị nút exit_album_button nếu ở trong album
-        if (album) exitAlbum.setVisibility(View.VISIBLE);
+        if (album || search) exitAlbum.setVisibility(View.VISIBLE);
+
 
         final int[] sortOrder = {0}; // Khai báo biến sortOrder dạng mảng để có thể thay đổi giá trị
         ImageButton sortButton = rootView.findViewById(R.id.sort_button);
@@ -323,7 +322,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
         public ImageAdapter(Activity localContext) {
             context = localContext;
-            if (!album) images = getAllShownImagesPath(context);
+            if (!album && !search) images = getAllShownImagesPath(context);
 
             selectedPositions = new ArrayList<>();
             securedIndices = new ArrayList<>();
