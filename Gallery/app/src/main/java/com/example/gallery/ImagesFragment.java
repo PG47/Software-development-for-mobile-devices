@@ -68,7 +68,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
     DatabaseHelper databaseHelper;
     private static final int DETAILS_ACTIVITY_REQUEST_CODE = 1;
 
-    private final int[] sortOrder = {0};
+    private int sortOrder = 0;
     public ImagesFragment() {
         // Required empty public constructor
     }
@@ -105,7 +105,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         }
     }
 
-    private void sortImagesByOldestDate() {
+    private void sortImages() {
         // Kiểm tra xem danh sách hình ảnh có tồn tại không
         if (images != null && images.size() > 0) {
             // Sử dụng Comparator để so sánh thời gian sửa đổi của hai tệp ảnh
@@ -121,23 +121,24 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                     long lastModified2 = file2.lastModified();
 
                     // So sánh thời gian sửa đổi của hai file
-                    // Nếu sortOrder[0] = 0 (mặc định), sắp xếp từ mới nhất đến cũ nhất
-                    // Nếu sortOrder[0] = 1, sắp xếp từ cũ nhất đến mới nhất
-                    if (sortOrder[0] == 0) {
+                    // Nếu sortOrder = 0 (mặc định), sắp xếp từ mới nhất đến cũ nhất
+                    // Nếu sortOrder = 1, sắp xếp từ cũ nhất đến mới nhất
+                    if (sortOrder == 0) {
                         return Long.compare(lastModified2, lastModified1); // Đảo ngược thứ tự sắp xếp
                     } else {
                         return Long.compare(lastModified1, lastModified2);
                     }
                 }
             });
-
-            // Đảo ngược giá trị sortOrder để thay đổi hướng sắp xếp cho lần sau
-            sortOrder[0] = (sortOrder[0] == 0) ? 1 : 0;
-
             // Cập nhật lại giao diện sau khi sắp xếp
             if (adapter != null) {
                 adapter.notifyDataSetChanged();
             }
+        }
+        if (sortOrder == 0) {
+            Toast.makeText(requireContext(), "Sort images from newest date", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(requireContext(), "Sort images from oldest date", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -264,14 +265,42 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         // Hiển thị nút exit_album_button nếu ở trong album
         if (album || search) exitAlbum.setVisibility(View.VISIBLE);
 
-
-        final int[] sortOrder = {0}; // Khai báo biến sortOrder dạng mảng để có thể thay đổi giá trị
         ImageButton sortButton = rootView.findViewById(R.id.sort_button);
         sortButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sortOrder[0] = (sortOrder[0] == 0) ? 1 : 0;
-                sortImagesByOldestDate(); // Thực hiện sắp xếp hình ảnh
+                // Create a dialog to act as the popup menu
+                AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+                builder.setTitle("Sort by...").setItems(new CharSequence[]{"Oldest Date", "Newest Date"}, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        switch (i) {
+                            case 0:
+                                // Sort by oldest date
+                                sortOrder = 1;
+                                sortImages();
+                                break;
+                            case 1:
+                                // Sort by newest date
+                                sortOrder = 0;
+                                sortImages();
+                                break;
+                        }
+                    }
+                });
+                AlertDialog dialog = builder.create();
+                dialog.show();
+
+                // Set dialog position to center
+                WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+                Window window = dialog.getWindow();
+                if (window != null) {
+                    lp.copyFrom(window.getAttributes());
+                    lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
+                    lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                    lp.gravity = Gravity.CENTER;
+                    window.setAttributes(lp);
+                }
             }
         });
 
