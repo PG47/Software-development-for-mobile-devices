@@ -793,39 +793,79 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         public void secureEnterPassword() {
             int count = selectedPositions.size();
 
-            final EditText input = new EditText(requireContext());
-            AlertDialog.Builder builder = inputPasswordAlert(input,
-                    "Enter a 4-digit password to secure " + count + " image(s):");
+            final EditText pass = new EditText(requireContext());
+            final EditText name = new EditText(requireContext());
 
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            // Create an AlertDialog name album
+            AlertDialog.Builder album = new AlertDialog.Builder(requireContext());
+            album.setTitle("Create a new secure Album");
+            album.setMessage("Enter the name for the secure album:");
+
+            // Add the EditText view to the dialog
+            album.setView(name);
+
+            // Set positive button for user confirmation
+            album.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    String password = String.valueOf(input.getText());
+                    String albumName = name.getText().toString().trim();
+                    if (!albumName.isEmpty()) {
+                        if (!CheckAlbum(albumName)) {
+                            // Call method to add set password
+                            AlertDialog.Builder builder = inputPasswordAlert(pass,
+                                    "Enter a 4-digit password to secure " + count + " image(s):");
 
-                    AlertDialog.Builder alert = new AlertDialog.Builder(requireContext());
-                    alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
+                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    String password = String.valueOf(pass.getText());
 
+                                    AlertDialog.Builder alert = new AlertDialog.Builder(requireContext());
+                                    alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+
+                                        }
+                                    });
+
+                                    if (password.length() != 4) {
+                                        alert.setTitle("Error").setMessage("Password must be exactly 4-digit long.");
+                                    }
+                                    else {
+                                        secureSelections(albumName, password);
+                                        alert.setTitle("Success").setMessage("Your images have been secured.");
+                                    }
+
+                                    alert.show();
+                                }
+                            });
+
+                            builder.show();
+                        } else {
+                            // Show error toast if album already exists
+                            Toast.makeText(requireContext(), "Album already exists", Toast.LENGTH_SHORT).show();
                         }
-                    });
-
-                    if (password.length() != 4) {
-                        alert.setTitle("Error").setMessage("Password must be exactly 4-digit long.");
+                    } else {
+                        // Show error toast if album name is empty
+                        Toast.makeText(requireContext(), "Album name cannot be empty", Toast.LENGTH_SHORT).show();
                     }
-                    else {
-                        secureSelections(password);
-                        alert.setTitle("Success").setMessage("Your images have been secured.");
-                    }
-
-                    alert.show();
                 }
             });
 
-            builder.show();
+            // Set negative button for cancel action
+            album.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            });
+
+            // Show the dialog
+            AlertDialog dialog = album.create();
+            dialog.show();
         }
 
-        public void secureSelections(String password) {
+        public void secureSelections(String albumName, String password) {
             String[] projection = {MediaStore.Images.Media._ID};
 
             String selection = MediaStore.Images.Media.DATA + " = ?";
