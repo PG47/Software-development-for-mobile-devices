@@ -8,6 +8,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
@@ -22,6 +23,10 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicBlur;
 import android.text.InputType;
 import android.util.Log;
 import android.util.TypedValue;
@@ -227,6 +232,59 @@ public class ImageFragment extends Fragment {
         adjustedBitmap = Bitmap.createBitmap(pixels, bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
         cropImageView.setImageBitmap(adjustedBitmap);
     }
+
+    public void executeChangeBlur(int value) {
+        // Calculate blur radius based on the provided value
+        float blurRadius = value / 4.5F;
+
+        // Create an empty bitmap to store the blurred image
+        adjustedBitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
+
+        // Copy the original bitmap to the blurred bitmap
+        Canvas canvas = new Canvas(adjustedBitmap);
+        canvas.drawBitmap(originalBitmap, 0, 0, null);
+
+        // Apply blur effect to the blurred bitmap
+        adjustedBitmap = applyBlur(adjustedBitmap, blurRadius);
+
+        // Set the adjusted bitmap to the ImageView for display
+        cropImageView.setImageBitmap(adjustedBitmap);
+    }
+
+    private Bitmap applyBlur(Bitmap src, float blurRadius) {
+        if (blurRadius <= 0) {
+            return src;
+        }
+
+        // Create a new bitmap for the blurred image
+        Bitmap blurredBitmap = Bitmap.createBitmap(src.getWidth(), src.getHeight(), Bitmap.Config.ARGB_8888);
+
+        // Create a RenderScript context
+        RenderScript rs = RenderScript.create(context);
+
+        // Allocate memory for Renderscript to work with
+        Allocation input = Allocation.createFromBitmap(rs, src, Allocation.MipmapControl.MIPMAP_NONE, Allocation.USAGE_SCRIPT);
+        Allocation output = Allocation.createTyped(rs, input.getType());
+
+        // Create a blur script
+        ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
+        script.setRadius(blurRadius);
+
+        // Perform the blur operation
+        script.setInput(input);
+        script.forEach(output);
+
+        // Copy the blurred image from the Allocation to the blurred bitmap
+        output.copyTo(blurredBitmap);
+
+        // Destroy RenderScript resources
+        rs.destroy();
+
+        return blurredBitmap;
+    }
+
+
+
     public void executeAddEditText() {
         editText = new EditText(context);
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(

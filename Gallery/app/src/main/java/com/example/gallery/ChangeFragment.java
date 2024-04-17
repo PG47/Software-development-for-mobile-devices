@@ -87,6 +87,9 @@ public class ChangeFragment extends Fragment {
                 } else if (changeType == "Contrast") {
                     editActivity.changeContrast(i);
                     value.setText(String.valueOf(i));
+                } else if (changeType == "Blur") {
+                    editActivity.changeBlur(i);
+                    value.setText(String.valueOf(i));
                 }
             }
 
