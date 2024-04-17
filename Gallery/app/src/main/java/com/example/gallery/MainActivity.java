@@ -552,12 +552,26 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
                 null
         );
 
+//        if (cursor != null) {
+//            while (cursor.moveToNext()) {
+//                @SuppressLint("Range") String imagePath = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+//                imagePaths.add(imagePath);
+//            }
+//            cursor.close();
+//        }
         if (cursor != null) {
             while (cursor.moveToNext()) {
-                @SuppressLint("Range") String imagePath = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
-                imagePaths.add(imagePath);
+                int columnIndex = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
+                if (columnIndex >= 0) {
+                    String imagePath = cursor.getString(columnIndex);
+                    imagePaths.add(imagePath);
+                } else {
+                    Log.e("MainActivity", "Column index is -1");
+                }
             }
             cursor.close();
+        } else {
+            Log.e("MainActivity", "Cursor is null");
         }
 
         // Query the media store to get album IDs with names containing the keyword
@@ -571,35 +585,44 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
 
         if (albumCursor != null) {
             while (albumCursor.moveToNext()) {
-                String albumId = albumCursor.getString(albumCursor.getColumnIndex(MediaStore.Images.Media.BUCKET_ID));
-                Cursor albumImagesCursor = getContentResolver().query(
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                        new String[]{MediaStore.Images.Media.DATA},
-                        MediaStore.Images.Media.BUCKET_ID + " = ?",
-                        new String[]{albumId},
-                        null
-                );
-                if (albumImagesCursor != null) {
-                    while (albumImagesCursor.moveToNext()) {
-                        @SuppressLint("Range") String imagePath = albumImagesCursor.getString(albumImagesCursor.getColumnIndex(MediaStore.Images.Media.DATA));
-                        imagePaths.add(imagePath);
+                int columnIndex = albumCursor.getColumnIndex(MediaStore.Images.Media.BUCKET_ID);
+                if (columnIndex >= 0) {
+                    String albumId = albumCursor.getString(columnIndex);
+                    Cursor albumImagesCursor = getContentResolver().query(
+                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                            new String[]{MediaStore.Images.Media.DATA},
+                            MediaStore.Images.Media.BUCKET_ID + " = ?",
+                            new String[]{albumId},
+                            null
+                    );
+                    if (albumImagesCursor != null) {
+                        while (albumImagesCursor.moveToNext()) {
+                            int imagePathIndex = albumImagesCursor.getColumnIndex(MediaStore.Images.Media.DATA);
+                            if (imagePathIndex >= 0) {
+                                String imagePath = albumImagesCursor.getString(imagePathIndex);
+                                imagePaths.add(imagePath);
+                            } else {
+                                Log.e("MainActivity", "Image path index is -1");
+                            }
+                        }
+                        albumImagesCursor.close();
+                    } else {
+                        Log.e("MainActivity", "Album images cursor is null");
                     }
-                    albumImagesCursor.close();
+                } else {
+                    Log.e("MainActivity", "Column index is -1 for album ID");
                 }
             }
             albumCursor.close();
+        } else {
+            Log.e("MainActivity", "Album cursor is null");
         }
 
-        // Create a new instance of ImagesFragment with the image paths
         imagesFragment = new ImagesFragment(imagePaths, true);
         selectOptions = (SelectOptions) imagesFragment;
         insideSearch = true;
 
-        // Replace the current fragment with the searchImagesFragment
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.mainFragment, imagesFragment)
-                .commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.mainFragment, imagesFragment).commit();
     }
 
 

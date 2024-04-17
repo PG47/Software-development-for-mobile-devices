@@ -9,7 +9,10 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="407925a2-5f9d-4e76-91d1-56fe32874ba9" name="Changes" comment="" />
+    <list default="true" id="407925a2-5f9d-4e76-91d1-56fe32874ba9" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../../Gallery/app/src/main/java/com/example/gallery/DatabaseHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Gallery/app/src/main/java/com/example/gallery/DatabaseHelper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Gallery/app/src/main/java/com/example/gallery/ImagesFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Gallery/app/src/main/java/com/example/gallery/ImagesFragment.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -18,7 +21,7 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[C:\Users\ASUS\.android\avd\EMU_-_Pixel_4_API_30.avd]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[R58W90DKYJY]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
