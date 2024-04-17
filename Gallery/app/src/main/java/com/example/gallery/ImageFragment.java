@@ -60,8 +60,6 @@ import java.util.UUID;
 public class ImageFragment extends Fragment {
     EditActivity editActivity;
     Context context;
-    float zoomLevel = (float) Math.sqrt(2);
-    private ImageView myImage;
     private Bitmap originalBitmap;
     private Bitmap adjustedBitmap;
     private int bitmapWidth, bitmapHeight;
@@ -69,7 +67,6 @@ public class ImageFragment extends Fragment {
     RelativeLayout layoutImage;
     EditText editText;
     CropImageView cropImageView;
-    Uri imageUri;
     String fontFamily, fontSize = "11";
     Boolean italic, bold;
     Integer color;
@@ -123,7 +120,7 @@ public class ImageFragment extends Fragment {
 
         cropImageView = (CropImageView) layoutImage.findViewById(com.theartofdev.edmodo.cropper.R.id.cropImageView);
 
-        cropImageView.setImageBitmap(originalBitmap);
+        cropImageView.setImageBitmap(adjustedBitmap);
         cropImageView.setShowCropOverlay(false);
         cropImageView.setOnSetImageUriCompleteListener(new CropImageView.OnSetImageUriCompleteListener() {
             @Override
@@ -141,42 +138,48 @@ public class ImageFragment extends Fragment {
     public void executeRotate(int value) {
         cropImageView.setShowCropOverlay(true);
         BitmapDrawable drawable = new BitmapDrawable(getResources(), originalBitmap);
-        drawable.setBounds(0, 0, originalBitmap.getWidth(), originalBitmap.getHeight());
+        drawable.setBounds(0, 0, bitmapWidth, bitmapHeight);
 
-        Bitmap rotatedBitmap = Bitmap.createBitmap(originalBitmap.getWidth(), originalBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        Bitmap rotatedBitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
 
         Canvas canvas = new Canvas(rotatedBitmap);
-        canvas.rotate(value - 180, originalBitmap.getWidth() / 2f, originalBitmap.getHeight() / 2f);
+        canvas.rotate(value - 180, bitmapWidth / 2f, bitmapHeight / 2f);
         drawable.draw(canvas);
 
-        cropImageView.setImageBitmap(rotatedBitmap);
+        adjustedBitmap = rotatedBitmap;
+
+        cropImageView.setImageBitmap(adjustedBitmap);
     }
     public void executeFastRotate(int value) {
         cropImageView.setShowCropOverlay(true);
         BitmapDrawable drawable = new BitmapDrawable(getResources(), originalBitmap);
-        drawable.setBounds(0, 0, originalBitmap.getWidth(), originalBitmap.getHeight());
+        drawable.setBounds(0, 0, bitmapWidth, bitmapHeight);
 
-        Bitmap rotatedBitmap = Bitmap.createBitmap(originalBitmap.getWidth(), originalBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        Bitmap rotatedBitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
 
         Canvas canvas = new Canvas(rotatedBitmap);
-        canvas.rotate(value, originalBitmap.getWidth() / 2f, originalBitmap.getHeight() / 2f);
+        canvas.rotate(value, bitmapWidth / 2f, bitmapHeight / 2f);
         drawable.draw(canvas);
 
-        cropImageView.setImageBitmap(rotatedBitmap);
+        adjustedBitmap = rotatedBitmap;
+
+        cropImageView.setImageBitmap(adjustedBitmap);
     }
     public void executeCropImage() {
         cropImageView.setShowCropOverlay(false);
         Bitmap rotatedImage = cropImageView.getCroppedImage();
+
+        adjustedBitmap = rotatedImage;
+        bitmapWidth = adjustedBitmap.getWidth();
+        bitmapHeight = adjustedBitmap.getHeight();
+
         cropImageView.setImageBitmap(rotatedImage);
-        saveImageToDevices(rotatedImage);
     }
     public void executeChangeBrightness(int value) {
         float brightnessFactor = Math.max(0, Math.min(100, value));;
-        int width = adjustedBitmap.getWidth();
-        int height = adjustedBitmap.getHeight();
 
-        int[] pixels = new int[width * height];
-        originalBitmap.getPixels(pixels, 0, width, 0, 0, width, height);
+        int[] pixels = new int[bitmapWidth * bitmapHeight];
+        originalBitmap.getPixels(pixels, 0, bitmapWidth, 0, 0, bitmapWidth, bitmapHeight);
 
         for (int i = 0; i < pixels.length; i++) {
             int alpha = (pixels[i] >> 24) & 0xFF;
@@ -195,16 +198,14 @@ public class ImageFragment extends Fragment {
             pixels[i] = (alpha << 24) | (red << 16) | (green << 8) | blue;
         }
 
-        adjustedBitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
-        myImage.setImageBitmap(adjustedBitmap);
+        adjustedBitmap = Bitmap.createBitmap(pixels, bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
+        cropImageView.setImageBitmap(adjustedBitmap);
     }
     public void executeChangeContrast(int value) {
         float contrastLevel = value / 10F;
-        int width = adjustedBitmap.getWidth();
-        int height = adjustedBitmap.getHeight();
 
-        int[] pixels = new int[width * height];
-        originalBitmap.getPixels(pixels, 0, width, 0, 0, width, height);
+        int[] pixels = new int[bitmapWidth * bitmapHeight];
+        originalBitmap.getPixels(pixels, 0, bitmapWidth, 0, 0, bitmapWidth, bitmapHeight);
 
         for (int i = 0; i < pixels.length; i++) {
             int alpha = (pixels[i] >> 24) & 0xFF;
@@ -223,8 +224,8 @@ public class ImageFragment extends Fragment {
             pixels[i] = (alpha << 24) | (red << 16) | (green << 8) | blue;
         }
 
-        adjustedBitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
-        myImage.setImageBitmap(adjustedBitmap);
+        adjustedBitmap = Bitmap.createBitmap(pixels, bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
+        cropImageView.setImageBitmap(adjustedBitmap);
     }
     public void executeAddEditText() {
         editText = new EditText(context);
@@ -353,9 +354,9 @@ public class ImageFragment extends Fragment {
     }
     public void executeAddTextToImage() {
         editText.setVisibility(View.INVISIBLE);
-        Bitmap mutableBitmap = originalBitmap.copy(Bitmap.Config.ARGB_8888, true);
+        Bitmap mutableBitmap = adjustedBitmap.copy(Bitmap.Config.ARGB_8888, true);
         Canvas canvas = new Canvas(mutableBitmap);
-        canvas.drawBitmap(originalBitmap, 0, 0, null);
+        canvas.drawBitmap(adjustedBitmap, 0, 0, null);
 
         Paint paint = new Paint();
         paint.setTextSize(Integer.parseInt(fontSize) * 10);
@@ -369,20 +370,13 @@ public class ImageFragment extends Fragment {
         } else if (bold) {
             paint.setTypeface(Typeface.create(typeface, Typeface.BOLD));
         }
-        canvas.drawText(String.valueOf(editText.getText()), mutableBitmap.getWidth() / 10f, mutableBitmap.getHeight() / 2f, paint);
-        cropImageView.setImageBitmap(mutableBitmap);
-        saveImageToDevices(mutableBitmap);
-    }
-    private float calculateScaleFactor(float angle) {
-        if (angle > 180) {
-            return (float) Math.sin(Math.toRadians(angle)) * zoomLevel;
-        }
-        return (float) Math.cos(Math.toRadians(angle)) * zoomLevel;
+        canvas.drawText(String.valueOf(editText.getText()), bitmapWidth / 10f, bitmapHeight / 2f, paint);
+
+        adjustedBitmap = mutableBitmap;
+        cropImageView.setImageBitmap(adjustedBitmap);
     }
 
-//    private void startCroppingActivity() {
-//        CropImage.activity(imageUri)
-//                .setGuidelines(CropImageView.Guidelines.ON)
-//                .start(requireActivity());
-//    }
+    public void executeSaveImage() {
+        saveImageToDevices(adjustedBitmap);
+    }
 }

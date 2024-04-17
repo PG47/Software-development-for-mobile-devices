@@ -44,6 +44,16 @@ public class SaveBackFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof EditActivity) {
+            editActivity = (EditActivity) context;
+        } else {
+            throw new IllegalStateException("EditActivity must implement callbacks");
+        }
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         ConstraintLayout layoutSaveBack = (ConstraintLayout)inflater.inflate(R.layout.fragment_save_back, null);
 
@@ -61,7 +71,6 @@ public class SaveBackFragment extends Fragment {
         getBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d("test", "st" + editActivity);
                 if (editActivity != null) {
                     editActivity.finish();
                 }
@@ -72,6 +81,7 @@ public class SaveBackFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if (editActivity != null) {
+                    editActivity.saveImage();
                     editActivity.finish();
                 }
             }

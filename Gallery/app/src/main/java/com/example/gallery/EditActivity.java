@@ -60,4 +60,5 @@ public class EditActivity extends AppCompatActivity {
         fragmentImage.updateEditText(strFontFamily, strFontSize, isItalic, isBold, textColor);
     }
     public void addTextToImage() { fragmentImage.executeAddTextToImage(); }
+    public void saveImage() { fragmentImage.executeSaveImage(); }
 }
