@@ -1,6 +1,5 @@
 package com.example.gallery;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
@@ -17,19 +16,13 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import java.io.File;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
 
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
@@ -38,7 +31,6 @@ import android.provider.MediaStore;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.util.Log;
-import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,15 +42,12 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -72,18 +61,25 @@ public class ImagesFragment extends Fragment implements SelectOptions {
     private boolean isSelectionMode;
     NavigationChange callback;
     NavigationAlbum closeAlbum;
+    NavigationSearch closeSearch;
     ImageAdapter adapter;
     Boolean album = false;
+    Boolean search = false;
     DatabaseHelper databaseHelper;
     private static final int DETAILS_ACTIVITY_REQUEST_CODE = 1;
 
-    private final int[] sortOrder = {0};
+    private int sortOrder = 0;
     public ImagesFragment() {
         // Required empty public constructor
     }
 
     public ImagesFragment(ArrayList<String> _images) {
         album = true;
+        images = _images;
+    }
+
+    public ImagesFragment(ArrayList<String> _images, Boolean srh) {
+        search = srh;
         images = _images;
     }
 
@@ -96,6 +92,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         super.onCreate(savedInstanceState);
         callback = (NavigationChange) requireActivity();
         closeAlbum = (NavigationAlbum) requireActivity();
+        closeSearch = (NavigationSearch) requireActivity();
         databaseHelper = new DatabaseHelper(requireActivity());
     }
 
@@ -108,7 +105,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         }
     }
 
-    private void sortImagesByOldestDate() {
+    private void sortImages() {
         // Kiểm tra xem danh sách hình ảnh có tồn tại không
         if (images != null && images.size() > 0) {
             // Sử dụng Comparator để so sánh thời gian sửa đổi của hai tệp ảnh
@@ -124,27 +121,26 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                     long lastModified2 = file2.lastModified();
 
                     // So sánh thời gian sửa đổi của hai file
-                    // Nếu sortOrder[0] = 0 (mặc định), sắp xếp từ mới nhất đến cũ nhất
-                    // Nếu sortOrder[0] = 1, sắp xếp từ cũ nhất đến mới nhất
-                    if (sortOrder[0] == 0) {
+                    // Nếu sortOrder = 0 (mặc định), sắp xếp từ mới nhất đến cũ nhất
+                    // Nếu sortOrder = 1, sắp xếp từ cũ nhất đến mới nhất
+                    if (sortOrder == 0) {
                         return Long.compare(lastModified2, lastModified1); // Đảo ngược thứ tự sắp xếp
                     } else {
                         return Long.compare(lastModified1, lastModified2);
                     }
                 }
             });
-
-            // Đảo ngược giá trị sortOrder để thay đổi hướng sắp xếp cho lần sau
-            sortOrder[0] = (sortOrder[0] == 0) ? 1 : 0;
-
             // Cập nhật lại giao diện sau khi sắp xếp
             if (adapter != null) {
                 adapter.notifyDataSetChanged();
             }
         }
+        if (sortOrder == 0) {
+            Toast.makeText(requireContext(), "Sort images from newest date", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(requireContext(), "Sort images from oldest date", Toast.LENGTH_SHORT).show();
+        }
     }
-
-    ImageButton sortButton;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -250,25 +246,61 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         });
 
         // Xử lý khi click vào nút exit_album_button
-        exitAlbum = rootView.findViewById(R.id.exit_album_button);
+        exitAlbum = rootView.findViewById(R.id.exit_button);
         exitAlbum.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                closeAlbum.closeAlbum();
-                exitAlbum.setVisibility(View.GONE);
+                if(album) {
+                    closeAlbum.closeAlbum();
+                    exitAlbum.setVisibility(View.GONE);
+                    album = false;
+                } else if (search) {
+                    closeSearch.closeSearch();
+                    exitAlbum.setVisibility(View.GONE);
+                    search = false;
+                }
             }
         });
 
         // Hiển thị nút exit_album_button nếu ở trong album
-        if (album) exitAlbum.setVisibility(View.VISIBLE);
+        if (album || search) exitAlbum.setVisibility(View.VISIBLE);
 
-        final int[] sortOrder = {0}; // Khai báo biến sortOrder dạng mảng để có thể thay đổi giá trị
         ImageButton sortButton = rootView.findViewById(R.id.sort_button);
         sortButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sortOrder[0] = (sortOrder[0] == 0) ? 1 : 0;
-                sortImagesByOldestDate(); // Thực hiện sắp xếp hình ảnh
+                // Create a dialog to act as the popup menu
+                AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+                builder.setTitle("Sort by...").setItems(new CharSequence[]{"Oldest Date", "Newest Date"}, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        switch (i) {
+                            case 0:
+                                // Sort by oldest date
+                                sortOrder = 1;
+                                sortImages();
+                                break;
+                            case 1:
+                                // Sort by newest date
+                                sortOrder = 0;
+                                sortImages();
+                                break;
+                        }
+                    }
+                });
+                AlertDialog dialog = builder.create();
+                dialog.show();
+
+                // Set dialog position to center
+                WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+                Window window = dialog.getWindow();
+                if (window != null) {
+                    lp.copyFrom(window.getAttributes());
+                    lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
+                    lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                    lp.gravity = Gravity.CENTER;
+                    window.setAttributes(lp);
+                }
             }
         });
 
@@ -319,7 +351,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
         public ImageAdapter(Activity localContext) {
             context = localContext;
-            if (!album) images = getAllShownImagesPath(context);
+            if (!album && !search) images = getAllShownImagesPath(context);
 
             selectedPositions = new ArrayList<>();
             securedIndices = new ArrayList<>();
@@ -761,39 +793,79 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         public void secureEnterPassword() {
             int count = selectedPositions.size();
 
-            final EditText input = new EditText(requireContext());
-            AlertDialog.Builder builder = inputPasswordAlert(input,
-                    "Enter a 4-digit password to secure " + count + " image(s):");
+            final EditText pass = new EditText(requireContext());
+            final EditText name = new EditText(requireContext());
 
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            // Create an AlertDialog name album
+            AlertDialog.Builder album = new AlertDialog.Builder(requireContext());
+            album.setTitle("Create a new secure Album");
+            album.setMessage("Enter the name for the secure album:");
+
+            // Add the EditText view to the dialog
+            album.setView(name);
+
+            // Set positive button for user confirmation
+            album.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    String password = String.valueOf(input.getText());
+                    String albumName = name.getText().toString().trim();
+                    if (!albumName.isEmpty()) {
+                        if (!CheckAlbum(albumName)) {
+                            // Call method to add set password
+                            AlertDialog.Builder builder = inputPasswordAlert(pass,
+                                    "Enter a 4-digit password to secure " + count + " image(s):");
 
-                    AlertDialog.Builder alert = new AlertDialog.Builder(requireContext());
-                    alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
+                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    String password = String.valueOf(pass.getText());
 
+                                    AlertDialog.Builder alert = new AlertDialog.Builder(requireContext());
+                                    alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+
+                                        }
+                                    });
+
+                                    if (password.length() != 4) {
+                                        alert.setTitle("Error").setMessage("Password must be exactly 4-digit long.");
+                                    }
+                                    else {
+                                        secureSelections(albumName, password);
+                                        alert.setTitle("Success").setMessage("Your images have been secured.");
+                                    }
+
+                                    alert.show();
+                                }
+                            });
+
+                            builder.show();
+                        } else {
+                            // Show error toast if album already exists
+                            Toast.makeText(requireContext(), "Album already exists", Toast.LENGTH_SHORT).show();
                         }
-                    });
-
-                    if (password.length() != 4) {
-                        alert.setTitle("Error").setMessage("Password must be exactly 4-digit long.");
+                    } else {
+                        // Show error toast if album name is empty
+                        Toast.makeText(requireContext(), "Album name cannot be empty", Toast.LENGTH_SHORT).show();
                     }
-                    else {
-                        secureSelections(password);
-                        alert.setTitle("Success").setMessage("Your images have been secured.");
-                    }
-
-                    alert.show();
                 }
             });
 
-            builder.show();
+            // Set negative button for cancel action
+            album.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            });
+
+            // Show the dialog
+            AlertDialog dialog = album.create();
+            dialog.show();
         }
 
-        public void secureSelections(String password) {
+        public void secureSelections(String albumName, String password) {
             String[] projection = {MediaStore.Images.Media._ID};
 
             String selection = MediaStore.Images.Media.DATA + " = ?";

@@ -11,6 +11,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.annotation.SuppressLint;
 import android.database.Cursor;
 import android.provider.MediaStore;
 import android.widget.ImageButton;
@@ -39,7 +40,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
-public class MainActivity extends AppCompatActivity implements NavigationChange, NavigationAlbum {
+public class MainActivity extends AppCompatActivity implements NavigationChange, NavigationAlbum, NavigationSearch {
     FragmentTransaction ft;
     public static final int REQUEST_IMAGE_CAPTURE = 3;
     HeadBarFragment f_headbar;
@@ -49,7 +50,10 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
     ImagesFragment imagesFragment;
     SelectOptions selectOptions;
     AlbumFragment albumFragment;
+    MapFragment mapFragment;
+    SearchFragment searchFragment;
     private boolean insideAlbum = false;
+    private boolean insideSearch = false;
     private boolean isSelectionMode = false;
     private static final String tag = "PERMISSION_TAG";
     private static final int REQUEST_PERMISSIONS = 1234;
@@ -110,8 +114,8 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
 
         imagesFragment = new ImagesFragment();
         albumFragment = new AlbumFragment();
-        MapFragment mapFragment = new MapFragment();
-        SearchFragment searchFragment = new SearchFragment();
+        mapFragment = new MapFragment();
+        searchFragment = new SearchFragment();
 
         selectOptions = (SelectOptions) imagesFragment;
 
@@ -370,6 +374,10 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
             closeAlbum();
             return;
         }
+        if (insideSearch) {
+            closeSearch();
+            return;
+        }
 
         if (imagesFragment != null) {
             imagesFragment.ExitSelection();
@@ -415,5 +423,83 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
                 .replace(R.id.mainFragment, albumFragment)
                 .commit();
         insideAlbum = false;
+    }
+
+    @Override
+    public void openSearch(String keyword) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .remove(imagesFragment)
+                .commit();
+
+        ArrayList<String> imagePaths = new ArrayList<>();
+
+        // Query the media store to get images with names containing the keyword
+        Cursor cursor = getContentResolver().query(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                new String[]{MediaStore.Images.Media.DATA},
+                MediaStore.Images.Media.DISPLAY_NAME + " LIKE ?",
+                new String[]{"%" + keyword + "%"},
+                null
+        );
+
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                @SuppressLint("Range") String imagePath = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+                imagePaths.add(imagePath);
+            }
+            cursor.close();
+        }
+
+        // Query the media store to get album IDs with names containing the keyword
+        Cursor albumCursor = getContentResolver().query(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                new String[]{MediaStore.Images.Media.BUCKET_ID},
+                MediaStore.Images.Media.BUCKET_DISPLAY_NAME + " LIKE ?",
+                new String[]{"%" + keyword + "%"},
+                null
+        );
+
+        if (albumCursor != null) {
+            while (albumCursor.moveToNext()) {
+                String albumId = albumCursor.getString(albumCursor.getColumnIndex(MediaStore.Images.Media.BUCKET_ID));
+                Cursor albumImagesCursor = getContentResolver().query(
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                        new String[]{MediaStore.Images.Media.DATA},
+                        MediaStore.Images.Media.BUCKET_ID + " = ?",
+                        new String[]{albumId},
+                        null
+                );
+                if (albumImagesCursor != null) {
+                    while (albumImagesCursor.moveToNext()) {
+                        @SuppressLint("Range") String imagePath = albumImagesCursor.getString(albumImagesCursor.getColumnIndex(MediaStore.Images.Media.DATA));
+                        imagePaths.add(imagePath);
+                    }
+                    albumImagesCursor.close();
+                }
+            }
+            albumCursor.close();
+        }
+
+        // Create a new instance of ImagesFragment with the image paths
+        imagesFragment = new ImagesFragment(imagePaths, true);
+        selectOptions = (SelectOptions) imagesFragment;
+        insideSearch = true;
+
+        // Replace the current fragment with the searchImagesFragment
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.mainFragment, imagesFragment)
+                .commit();
+    }
+
+
+    @Override
+    public void closeSearch(){
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.mainFragment, searchFragment)
+                .commit();
+        insideSearch = false;
     }
 }
