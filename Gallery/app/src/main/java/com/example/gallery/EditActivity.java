@@ -57,6 +57,8 @@ public class EditActivity extends AppCompatActivity {
     public void changeContrast(int value) { fragmentImage.executeChangeContrast(value); }
     public void changeBlur(int value) { fragmentImage.executeChangeBlur(value); }
     public void changeSepia(int value) { fragmentImage.executeChangeSepia(value); }
+    public void changeGrayscale(int value) { fragmentImage.executeChangeGrayscale(value); }
+
 
     public void addEditText() { fragmentImage.executeAddEditText(); }
     public void updateEditText(String strFontFamily, String strFontSize, boolean isItalic, boolean isBold, int textColor) {

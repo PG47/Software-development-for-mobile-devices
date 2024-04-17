@@ -284,7 +284,6 @@ public class ImageFragment extends Fragment {
     }
 
     public void executeChangeSepia(int value) {
-        // Normalize value to be within the range of 0 to 1
         float intensity = value / 10f;
 
         // Create an array to store the pixel values of the original bitmap
@@ -314,6 +313,39 @@ public class ImageFragment extends Fragment {
 
             // Combine sepia values into a single pixel
             pixels[i] = (alpha << 24) | (sepiaRed << 16) | (sepiaGreen << 8) | sepiaBlue;
+        }
+
+        // Create a new bitmap from the modified pixel array
+        adjustedBitmap = Bitmap.createBitmap(pixels, bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
+
+        // Set the adjusted bitmap to the ImageView for display
+        cropImageView.setImageBitmap(adjustedBitmap);
+    }
+    public void executeChangeGrayscale(int value) {
+        float intensity = value / 10f;
+
+        // Create an array to store the pixel values of the original bitmap
+        int[] pixels = new int[bitmapWidth * bitmapHeight];
+        originalBitmap.getPixels(pixels, 0, bitmapWidth, 0, 0, bitmapWidth, bitmapHeight);
+
+        // Loop through each pixel to apply grayscale effect
+        for (int i = 0; i < pixels.length; i++) {
+            int alpha = (pixels[i] >> 24) & 0xFF;
+            int red = (pixels[i] >> 16) & 0xFF;
+            int green = (pixels[i] >> 8) & 0xFF;
+            int blue = pixels[i] & 0xFF;
+
+            // Calculate grayscale value
+            int gray = (int) (0.299 * red + 0.587 * green + 0.114 * blue);
+
+            // Apply intensity to grayscale value
+            gray = (int) (gray + (gray - red) * intensity);
+
+            // Clip values to ensure they are within the valid range
+            gray = Math.min(255, Math.max(0, gray));
+
+            // Combine grayscale values into a single pixel
+            pixels[i] = (alpha << 24) | (gray << 16) | (gray << 8) | gray;
         }
 
         // Create a new bitmap from the modified pixel array

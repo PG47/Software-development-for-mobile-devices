@@ -93,6 +93,9 @@ public class ChangeFragment extends Fragment {
                 } else if (changeType == "Sepia") {
                     editActivity.changeSepia(i);
                     value.setText(String.valueOf(i));
+                } else if (changeType == "Grayscale") {
+                    editActivity.changeGrayscale(i);
+                    value.setText(String.valueOf(i));
                 }
             }
 
