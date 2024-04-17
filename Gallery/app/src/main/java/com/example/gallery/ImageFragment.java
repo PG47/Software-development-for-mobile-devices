@@ -283,6 +283,47 @@ public class ImageFragment extends Fragment {
         return blurredBitmap;
     }
 
+    public void executeChangeSepia(int value) {
+        // Normalize value to be within the range of 0 to 1
+        float intensity = value / 10f;
+
+        // Create an array to store the pixel values of the original bitmap
+        int[] pixels = new int[bitmapWidth * bitmapHeight];
+        originalBitmap.getPixels(pixels, 0, bitmapWidth, 0, 0, bitmapWidth, bitmapHeight);
+
+        // Loop through each pixel to apply sepia effect
+        for (int i = 0; i < pixels.length; i++) {
+            int alpha = (pixels[i] >> 24) & 0xFF;
+            int red = (pixels[i] >> 16) & 0xFF;
+            int green = (pixels[i] >> 8) & 0xFF;
+            int blue = pixels[i] & 0xFF;
+
+            int sepiaRed = (int) (0.393 * red + 0.769 * green + 0.189 * blue);
+            int sepiaGreen = (int) (0.349 * red + 0.686 * green + 0.168 * blue);
+            int sepiaBlue = (int) (0.272 * red + 0.534 * green + 0.131 * blue);
+
+            // Apply intensity to sepia values
+            sepiaRed = (int) (red + (sepiaRed - red) * intensity);
+            sepiaGreen = (int) (green + (sepiaGreen - green) * intensity);
+            sepiaBlue = (int) (blue + (sepiaBlue - blue) * intensity);
+
+            // Clip values to ensure they are within the valid range
+            sepiaRed = Math.min(255, Math.max(0, sepiaRed));
+            sepiaGreen = Math.min(255, Math.max(0, sepiaGreen));
+            sepiaBlue = Math.min(255, Math.max(0, sepiaBlue));
+
+            // Combine sepia values into a single pixel
+            pixels[i] = (alpha << 24) | (sepiaRed << 16) | (sepiaGreen << 8) | sepiaBlue;
+        }
+
+        // Create a new bitmap from the modified pixel array
+        adjustedBitmap = Bitmap.createBitmap(pixels, bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
+
+        // Set the adjusted bitmap to the ImageView for display
+        cropImageView.setImageBitmap(adjustedBitmap);
+    }
+
+
 
 
     public void executeAddEditText() {
