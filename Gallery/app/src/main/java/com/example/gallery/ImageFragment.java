@@ -27,6 +27,7 @@ import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
+import android.renderscript.ScriptIntrinsicConvolve3x3;
 import android.text.InputType;
 import android.util.Log;
 import android.util.TypedValue;
@@ -354,6 +355,44 @@ public class ImageFragment extends Fragment {
         // Set the adjusted bitmap to the ImageView for display
         cropImageView.setImageBitmap(adjustedBitmap);
     }
+
+    public void executeChangeSharpen(int value) {
+        // Ensure value is within a reasonable range
+        float intensity = value / 10f;
+
+        // Get the pixel array of the original bitmap
+        int[] pixels = new int[bitmapWidth * bitmapHeight];
+        originalBitmap.getPixels(pixels, 0, bitmapWidth, 0, 0, bitmapWidth, bitmapHeight);
+
+        // Apply the sharpening effect to each pixel
+        for (int i = 0; i < pixels.length; i++) {
+            int alpha = (pixels[i] >> 24) & 0xFF;
+            int red = (pixels[i] >> 16) & 0xFF;
+            int green = (pixels[i] >> 8) & 0xFF;
+            int blue = pixels[i] & 0xFF;
+
+            // Calculate new pixel values
+            int newRed = red + (int) (intensity * (red - 128));
+            int newGreen = green + (int) (intensity * (green - 128));
+            int newBlue = blue + (int) (intensity * (blue - 128));
+
+            // Clip values to ensure they are within the valid range
+            newRed = Math.min(255, Math.max(0, newRed));
+            newGreen = Math.min(255, Math.max(0, newGreen));
+            newBlue = Math.min(255, Math.max(0, newBlue));
+
+            // Combine RGB values into a single pixel
+            pixels[i] = (alpha << 24) | (newRed << 16) | (newGreen << 8) | newBlue;
+        }
+
+        // Create a new bitmap from the modified pixel array
+        adjustedBitmap = Bitmap.createBitmap(pixels, bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
+
+        // Set the adjusted bitmap to the ImageView for display
+        cropImageView.setImageBitmap(adjustedBitmap);
+    }
+
+
 
 
 
