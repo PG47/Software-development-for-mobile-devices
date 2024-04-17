@@ -51,6 +51,7 @@ import com.bumptech.glide.request.transition.Transition;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class ImagesFragment extends Fragment implements SelectOptions {
     ImageButton selectAll;
@@ -66,6 +67,13 @@ public class ImagesFragment extends Fragment implements SelectOptions {
     Boolean album = false;
     Boolean search = false;
     DatabaseHelper databaseHelper;
+//    private ArrayList<String> images = new ArrayList<>();
+//    private ImageAdapter adapter;
+//    private boolean isSelectionMode = false;
+//    private boolean active = false;
+//    private ImageButton selectAll;
+//    private ImageButton selectExit;
+//    private ImageButton exitAlbum;
     private static final int DETAILS_ACTIVITY_REQUEST_CODE = 1;
 
     private int sortOrder = 0;
@@ -139,6 +147,113 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             Toast.makeText(requireContext(), "Sort images from newest date", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(requireContext(), "Sort images from oldest date", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void showDateOptionDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Chọn thời gian");
+
+        String[] options = {"Chọn năm", "Toàn thời gian"};
+
+        builder.setItems(options, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int optionIndex) {
+                if (optionIndex == 0) {
+                    // Chọn năm
+                    showYearPickerDialog();
+                } else {
+                    // Toàn thời gian
+                    displayAllImages();
+                }
+            }
+        });
+
+        builder.show();
+    }
+
+    private void showYearPickerDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Chọn năm");
+
+        // Tính toán danh sách các năm từ năm 1970 đến năm hiện tại
+        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+        int numYears = currentYear - 1970 + 1;
+        String[] yearsArray = new String[numYears];
+        for (int i = 0; i < numYears; i++) {
+            yearsArray[i] = String.valueOf(currentYear - i);
+        }
+
+        builder.setItems(yearsArray, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int yearIndex) {
+                int selectedYear = Integer.parseInt(yearsArray[yearIndex]);
+                showMonthPickerDialog(selectedYear);
+            }
+        });
+
+        builder.show();
+    }
+
+    private void showMonthPickerDialog(final int selectedYear) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Chọn tháng");
+
+        String[] monthsArray = new String[]{"Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"};
+
+        builder.setItems(monthsArray, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int monthIndex) {
+                int selectedMonth = monthIndex + 1;
+                // Sau khi đã chọn năm và tháng, kiểm tra và hiển thị ảnh
+                checkAndDisplayImages(selectedYear, selectedMonth);
+            }
+        });
+
+        builder.show();
+    }
+    private void checkAndDisplayImages(int year, int month) {
+        // Tạo Calendar instance và đặt ngày đầu tiên của tháng đã chọn
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(year, month - 1, 1);
+
+        long startOfMonth = calendar.getTimeInMillis();
+        int lastDayOfMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+        calendar.set(Calendar.DAY_OF_MONTH, lastDayOfMonth);
+        long endOfMonth = calendar.getTimeInMillis();
+
+        // Kiểm tra và hiển thị ảnh trong khoảng thời gian đã chọn
+        ArrayList<String> imagesInRange = new ArrayList<>();
+        for (String imagePath : images) {
+            File imageFile = new File(imagePath);
+            if (imageFile.exists()) {
+                long lastModified = imageFile.lastModified();
+                if (lastModified >= startOfMonth && lastModified <= endOfMonth) {
+                    imagesInRange.add(imagePath);
+                }
+            }
+        }
+
+        if (imagesInRange.isEmpty()) {
+            Toast.makeText(requireContext(), "Không có ảnh trong tháng " + month + " năm " + year, Toast.LENGTH_SHORT).show();
+        } else {
+            updateImage(imagesInRange);
+        }
+    }
+
+    private void displayAllImages() {
+        // Hiển thị toàn bộ các ảnh trong ứng dụng
+        updateImage(images);
+    }
+
+    private void updateImage(ArrayList<String> updatedImages) {
+        // Cập nhật danh sách ảnh với danh sách mới
+        images.clear();
+        images.addAll(updatedImages);
+
+        // Cập nhật adapter
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
         }
     }
 
@@ -233,6 +348,15 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                     icon.clearColorFilter();
                     selectAll.setImageDrawable(icon);
                 }
+            }
+        });
+
+        // Thiết lập sự kiện khi click vào nút date_button
+        ImageButton dateButton = rootView.findViewById(R.id.date_button);
+        dateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDateOptionDialog();
             }
         });
 
