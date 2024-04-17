@@ -43,7 +43,7 @@
             tools:ignore="SpeakableTextPresentCheck" />
 
         <ImageButton
-            android:id="@+id/people_button"
+            android:id="@+id/login_google_button"
             android:layout_width="70dp"
             android:layout_height="70dp"
             android:layout_marginStart="4dp"
@@ -55,7 +55,7 @@
             app:layout_constraintStart_toEndOf="@+id/add_button"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0"
-            app:srcCompat="@mipmap/people_icon_foreground"
+            app:srcCompat="@drawable/ic_user_google_foreground"
             tools:ignore="SpeakableTextPresentCheck" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

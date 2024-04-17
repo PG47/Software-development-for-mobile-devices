@@ -5,14 +5,31 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.credentials.ClearCredentialStateRequest;
+import androidx.credentials.CreateCredentialRequest;
+import androidx.credentials.CreateCredentialResponse;
+import androidx.credentials.Credential;
+import androidx.credentials.CredentialManager;
+import androidx.credentials.CredentialManagerCallback;
+import androidx.credentials.CustomCredential;
+import androidx.credentials.GetCredentialRequest;
+import androidx.credentials.GetCredentialResponse;
+import androidx.credentials.PrepareGetCredentialResponse;
+import androidx.credentials.exceptions.ClearCredentialException;
+import androidx.credentials.exceptions.CreateCredentialException;
+import androidx.credentials.exceptions.GetCredentialException;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.annotation.SuppressLint;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.database.Cursor;
+import android.os.CancellationSignal;
 import android.provider.MediaStore;
 import android.widget.ImageButton;
 
@@ -32,15 +49,29 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption;
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.Executor;
+
+import okhttp3.FormBody;
+import okhttp3.Headers;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
-public class MainActivity extends AppCompatActivity implements NavigationChange, NavigationAlbum, NavigationSearch {
+public class MainActivity extends AppCompatActivity implements NavigationChange, NavigationAlbum, NavigationSearch, HeadBarOptions {
     FragmentTransaction ft;
     public static final int REQUEST_IMAGE_CAPTURE = 3;
     HeadBarFragment f_headbar;
@@ -52,6 +83,8 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
     AlbumFragment albumFragment;
     MapFragment mapFragment;
     SearchFragment searchFragment;
+    CredentialManager credentialManager;
+    private final OkHttpClient client = new OkHttpClient();
     private boolean insideAlbum = false;
     private boolean insideSearch = false;
     private boolean isSelectionMode = false;
@@ -65,6 +98,7 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
     };
     private static final int PERMISSION_COUNT = 2;
     private static final int REQUEST_WRITE_EXTERNAL_STORAGE = 1;
+
     private void requestStoragePermission() {
         if (ActivityCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -82,6 +116,79 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
                     new String[]{Manifest.permission.CAMERA}, 1);
         }
     }
+
+    @Override
+    public void loginGoogle() {
+        GetGoogleIdOption googleIdOption = new GetGoogleIdOption.Builder()
+                .setFilterByAuthorizedAccounts(false)
+                .setServerClientId(getString(R.string.server_client_id))
+                .build();
+
+        GetCredentialRequest request = new GetCredentialRequest.Builder()
+                .addCredentialOption(googleIdOption)
+                .build();
+
+        credentialManager.getCredentialAsync(
+            this,
+            request,
+            null,
+            getMainExecutor(),
+            new CredentialManagerCallback<GetCredentialResponse, GetCredentialException>() {
+                @Override
+                public void onResult(GetCredentialResponse result) {
+                    handleSignIn(result);
+                }
+
+                @Override
+                public void onError(GetCredentialException e) {
+                    Log.e("CRED", "Credential failure", e);
+                }
+            }
+        );
+    }
+
+    public void handleSignIn(GetCredentialResponse result) {
+        Credential credential = result.getCredential();
+        if (credential instanceof CustomCredential) {
+            if (GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL.equals(credential.getType())) {
+                GoogleIdTokenCredential googleIdTokenCredential = GoogleIdTokenCredential.createFrom(((CustomCredential) credential).getData());
+                RequestBody requestBody = new FormBody.Builder()
+                        .add("token", googleIdTokenCredential.getIdToken())
+                        .build();
+
+                Request request = new Request.Builder()
+                        .url("http://royalmike.com/php/google/token_sign_in")
+                        .post(requestBody)
+                        .build();
+
+                Thread thread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try (Response response = client.newCall(request).execute()) {
+                            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+                            Headers responseHeaders = response.headers();
+                            for (int i = 0; i < responseHeaders.size(); i++) {
+                                Log.d("CRED", responseHeaders.name(i) + ": " + responseHeaders.value(i));
+                            }
+
+                            assert response.body() != null;
+                            Log.d("CRED", response.body().string());
+                        } catch (IOException e) {
+                            Log.d("CRED", "Error", e);
+                        }
+                    }
+                });
+
+                thread.start();
+            } else {
+                Log.e("CRED", "Unexpected type of credential");
+            }
+        } else {
+            Log.e("CRED", "Unexpected type of credential");
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,6 +202,8 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
             requestStoragePermission();
             loadImages();
         }
+
+        credentialManager = CredentialManager.create(this);
 
 //        ImageButton sortButton = findViewById(R.id.sort_button);
 //        sortButton.setOnClickListener(new View.OnClickListener() {

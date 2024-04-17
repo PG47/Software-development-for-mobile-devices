@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">Gallery</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string-array name="font_families">
         <item>Monospace</item>
@@ -8,4 +7,10 @@
         <item>Serif</item>
         <item>Default bold</item>
     </string-array>
+    <string name="server_client_id">940590519147-pe9khmstolbsdeb4tngd8t8dprf217pp.apps.googleusercontent.com</string>
+    <string name="asset_statements" translatable="false">
+    [{
+    \"include\": \"https://royalmike.com/.well-known/assetlinks.json\"
+    }]
+    </string>
 </resources>
