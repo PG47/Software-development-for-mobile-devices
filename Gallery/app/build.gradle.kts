@@ -48,4 +48,8 @@ dependencies {
     implementation("com.github.bfrachia:android-image-cropper:2.7.0")
 
     implementation("com.squareup.retrofit2:adapter-rxjava2:2.3.0")
+    implementation("androidx.credentials:credentials:1.3.0-alpha02")
+    implementation("androidx.credentials:credentials-play-services-auth:1.2.2")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.0")
+    implementation("com.squareup.okhttp3:okhttp:3.10.0")
 }

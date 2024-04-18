@@ -84,6 +84,18 @@ public class ChangeFragment extends Fragment {
                 } else if (changeType == "Contrast") {
                     editActivity.changeContrast(i);
                     value.setText(String.valueOf(i));
+                } else if (changeType == "Blur") {
+                    editActivity.changeBlur(i);
+                    value.setText(String.valueOf(i));
+                } else if (changeType == "Sepia") {
+                    editActivity.changeSepia(i);
+                    value.setText(String.valueOf(i));
+                } else if (changeType == "Grayscale") {
+                    editActivity.changeGrayscale(i);
+                    value.setText(String.valueOf(i));
+                } else if (changeType == "Sharpen") {
+                    editActivity.changeSharpen(i);
+                    value.setText(String.valueOf(i));
                 }
             }
 

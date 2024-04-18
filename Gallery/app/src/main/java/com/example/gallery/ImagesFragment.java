@@ -51,6 +51,7 @@ import com.bumptech.glide.request.transition.Transition;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class ImagesFragment extends Fragment implements SelectOptions {
     ImageButton selectAll;
@@ -66,6 +67,13 @@ public class ImagesFragment extends Fragment implements SelectOptions {
     Boolean album = false;
     Boolean search = false;
     DatabaseHelper databaseHelper;
+//    private ArrayList<String> images = new ArrayList<>();
+//    private ImageAdapter adapter;
+//    private boolean isSelectionMode = false;
+//    private boolean active = false;
+//    private ImageButton selectAll;
+//    private ImageButton selectExit;
+//    private ImageButton exitAlbum;
     private static final int DETAILS_ACTIVITY_REQUEST_CODE = 1;
 
     private int sortOrder = 0;
@@ -142,6 +150,113 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         }
     }
 
+    private void showDateOptionDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Chọn thời gian");
+
+        String[] options = {"Chọn năm", "Toàn thời gian"};
+
+        builder.setItems(options, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int optionIndex) {
+                if (optionIndex == 0) {
+                    // Chọn năm
+                    showYearPickerDialog();
+                } else {
+                    // Toàn thời gian
+                    displayAllImages();
+                }
+            }
+        });
+
+        builder.show();
+    }
+
+    private void showYearPickerDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Chọn năm");
+
+        // Tính toán danh sách các năm từ năm 1970 đến năm hiện tại
+        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+        int numYears = currentYear - 1970 + 1;
+        String[] yearsArray = new String[numYears];
+        for (int i = 0; i < numYears; i++) {
+            yearsArray[i] = String.valueOf(currentYear - i);
+        }
+
+        builder.setItems(yearsArray, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int yearIndex) {
+                int selectedYear = Integer.parseInt(yearsArray[yearIndex]);
+                showMonthPickerDialog(selectedYear);
+            }
+        });
+
+        builder.show();
+    }
+
+    private void showMonthPickerDialog(final int selectedYear) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Chọn tháng");
+
+        String[] monthsArray = new String[]{"Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"};
+
+        builder.setItems(monthsArray, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int monthIndex) {
+                int selectedMonth = monthIndex + 1;
+                // Sau khi đã chọn năm và tháng, kiểm tra và hiển thị ảnh
+                checkAndDisplayImages(selectedYear, selectedMonth);
+            }
+        });
+
+        builder.show();
+    }
+    private void checkAndDisplayImages(int year, int month) {
+        // Tạo Calendar instance và đặt ngày đầu tiên của tháng đã chọn
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(year, month - 1, 1);
+
+        long startOfMonth = calendar.getTimeInMillis();
+        int lastDayOfMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+        calendar.set(Calendar.DAY_OF_MONTH, lastDayOfMonth);
+        long endOfMonth = calendar.getTimeInMillis();
+
+        // Kiểm tra và hiển thị ảnh trong khoảng thời gian đã chọn
+        ArrayList<String> imagesInRange = new ArrayList<>();
+        for (String imagePath : images) {
+            File imageFile = new File(imagePath);
+            if (imageFile.exists()) {
+                long lastModified = imageFile.lastModified();
+                if (lastModified >= startOfMonth && lastModified <= endOfMonth) {
+                    imagesInRange.add(imagePath);
+                }
+            }
+        }
+
+        if (imagesInRange.isEmpty()) {
+            Toast.makeText(requireContext(), "Không có ảnh trong tháng " + month + " năm " + year, Toast.LENGTH_SHORT).show();
+        } else {
+            updateImage(imagesInRange);
+        }
+    }
+
+    private void displayAllImages() {
+        // Hiển thị toàn bộ các ảnh trong ứng dụng
+        updateImage(images);
+    }
+
+    private void updateImage(ArrayList<String> updatedImages) {
+        // Cập nhật danh sách ảnh với danh sách mới
+        images.clear();
+        images.addAll(updatedImages);
+
+        // Cập nhật adapter
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_images, container, false);
@@ -151,43 +266,6 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
         gallery.setOnItemClickListener((parent, view, position, id) -> {
             if (!isSelectionMode) {
-                if (adapter.securedIndices.contains(position)) {
-                    final EditText input = new EditText(requireContext());
-                    AlertDialog.Builder builder = inputPasswordAlert(input,
-                            "Enter password to view image:");
-
-                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            String inputPass = String.valueOf(input.getText());
-                            int index = adapter.securedIndices.indexOf(position);
-                            String password = adapter.securedPasswords.get(index);
-
-                            if (!inputPass.equals(password)) {
-                                AlertDialog.Builder alert = new AlertDialog.Builder(requireContext());
-                                alert.setTitle("Error").setMessage("Incorrect password.");
-                                alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-
-                                    }
-                                });
-                                alert.show();
-                            }
-                            else {
-                                // Xử lý sự kiện khi click vào một item
-                                Intent intent = new Intent(requireContext(), DetailsActivity.class);
-                                intent.putExtra("SelectedImage", images.get(position));
-                                //startActivity(intent);
-                                startActivityForResult(intent, DETAILS_ACTIVITY_REQUEST_CODE);
-                            }
-                        }
-                    });
-
-                    builder.show();
-                    return;
-                }
-                
                 // Xử lý sự kiện khi click vào một item
                 Intent intent = new Intent(requireContext(), DetailsActivity.class);
                 intent.putExtra("SelectedImage", images.get(position));
@@ -233,6 +311,15 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                     icon.clearColorFilter();
                     selectAll.setImageDrawable(icon);
                 }
+            }
+        });
+
+        // Thiết lập sự kiện khi click vào nút date_button
+        ImageButton dateButton = rootView.findViewById(R.id.date_button);
+        dateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDateOptionDialog();
             }
         });
 
@@ -351,13 +438,13 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
         public ImageAdapter(Activity localContext) {
             context = localContext;
-            if (!album && !search) images = getAllShownImagesPath(context);
-
-            selectedPositions = new ArrayList<>();
             securedIndices = new ArrayList<>();
             securedPasswords = new ArrayList<>();
-
-            getAllSecuredIDs();
+            if (!album && !search) {
+                getAllSecuredIDs();
+                images = getAllShownImagesPath(context);
+            }
+            selectedPositions = new ArrayList<>();
         }
 
         public int getCount() {
@@ -379,6 +466,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         public View getView(final int position, View convertView, ViewGroup parent) {
             final ImageView imageView;
 
+
             if (convertView == null) {
                 imageView = (ImageView) LayoutInflater.from(parent.getContext()).inflate(R.layout.item_image, parent, false);
             } else {
@@ -397,13 +485,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                 imageView.setBackgroundResource(R.drawable.selected_chosen_image_background);
             }
 
-            if (securedIndices.contains(position)) {
-                imageView.setBackgroundResource(R.drawable.selected_image_background);
-                Glide.with(context).load(R.drawable.ic_lock_foreground).centerCrop().into(imageView);
-            }
-            else {
-                Glide.with(context).load(images.get(position)).centerCrop().into(imageView);
-            }
+            Glide.with(context).load(images.get(position)).centerCrop().into(imageView);
 
             Log.d("TEST", String.valueOf(securedIndices));
 
@@ -413,16 +495,17 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         public void getAllSecuredIDs() {
             securedIndices.clear();
             securedPasswords.clear();
+            ArrayList<String> l_images = getAllShownImagesPath(context);
 
             Cursor cursor = databaseHelper.getData();
 
             if (cursor != null && cursor.moveToFirst()) {
                 do {
                     int column_index_id = cursor.getColumnIndex("media_id");
-                    int column_index_password = cursor.getColumnIndex("password");
+                    //int column_index_password = cursor.getColumnIndex("password");
 
                     long media_id = cursor.getLong(column_index_id);
-                    String password = cursor.getString(column_index_password);
+                    //String password = cursor.getString(column_index_password);
 
                     String[] projection = {MediaStore.Images.Media.DATA};
 
@@ -439,9 +522,9 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
                     if (cursorToData.moveToFirst()) {
                         String path = cursorToData.getString(column_index_data);
-                        int index = images.indexOf(path);
+                        int index = l_images.indexOf(path);
                         securedIndices.add(index);
-                        securedPasswords.add(password);
+                        //securedPasswords.add(password);
                     }
 
                     cursorToData.close();
@@ -449,6 +532,8 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
                 cursor.close();
             }
+
+            Collections.sort(securedIndices);
         }
 
         public void toggleSelection(int position) {
@@ -501,9 +586,18 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             }
 
             cursor.close();
+            if(securedIndices != null) {
+                int de = 0;
+                for(int i: securedIndices) {
+                    listOfAllImages.remove(i- de);
+                    de++;
+                }
+            }
 
             return listOfAllImages;
         }
+
+
 
         private ArrayList<String> getAllAlbums() {
             ArrayList<String> albumNames = new ArrayList<>();
@@ -736,6 +830,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                 cursor.close();
             }
 
+            getAllSecuredIDs();
             images = getAllShownImagesPath(context);
             notifyDataSetChanged();
             ExitSelection();
@@ -866,43 +961,55 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         }
 
         public void secureSelections(String albumName, String password) {
-            String[] projection = {MediaStore.Images.Media._ID};
+            File albumDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), albumName);
+            if (albumDir.mkdirs()) {
+                databaseHelper.creat_secure_album(albumName,password);
+                String[] projection = {MediaStore.Images.Media._ID};
 
-            String selection = MediaStore.Images.Media.DATA + " = ?";
-            Uri queryUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-            ContentResolver contentResolver = requireActivity().getContentResolver();
+                String selection = MediaStore.Images.Media.DATA + " = ?";
+                Uri queryUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                ContentResolver contentResolver = requireActivity().getContentResolver();
 
-            for (int i = 0; i < selectedPositions.size(); i++) {
-                String[] selectionArgs = new String[] {images.get(selectedPositions.get(i))};
+                int album_id = databaseHelper.find_album_id(albumName);
 
-                Cursor cursor = contentResolver.query(queryUri, projection, selection, selectionArgs, null);
+                for (int i = 0; i < selectedPositions.size(); i++) {
+                    String[] selectionArgs = new String[] {images.get(selectedPositions.get(i))};
 
-                assert cursor != null;
-                int column_index_data = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
+                    Cursor cursor = contentResolver.query(queryUri, projection, selection, selectionArgs, null);
 
-                if (cursor.moveToFirst()) {
-                    long id = cursor.getLong(column_index_data);
+                    assert cursor != null;
+                    int column_index_data = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
 
-                    Cursor cursorID = databaseHelper.findID(id);
-                    if (cursorID != null && cursorID.moveToFirst()) {
-                        databaseHelper.updateData(id, password);
-                        cursorID.close();
+                    if (cursor.moveToFirst()) {
+                        long id = cursor.getLong(column_index_data);
+
+                        Cursor cursorID = databaseHelper.find_image_ID(id);
+                        if (cursorID != null && cursorID.moveToFirst()) {
+                            databaseHelper.updateData(id, album_id);
+                            cursorID.close();
+                        }
+
+                        else {
+                            databaseHelper.insertImage(id, album_id);
+                        }
                     }
 
-                    else {
-                        databaseHelper.insertData(id, password);
-                    }
+                    cursor.close();
                 }
 
-                cursor.close();
+                moveImagesToAlbum(albumName);
+                reloadImages();
+                notifyDataSetChanged();
+            } else {
+                // If directory creation fails, show an error toast
+                Toast.makeText(requireContext(), "Error in securing images!", Toast.LENGTH_SHORT).show();
             }
-
-            getAllSecuredIDs();
-            notifyDataSetChanged();
         }
+
 
         //Load lại ảnh khi cân thiết
         public void reloadImages() {
+            getAllSecuredIDs();
             images = getAllShownImagesPath(context);
             adapter.notifyDataSetChanged();
         }

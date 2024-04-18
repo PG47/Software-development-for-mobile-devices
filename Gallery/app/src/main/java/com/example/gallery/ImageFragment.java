@@ -11,6 +11,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Camera;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
@@ -27,6 +28,11 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicBlur;
+import android.renderscript.ScriptIntrinsicConvolve3x3;
 import android.text.InputType;
 import android.util.Log;
 import android.util.TypedValue;
@@ -243,6 +249,170 @@ public class ImageFragment extends Fragment {
         adjustedBitmap = Bitmap.createBitmap(pixels, bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
         cropImageView.setImageBitmap(adjustedBitmap);
     }
+
+    public void executeChangeBlur(int value) {
+        // Calculate blur radius based on the provided value
+        float blurRadius = value / 4.5F;
+
+        // Create an empty bitmap to store the blurred image
+        adjustedBitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
+
+        // Copy the original bitmap to the blurred bitmap
+        Canvas canvas = new Canvas(adjustedBitmap);
+        canvas.drawBitmap(originalBitmap, 0, 0, null);
+
+        // Apply blur effect to the blurred bitmap
+        adjustedBitmap = applyBlur(adjustedBitmap, blurRadius);
+
+        // Set the adjusted bitmap to the ImageView for display
+        cropImageView.setImageBitmap(adjustedBitmap);
+    }
+
+    private Bitmap applyBlur(Bitmap src, float blurRadius) {
+        if (blurRadius <= 0) {
+            return src;
+        }
+
+        // Create a new bitmap for the blurred image
+        Bitmap blurredBitmap = Bitmap.createBitmap(src.getWidth(), src.getHeight(), Bitmap.Config.ARGB_8888);
+
+        // Create a RenderScript context
+        RenderScript rs = RenderScript.create(context);
+
+        // Allocate memory for Renderscript to work with
+        Allocation input = Allocation.createFromBitmap(rs, src, Allocation.MipmapControl.MIPMAP_NONE, Allocation.USAGE_SCRIPT);
+        Allocation output = Allocation.createTyped(rs, input.getType());
+
+        // Create a blur script
+        ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
+        script.setRadius(blurRadius);
+
+        // Perform the blur operation
+        script.setInput(input);
+        script.forEach(output);
+
+        // Copy the blurred image from the Allocation to the blurred bitmap
+        output.copyTo(blurredBitmap);
+
+        // Destroy RenderScript resources
+        rs.destroy();
+
+        return blurredBitmap;
+    }
+
+    public void executeChangeSepia(int value) {
+        float intensity = value / 10f;
+
+        // Create an array to store the pixel values of the original bitmap
+        int[] pixels = new int[bitmapWidth * bitmapHeight];
+        originalBitmap.getPixels(pixels, 0, bitmapWidth, 0, 0, bitmapWidth, bitmapHeight);
+
+        // Loop through each pixel to apply sepia effect
+        for (int i = 0; i < pixels.length; i++) {
+            int alpha = (pixels[i] >> 24) & 0xFF;
+            int red = (pixels[i] >> 16) & 0xFF;
+            int green = (pixels[i] >> 8) & 0xFF;
+            int blue = pixels[i] & 0xFF;
+
+            int sepiaRed = (int) (0.393 * red + 0.769 * green + 0.189 * blue);
+            int sepiaGreen = (int) (0.349 * red + 0.686 * green + 0.168 * blue);
+            int sepiaBlue = (int) (0.272 * red + 0.534 * green + 0.131 * blue);
+
+            // Apply intensity to sepia values
+            sepiaRed = (int) (red + (sepiaRed - red) * intensity);
+            sepiaGreen = (int) (green + (sepiaGreen - green) * intensity);
+            sepiaBlue = (int) (blue + (sepiaBlue - blue) * intensity);
+
+            // Clip values to ensure they are within the valid range
+            sepiaRed = Math.min(255, Math.max(0, sepiaRed));
+            sepiaGreen = Math.min(255, Math.max(0, sepiaGreen));
+            sepiaBlue = Math.min(255, Math.max(0, sepiaBlue));
+
+            // Combine sepia values into a single pixel
+            pixels[i] = (alpha << 24) | (sepiaRed << 16) | (sepiaGreen << 8) | sepiaBlue;
+        }
+
+        // Create a new bitmap from the modified pixel array
+        adjustedBitmap = Bitmap.createBitmap(pixels, bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
+
+        // Set the adjusted bitmap to the ImageView for display
+        cropImageView.setImageBitmap(adjustedBitmap);
+    }
+    public void executeChangeGrayscale(int value) {
+        float intensity = value / 10f;
+
+        // Create an array to store the pixel values of the original bitmap
+        int[] pixels = new int[bitmapWidth * bitmapHeight];
+        originalBitmap.getPixels(pixels, 0, bitmapWidth, 0, 0, bitmapWidth, bitmapHeight);
+
+        // Loop through each pixel to apply grayscale effect
+        for (int i = 0; i < pixels.length; i++) {
+            int alpha = (pixels[i] >> 24) & 0xFF;
+            int red = (pixels[i] >> 16) & 0xFF;
+            int green = (pixels[i] >> 8) & 0xFF;
+            int blue = pixels[i] & 0xFF;
+
+            // Calculate grayscale value
+            int gray = (int) (0.299 * red + 0.587 * green + 0.114 * blue);
+
+            // Apply intensity to grayscale value
+            gray = (int) (gray + (gray - red) * intensity);
+
+            // Clip values to ensure they are within the valid range
+            gray = Math.min(255, Math.max(0, gray));
+
+            // Combine grayscale values into a single pixel
+            pixels[i] = (alpha << 24) | (gray << 16) | (gray << 8) | gray;
+        }
+
+        // Create a new bitmap from the modified pixel array
+        adjustedBitmap = Bitmap.createBitmap(pixels, bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
+
+        // Set the adjusted bitmap to the ImageView for display
+        cropImageView.setImageBitmap(adjustedBitmap);
+    }
+
+    public void executeChangeSharpen(int value) {
+        // Ensure value is within a reasonable range
+        float intensity = value / 10f;
+
+        // Get the pixel array of the original bitmap
+        int[] pixels = new int[bitmapWidth * bitmapHeight];
+        originalBitmap.getPixels(pixels, 0, bitmapWidth, 0, 0, bitmapWidth, bitmapHeight);
+
+        // Apply the sharpening effect to each pixel
+        for (int i = 0; i < pixels.length; i++) {
+            int alpha = (pixels[i] >> 24) & 0xFF;
+            int red = (pixels[i] >> 16) & 0xFF;
+            int green = (pixels[i] >> 8) & 0xFF;
+            int blue = pixels[i] & 0xFF;
+
+            // Calculate new pixel values
+            int newRed = red + (int) (intensity * (red - 128));
+            int newGreen = green + (int) (intensity * (green - 128));
+            int newBlue = blue + (int) (intensity * (blue - 128));
+
+            // Clip values to ensure they are within the valid range
+            newRed = Math.min(255, Math.max(0, newRed));
+            newGreen = Math.min(255, Math.max(0, newGreen));
+            newBlue = Math.min(255, Math.max(0, newBlue));
+
+            // Combine RGB values into a single pixel
+            pixels[i] = (alpha << 24) | (newRed << 16) | (newGreen << 8) | newBlue;
+        }
+
+        // Create a new bitmap from the modified pixel array
+        adjustedBitmap = Bitmap.createBitmap(pixels, bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
+
+        // Set the adjusted bitmap to the ImageView for display
+        cropImageView.setImageBitmap(adjustedBitmap);
+    }
+
+
+
+
+
+
     public void executeAddEditText() {
         editText = new EditText(context);
         ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(

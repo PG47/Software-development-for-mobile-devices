@@ -36,6 +36,7 @@ public class HeadBarFragment extends Fragment {
     ImageButton add;
     ImageButton people;
     Uri imageUri;
+    HeadBarOptions callback;
 
     public static HeadBarFragment newInstance(String strArg) {
         HeadBarFragment fragment = new HeadBarFragment();
@@ -48,6 +49,7 @@ public class HeadBarFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        callback = (HeadBarOptions) requireActivity();
         try {
             context = getActivity();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -71,13 +73,19 @@ public class HeadBarFragment extends Fragment {
             }
         }
 
-        // Find your views by their IDs
         ImageButton add = layoutImage.findViewById(R.id.add_button);
-        //ImageButton people = layoutImage.findViewById(R.id.getBackButton);
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 openCamera();
+            }
+        });
+
+        ImageButton login = layoutImage.findViewById(R.id.login_google_button);
+        login.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                callback.loginGoogle();
             }
         });
 
