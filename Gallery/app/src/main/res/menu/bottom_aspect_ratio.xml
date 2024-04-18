@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/op1"
+        android:title="1:1"
+        android:icon="@drawable/ic_aspect_foreground"/>
+    <item
+        android:id="@+id/op2"
+        android:title="3:2"
+        android:icon="@drawable/ic_aspect_foreground"/>
+    <item
+        android:id="@+id/op3"
+        android:title="4:3"
+        android:icon="@drawable/ic_aspect_foreground"/>
+    <item
+        android:id="@+id/op4"
+        android:title="5:4"
+        android:icon="@drawable/ic_aspect_foreground"/>
+    <item
+        android:id="@+id/op5"
+        android:title="16:9"
+        android:icon="@drawable/ic_aspect_foreground"/>
+</menu>

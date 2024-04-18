@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/contrast"
+        android:id="@+id/normal"
+        android:title="Normal"
         android:icon="@drawable/ic_cropmenu_foreground"/>
     <item
         android:id="@+id/fliphorizontally"
+        android:title="Horizontal Flip"
         android:icon="@drawable/ic_fliphorizontally_foreground"/>
     <item
         android:id="@+id/flipvertically"
+        android:title="Vertical Flip"
         android:icon="@drawable/ic_flipvertically_foreground"/>
 </menu>

@@ -54,6 +54,7 @@ public class EditActivity extends AppCompatActivity {
     public void cropTheImage() { fragmentImage.executeCropImage(); }
     public void startToZoom() {fragmentImage.executeZoom();}
     public void changeBrightness(int value) { fragmentImage.executeChangeBrightness(value); }
+    public void saveChangeBrightness() { fragmentImage.executeSaveChangeBrightness(); }
     public void changeContrast(int value) { fragmentImage.executeChangeContrast(value); }
     public void addEditText() { fragmentImage.executeAddEditText(); }
     public void updateEditText(String strFontFamily, String strFontSize, boolean isItalic, boolean isBold, int textColor) {
@@ -61,4 +62,15 @@ public class EditActivity extends AppCompatActivity {
     }
     public void addTextToImage() { fragmentImage.executeAddTextToImage(); }
     public void saveImage() { fragmentImage.executeSaveImage(); }
+    public void setCropOverlay() { fragmentImage.executeSetCropOverlay(); }
+    public void setUpNormal() { fragmentImage.executeSetUpNormal(); }
+    public void setUpHorizontalFlip() { fragmentImage.executeSetUpHorizontalFlip(); }
+    public void setUpVerticalFlip() { fragmentImage.executeSetUpVerticalFlip(); }
+    public void setRatio1() { fragmentImage.executeSetRatio1(); }
+    public void setRatio2() { fragmentImage.executeSetRatio2(); }
+    public void setRatio3() { fragmentImage.executeSetRatio3(); }
+    public void setRatio4() { fragmentImage.executeSetRatio4(); }
+    public void setRatio5() { fragmentImage.executeSetRatio5(); }
+    public void invisibleSave(String option) { fragmentSaveBack.executeInvisibleSave(option); }
+    public boolean checkChange() { return fragmentImage.executeCheckChange(); }
 }

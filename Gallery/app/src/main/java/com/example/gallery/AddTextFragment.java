@@ -32,9 +32,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class AddTextFragment extends Fragment {
     EditActivity editActivity;
-    FragmentTransaction transaction;
     Context context;
-    Button finishAddText;
     ViewGroup scrollViewGroup;
     ImageView selectedColor;
     Spinner spinner;
@@ -199,21 +197,6 @@ public class AddTextFragment extends Fragment {
             boxOfColor.setImageResource(colorInt[i]);
             scrollViewGroup.addView(singleFrame);
         }
-
-        finishAddText = (Button) textLayout.findViewById(R.id.actionDone);
-
-        finishAddText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                EditFragment editFragment = EditFragment.newInstance("Options");
-                transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.AllOptions, editFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
-                editActivity.addTextToImage();
-            }
-        });
-
 
         return textLayout;
     }

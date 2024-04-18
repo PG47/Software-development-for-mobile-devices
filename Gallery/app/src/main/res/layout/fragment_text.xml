@@ -14,7 +14,7 @@
             android:layout_height="wrap_content"
             android:text="Font family:"
             android:id="@+id/fontTextView"
-            android:textSize="10dp"/>
+            android:textSize="13dp"/>
 
         <Spinner
             android:layout_width="100dp"
@@ -30,7 +30,7 @@
             android:layout_height="wrap_content"
             android:text="Font size:"
             android:layout_marginLeft="5dp"
-            android:textSize="10dp"/>
+            android:textSize="13dp"/>
 
         <EditText
             android:layout_width="60dp"
@@ -64,15 +64,6 @@
             android:layout_marginLeft="5dp"
             android:padding="3dp"
             android:background="@drawable/border"/>
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:text="✔️"
-            android:padding="0dp"
-            android:id="@+id/actionDone"
-            android:layout_marginLeft="4dp" />
     </LinearLayout>
 
     <LinearLayout

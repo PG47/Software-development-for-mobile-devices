@@ -20,8 +20,7 @@ import androidx.fragment.app.FragmentTransaction;
 public class RotateFragment extends Fragment {
     EditActivity editActivity;
     Context context;
-    FragmentTransaction transaction;
-    Button finishRotate, rotate30deg, rotate45deg, rotate90deg, rotate180deg;
+    Button rotate30deg, rotate45deg, rotate60deg, rotate90deg, rotate180deg;
     SeekBar changeValue;
     TextView rotateAngle;
 
@@ -70,24 +69,13 @@ public class RotateFragment extends Fragment {
             }
         }
 
-        finishRotate = (Button) rotateOption.findViewById(R.id.actionDone);
         changeValue = (SeekBar) rotateOption.findViewById(R.id.testSeekBar);
         rotateAngle = (TextView) rotateOption.findViewById(R.id.rotateAngle);
         rotate30deg = (Button) rotateOption.findViewById(R.id.rotate30deg);
         rotate45deg = (Button) rotateOption.findViewById(R.id.rotate45deg);
+        rotate60deg = (Button) rotateOption.findViewById(R.id.rotate60deg);
         rotate90deg = (Button) rotateOption.findViewById(R.id.rotate90deg);
         rotate180deg = (Button) rotateOption.findViewById(R.id.rotate180deg);
-        finishRotate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                EditFragment editFragment = EditFragment.newInstance("Options");
-                transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.AllOptions, editFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
-                editActivity.cropTheImage();
-            }
-        });
         changeValue.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -119,6 +107,14 @@ public class RotateFragment extends Fragment {
                 rotateAngle.setText("45°");
                 editActivity.fastRotate(45);
                 changeValue.setProgress(180 + 45);
+            }
+        });
+        rotate60deg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                rotateAngle.setText("60°");
+                editActivity.fastRotate(60);
+                changeValue.setProgress(180 + 60);
             }
         });
         rotate90deg.setOnClickListener(new View.OnClickListener() {

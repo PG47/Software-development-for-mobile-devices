@@ -7,12 +7,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.bumptech.glide.Glide;
 
@@ -20,6 +23,9 @@ public class SaveBackFragment extends Fragment {
     EditActivity editActivity;
     Context context;
     ImageButton getBack, save;
+    TextView doneAction;
+    FragmentTransaction transaction;
+    String option;
 
     public static SaveBackFragment newInstance(String strArg) {
         SaveBackFragment fragment = new SaveBackFragment();
@@ -67,6 +73,7 @@ public class SaveBackFragment extends Fragment {
 
         getBack = (ImageButton) layoutSaveBack.findViewById(R.id.backToDetails);
         save = (ImageButton) layoutSaveBack.findViewById(R.id.saveImage);
+        doneAction = (TextView) layoutSaveBack.findViewById(R.id.actionDone);
 
         getBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -87,6 +94,39 @@ public class SaveBackFragment extends Fragment {
             }
         });
 
+        doneAction.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                EditFragment editFragment = EditFragment.newInstance("Options");
+                transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.AllOptions, editFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
+                if (option == "rotate") {
+                    editActivity.cropTheImage();
+                } else if (option == "text") {
+                    editActivity.addTextToImage();
+                } else if (option == "filter") {
+
+                } else if (option == "brightness") {
+                    editActivity.saveChangeBrightness();
+                } else if (option == "crop") {
+                    editActivity.cropTheImage();
+                }
+
+                if (editActivity.checkChange() == true) {
+                    save.setVisibility(View.VISIBLE);
+                }
+                doneAction.setVisibility(View.GONE);
+            }
+        });
+
         return layoutSaveBack;
+    }
+
+    public void executeInvisibleSave(String option) {
+        save.setVisibility(View.GONE);
+        doneAction.setVisibility(View.VISIBLE);
+        this.option = option;
     }
 }

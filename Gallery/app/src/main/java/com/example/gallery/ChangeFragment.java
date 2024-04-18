@@ -18,8 +18,6 @@ import androidx.fragment.app.FragmentTransaction;
 public class ChangeFragment extends Fragment {
     private EditActivity editActivity;
     private Context context;
-    private FragmentTransaction transaction;
-    private Button finishChange;
     private static String changeType;
     private TextView type;
     private TextView value;
@@ -73,7 +71,6 @@ public class ChangeFragment extends Fragment {
         type = changeOption.findViewById(R.id.changeType);
         value = changeOption.findViewById(R.id.value);
         scrollValue = changeOption.findViewById(R.id.seekbar);
-        finishChange = (Button) changeOption.findViewById(R.id.actionDone);
 
         type.setText(changeType);
         value.setText("0");
@@ -98,16 +95,6 @@ public class ChangeFragment extends Fragment {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
 
-            }
-        });
-        finishChange.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                EditFragment editFragment = EditFragment.newInstance("Options");
-                transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.AllOptions, editFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
             }
         });
 

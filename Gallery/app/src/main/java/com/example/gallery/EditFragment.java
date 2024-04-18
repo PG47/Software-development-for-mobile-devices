@@ -73,6 +73,8 @@ public class EditFragment extends Fragment {
                 transaction.replace(R.id.AllOptions, rotateFragment);
                 transaction.addToBackStack(null);
                 transaction.commit();
+                editActivity.setCropOverlay();
+                editActivity.invisibleSave("rotate");
                 return true;
             } else if (itemId == R.id.text) {
                 AddTextFragment addTextFragment = AddTextFragment.newInstance("Text");
@@ -80,6 +82,7 @@ public class EditFragment extends Fragment {
                 transaction.replace(R.id.AllOptions, addTextFragment);
                 transaction.addToBackStack(null);
                 transaction.commit();
+                editActivity.invisibleSave("text");
                 return true;
             } else if (itemId == R.id.filter) {
                 FilterFragment filterFragment = FilterFragment.newInstance("Filter");
@@ -87,6 +90,7 @@ public class EditFragment extends Fragment {
                 transaction.replace(R.id.AllOptions, filterFragment);
                 transaction.addToBackStack(null);
                 transaction.commit();
+                editActivity.invisibleSave("filter");
                 return true;
             } else if (itemId == R.id.brightness) {
                 ChangeFragment changeFragment = ChangeFragment.newInstance("Brightness");
@@ -94,6 +98,7 @@ public class EditFragment extends Fragment {
                 transaction.replace(R.id.AllOptions, changeFragment);
                 transaction.addToBackStack(null);
                 transaction.commit();
+                editActivity.invisibleSave("brightness");
                 return true;
             } else if (itemId == R.id.crop) {
                 CropMenuFragment cropMenuFragment = CropMenuFragment.newInstance("Crop");
@@ -101,6 +106,8 @@ public class EditFragment extends Fragment {
                 transaction.replace(R.id.AllOptions, cropMenuFragment);
                 transaction.addToBackStack(null);
                 transaction.commit();
+                editActivity.setCropOverlay();
+                editActivity.invisibleSave("crop");
                 return true;
             }
 

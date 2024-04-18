@@ -31,6 +31,20 @@
         android:contentDescription="TODO"
         android:id="@+id/saveImage"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="gone" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="80dp"
+        android:text="DONE"
+        android:layout_marginEnd="5dp"
+        android:textSize="30sp"
+        android:id="@+id/actionDone"
+        android:paddingVertical="20dp"
+        android:layout_marginTop="-10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="gone"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
