@@ -17,8 +17,7 @@
         app:itemTextAppearanceActiveBoldEnabled="true"
         app:itemTextAppearanceInactive="@color/white"
         app:itemActiveIndicatorStyle="@color/white"
-        app:menu="@menu/bottom_crop_menu"
-        android:layout_below="@id/actionDone">
+        app:menu="@menu/bottom_crop_menu">
 
     </com.google.android.material.bottomnavigation.BottomNavigationView>
 

@@ -31,6 +31,7 @@ public class DetailsActivity extends AppCompatActivity {
     LargeImageFragment fragmentImage;
     OptionFragment fragmentOption;
     Boolean optionsHidden;
+    Boolean showAdvancedOptions = false;
 
     private OnImageChangeListener onImageNewChangeListener;
 
@@ -113,8 +114,21 @@ public class DetailsActivity extends AppCompatActivity {
                 finish();
             }
         });
-
     }
-
-
+    public void replaceAdvancedOptionFragment() {
+        if (showAdvancedOptions == false) {
+            AdvancedOptionsFragment advancedOptionsFragment = AdvancedOptionsFragment.newInstance("AdvancedOptions");
+            ft = getSupportFragmentManager().beginTransaction();
+            ft.replace(R.id.toDoWith, advancedOptionsFragment);
+            ft.addToBackStack(null);
+            ft.commit();
+            showAdvancedOptions = true;
+        } else {
+            ft = getSupportFragmentManager().beginTransaction();
+            ft.replace(R.id.toDoWith, fragmentOption);
+            ft.addToBackStack(null);
+            ft.commit();
+            showAdvancedOptions = false;
+        }
+    }
 }

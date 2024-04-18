@@ -452,7 +452,7 @@ public class ImageFragment extends Fragment {
                         float newY = event.getRawY() + dY;
 
                         newX = Math.max(0, Math.min(newX, cropImageView.getWidth()));
-                        newY = Math.max(0, Math.min(newY, cropImageView.getHeight() + v.getHeight()));
+                        newY = Math.max(0, Math.min(newY, cropImageView.getHeight()));
 
                         float relativeX = newX / cropImageView.getWidth();
                         float relativeY = newY / cropImageView.getHeight();
@@ -465,7 +465,6 @@ public class ImageFragment extends Fragment {
                         break;
                     case MotionEvent.ACTION_UP:
                         v.requestFocus();
-                        Log.d("test", "value" + v.getHeight());
                         InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
                         imm.showSoftInput(v, InputMethodManager.SHOW_IMPLICIT);
                         break;

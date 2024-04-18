@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/option1"
+        android:title="Detect faces"
+        android:icon="@mipmap/ic_detect_face_foreground"/>
+    <item android:id="@+id/option2"
+        android:title="Detect text"
+        android:icon="@mipmap/ic_detect_text_foreground"/>
+    <item android:id="@+id/option3"
+        android:title="Similar photos"
+        android:icon="@mipmap/ic_similarity_foreground"/>
+    <item android:id="@+id/option4"
+        android:title="Change name"
+        android:icon="@mipmap/ic_change_name_foreground"/>
+    <item android:id="@+id/option5"
+        android:title="Security"
+        android:icon="@mipmap/ic_security_foreground"/>
+</menu>

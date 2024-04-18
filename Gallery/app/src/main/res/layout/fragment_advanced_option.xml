@@ -7,14 +7,17 @@
     android:background="#808080">
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/editToolbar"
+        android:id="@+id/advancedOptions"
         android:layout_width="match_parent"
         android:layout_height="75dp"
+        android:layout_gravity="center_vertical"
         app:itemIconSize="35dp"
         app:itemPaddingTop="0dp"
         app:labelVisibilityMode="labeled"
+        app:itemTextAppearanceActiveBoldEnabled="true"
+        app:itemTextAppearanceInactive="@color/white"
         app:itemActiveIndicatorStyle="@color/white"
-        app:menu="@menu/bottom_edit_menu">
+        app:menu="@menu/more_actions_on_image_menu">
 
     </com.google.android.material.bottomnavigation.BottomNavigationView>
 
