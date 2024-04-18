@@ -266,43 +266,6 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
         gallery.setOnItemClickListener((parent, view, position, id) -> {
             if (!isSelectionMode) {
-                if (adapter.securedIndices.contains(position)) {
-                    final EditText input = new EditText(requireContext());
-                    AlertDialog.Builder builder = inputPasswordAlert(input,
-                            "Enter password to view image:");
-
-                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            String inputPass = String.valueOf(input.getText());
-                            int index = adapter.securedIndices.indexOf(position);
-                            String password = adapter.securedPasswords.get(index);
-
-                            if (!inputPass.equals(password)) {
-                                AlertDialog.Builder alert = new AlertDialog.Builder(requireContext());
-                                alert.setTitle("Error").setMessage("Incorrect password.");
-                                alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-
-                                    }
-                                });
-                                alert.show();
-                            }
-                            else {
-                                // Xử lý sự kiện khi click vào một item
-                                Intent intent = new Intent(requireContext(), DetailsActivity.class);
-                                intent.putExtra("SelectedImage", images.get(position));
-                                //startActivity(intent);
-                                startActivityForResult(intent, DETAILS_ACTIVITY_REQUEST_CODE);
-                            }
-                        }
-                    });
-
-                    builder.show();
-                    return;
-                }
-
                 // Xử lý sự kiện khi click vào một item
                 Intent intent = new Intent(requireContext(), DetailsActivity.class);
                 intent.putExtra("SelectedImage", images.get(position));
