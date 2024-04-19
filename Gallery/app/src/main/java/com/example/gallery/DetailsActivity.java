@@ -34,6 +34,15 @@ import androidx.fragment.app.FragmentTransaction;
 import java.io.File;
 import java.util.ArrayList;
 
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfFloat;
+import org.opencv.core.MatOfInt;
+import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
+
 public class DetailsActivity extends AppCompatActivity {
     FragmentTransaction ft;
     HeadDetailsFragment headDetailsFragment;
@@ -150,17 +159,19 @@ public class DetailsActivity extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     public void findSimular_images() {
         ArrayList<String> images = getAllShownImagesPath(this);
-        ArrayList<String> result = null;
-        for (String img:images){
-            if(compare(img,img_path, 20)) {
+        ArrayList<String> result = new ArrayList<>(); // Initialize the result ArrayList
+
+        for (String img : images) {
+            if (compare(img, img_path, 90)) { // Assuming img_path is the path of the image to compare with
                 result.add(img);
             }
         }
 
         Intent intent = new Intent(this, SimularResult.class);
-        intent.putExtra("ResultImages", result);
+        intent.putStringArrayListExtra("ResultImages", result); // Use putStringArrayListExtra for ArrayList<String>
         startActivity(intent);
     }
+
     private ArrayList<String> getAllShownImagesPath(Activity activity) {
         Uri uri;
         Cursor cursor;
@@ -198,54 +209,49 @@ public class DetailsActivity extends AppCompatActivity {
 
     boolean compare(String img1, String img2, int threshold) {
         // Load images from file paths
-        Bitmap bitmap1 = BitmapFactory.decodeFile(img1);
-        Bitmap bitmap2 = BitmapFactory.decodeFile(img2);
+        Mat mat1 = Imgcodecs.imread(img1);
+        Mat mat2 = Imgcodecs.imread(img2);
 
-        // Check if bitmaps were loaded successfully
-        if (bitmap1 == null || bitmap2 == null) {
+        // Check if images were loaded successfully
+        if (mat1.empty() || mat2.empty()) {
             return false; // Images couldn't be loaded
         }
 
-        // Call the original method to compare the bitmaps
-        return areImagesSimilar(bitmap1, bitmap2, threshold);
-    }
+        // Convert images to grayscale
+        Mat grayMat1 = new Mat();
+        Mat grayMat2 = new Mat();
 
-    private boolean areImagesSimilar(Bitmap bitmap1, Bitmap bitmap2, int threshold) {
-        // Convert Bitmaps to OpenCV Mat objects
-        Mat mat1 = new Mat();
-        Mat mat2 = new Mat();
-        Utils.bitmapToMat(bitmap1, mat1);
-        Utils.bitmapToMat(bitmap2, mat2);
+        Imgproc.cvtColor(mat1, grayMat1, Imgproc.COLOR_BGR2GRAY);
+        Imgproc.cvtColor(mat2, grayMat2, Imgproc.COLOR_BGR2GRAY);
 
-        // Resize images for faster processing (optional)
-        Size size = new Size(400, 300);
-        Imgproc.resize(mat1, mat1, size);
-        Imgproc.resize(mat2, mat2, size);
+        // Resize images to a fixed size (if needed)
+        Mat resizedMat1 = new Mat();
+        Mat resizedMat2 = new Mat();
+        Imgproc.resize(grayMat1, resizedMat1, new Size(64, 64)); // Resize to match the size used in hashing
+        Imgproc.resize(grayMat2, resizedMat2, new Size(64, 64)); // Resize to match the size used in hashing
 
-        // Extract keypoints and descriptors using ORB
-        ORB orb = ORB.create();
-        MatOfKeyPoint keypoints1 = new MatOfKeyPoint();
-        MatOfKeyPoint keypoints2 = new MatOfKeyPoint();
-        Mat descriptors1 = new Mat();
-        Mat descriptors2 = new Mat();
-        orb.detectAndCompute(mat1, new Mat(), keypoints1, descriptors1);
-        orb.detectAndCompute(mat2, new Mat(), keypoints2, descriptors2);
+        // Compute histograms
+        MatOfFloat ranges = new MatOfFloat(0, 256);
+        MatOfInt histSize = new MatOfInt(256);
+        MatOfInt channels = new MatOfInt(0);
+        Mat hist1 = new Mat();
+        Mat hist2 = new Mat();
+        ArrayList<Mat> images1 = new ArrayList<>();
+        ArrayList<Mat> images2 = new ArrayList<>();
+        images1.add(grayMat1);
+        images2.add(grayMat2);
+        Imgproc.calcHist(images1, channels, new Mat(), hist1, histSize, ranges);
+        Imgproc.calcHist(images2, channels, new Mat(), hist2, histSize, ranges);
 
-        // Match descriptors using a DescriptorMatcher (here we use BruteForce)
-        DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
-        MatOfDMatch matches = new MatOfDMatch();
-        matcher.match(descriptors1, descriptors2, matches);
+        // Normalize histograms
+        Core.normalize(hist1, hist1, 0, 1, Core.NORM_MINMAX, -1, new Mat());
+        Core.normalize(hist2, hist2, 0, 1, Core.NORM_MINMAX, -1, new Mat());
 
-        // Count the number of good matches based on a threshold
-        int goodMatches = 0;
-        for (DMatch match : matches.toList()) {
-            if (match.distance <= threshold) {
-                goodMatches++;
-            }
-        }
+        // Compute histogram intersection similarity
+        double similarity = Imgproc.compareHist(hist1, hist2, Imgproc.HISTCMP_INTERSECT);
 
-        // Decide similarity based on the number of good matches
-        return goodMatches >= threshold;
+        // Check if similarity meets the threshold
+        return similarity >= threshold;
     }
 
 }

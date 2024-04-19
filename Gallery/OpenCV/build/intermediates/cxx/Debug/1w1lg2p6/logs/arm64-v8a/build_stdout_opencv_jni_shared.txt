@@ -1,0 +1,2 @@
+ninja: Entering directory `C:\Users\ASUS\Documents\mobile app dev\Software-development-for-mobile-devices\Gallery\OpenCV\.cxx\Debug\1w1lg2p6\arm64-v8a'
+ninja: no work to do.

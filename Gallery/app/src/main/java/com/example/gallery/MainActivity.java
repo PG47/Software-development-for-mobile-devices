@@ -60,6 +60,8 @@ import com.google.android.libraries.identity.googleid.GetGoogleIdOption;
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import org.opencv.android.OpenCVLoader;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -192,6 +194,10 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if(OpenCVLoader.initDebug()) {
+
+        }
 
         if (checkPermission()) {
             // do later
