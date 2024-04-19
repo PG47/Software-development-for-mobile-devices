@@ -59,7 +59,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
     ImageButton selectExit;
     ImageButton exitAlbum;
     private ArrayList<String> images;
-    private boolean isSelectionMode;
+    public boolean isSelectionMode;
     NavigationChange callback;
     NavigationAlbum closeAlbum;
     NavigationSearch closeSearch;
