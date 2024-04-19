@@ -39,6 +39,7 @@ import java.util.ArrayList;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
     private ArrayList<String> images;
+    private ArrayList<String> imagesName;
 
     public MapFragment() {
         // Required empty public constructor
@@ -48,6 +49,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         images = new ArrayList<>();
+        imagesName = new ArrayList<>();
         getAllImages();
     }
 
@@ -69,7 +71,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
-        for (String path : images) {
+        for (int i = 0; i < images.size(); i++) {
+            String path = images.get(i), name = imagesName.get(i);
+            name = name.substring(0, Math.min(name.length(), 10)) + "...";
+
             ExifInterface exif = null;
             try {
                 exif = new ExifInterface(path);
@@ -82,6 +87,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             boolean hasLatLong = exif.getLatLong(latLong);
 
             if (hasLatLong) {
+                String finalName = name;
                 Glide.with(requireContext())
                         .asBitmap()
                         .load(path)
@@ -90,7 +96,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                             public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                                 Bitmap smallMarker = Bitmap.createScaledBitmap(resource, 150, 150, false);
                                 LatLng latLng = new LatLng(latLong[0], latLong[1]);
-                                googleMap.addMarker(new MarkerOptions().position(latLng).title("Marker in Vietnam")
+                                googleMap.addMarker(new MarkerOptions().position(latLng).title(finalName)
                                         .icon(BitmapDescriptorFactory.fromBitmap(smallMarker)));
                                 googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
                             }
@@ -105,20 +111,23 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private void getAllImages() {
         Uri uri;
         Cursor cursor;
-        int column_index_data;
+        int column_index_data, column_index_name;
         uri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 
-        String[] projection = {MediaStore.MediaColumns.DATA };
+        String[] projection = {MediaStore.MediaColumns.DATA, MediaStore.MediaColumns.DISPLAY_NAME };
 
         cursor = requireActivity().getContentResolver().query(uri, projection, null,
                 null, null);
 
         assert cursor != null;
         column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+        column_index_name = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME);
 
         while (cursor.moveToNext()) {
             String absolutePathOfImage = cursor.getString(column_index_data);
             images.add(absolutePathOfImage);
+            String nameOfImage = cursor.getString(column_index_name);
+            imagesName.add(nameOfImage);
         }
 
         cursor.close();
