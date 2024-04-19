@@ -145,6 +145,7 @@ public class DetailsActivity extends AppCompatActivity {
 
     public void showCropOverlay() { fragmentImage.executeShowCropOverlay(); }
     public String extractText() { return fragmentImage.executeExtractText(); }
+    public void FacesDetection() { fragmentImage.executeFacesDetection(); }
 
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     public void findSimular_images() {

@@ -35,12 +35,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL(SQL_CREATE_SECURE_ALBUM);
+        db.execSQL(SQL_CREATE_SECURE_IMAGES);
+
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(SQL_CREATE_SECURE_ALBUM);
-        db.execSQL(SQL_CREATE_SECURE_IMAGES);
+
     }
 
     @Override

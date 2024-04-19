@@ -8,9 +8,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
+
+import java.util.Objects;
 
 public class SupportAdvancedOptionsFragment extends Fragment {
     DetailsActivity detailsActivity;
@@ -19,6 +22,7 @@ public class SupportAdvancedOptionsFragment extends Fragment {
     TextView textFromImage;
     Button actionDone;
     String text;
+    ScrollView textScroll;
 
     public static SupportAdvancedOptionsFragment newInstance(String strArg) {
         SupportAdvancedOptionsFragment fragment = new SupportAdvancedOptionsFragment();
@@ -67,15 +71,26 @@ public class SupportAdvancedOptionsFragment extends Fragment {
 
         textFromImage = (TextView) layoutSupport.findViewById(R.id.textFromImage);
         actionDone = (Button) layoutSupport.findViewById(R.id.getImageDone);
+        textScroll = (ScrollView) layoutSupport.findViewById(R.id.textScroll);
 
         actionDone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 text = detailsActivity.extractText();
                 textFromImage.setText(text);
+                textScroll.setVisibility(View.VISIBLE);
+                textFromImage.setVisibility(View.VISIBLE);
                 view.setVisibility(View.GONE);
             }
         });
+
+        if (Objects.equals(option, "Faces Detection")) {
+            textScroll.setVisibility(View.GONE);
+            actionDone.setVisibility(View.GONE);
+            textFromImage.setVisibility(View.GONE);
+        } else if (Objects.equals(option, "Text Extraction")) {
+            actionDone.setVisibility(View.VISIBLE);
+        }
 
         return layoutSupport;
     }
