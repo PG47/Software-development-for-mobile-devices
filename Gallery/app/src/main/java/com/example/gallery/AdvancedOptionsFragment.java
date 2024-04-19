@@ -68,39 +68,24 @@ public class AdvancedOptionsFragment extends Fragment {
             int itemId = item.getItemId();
 
             if (itemId == R.id.option1) {
-                RotateFragment rotateFragment = RotateFragment.newInstance("Rotate");
-                transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.AllOptions, rotateFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
+
                 return true;
             } else if (itemId == R.id.option2) {
-                AddTextFragment addTextFragment = AddTextFragment.newInstance("Text");
+                SupportAdvancedOptionsFragment supportAdvancedOptionsFragment = SupportAdvancedOptionsFragment.newInstance("Text Extraction");
                 transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.AllOptions, addTextFragment);
+                transaction.replace(R.id.toDoWith, supportAdvancedOptionsFragment);
                 transaction.addToBackStack(null);
                 transaction.commit();
+                detailsActivity.showCropOverlay();
                 return true;
             } else if (itemId == R.id.option3) {
-                FilterFragment filterFragment = FilterFragment.newInstance("Filter");
-                transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.AllOptions, filterFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
+
                 return true;
             } else if (itemId == R.id.option4) {
-                ChangeFragment changeFragment = ChangeFragment.newInstance("Brightness");
-                transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.AllOptions, changeFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
+
                 return true;
             } else if (itemId == R.id.option5) {
-                CropMenuFragment cropMenuFragment = CropMenuFragment.newInstance("Crop");
-                transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.AllOptions, cropMenuFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
+
                 return true;
             }
 

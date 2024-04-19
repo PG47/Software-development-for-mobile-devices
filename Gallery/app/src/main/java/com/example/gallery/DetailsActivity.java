@@ -131,4 +131,7 @@ public class DetailsActivity extends AppCompatActivity {
             showAdvancedOptions = false;
         }
     }
+
+    public void showCropOverlay() { fragmentImage.executeShowCropOverlay(); }
+    public String extractText() { return fragmentImage.executeExtractText(); }
 }
