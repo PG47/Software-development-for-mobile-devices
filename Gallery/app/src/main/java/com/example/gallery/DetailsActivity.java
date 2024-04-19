@@ -134,4 +134,5 @@ public class DetailsActivity extends AppCompatActivity {
 
     public void showCropOverlay() { fragmentImage.executeShowCropOverlay(); }
     public String extractText() { return fragmentImage.executeExtractText(); }
+    public void FacesDetection() { fragmentImage.executeFacesDetection(); }
 }

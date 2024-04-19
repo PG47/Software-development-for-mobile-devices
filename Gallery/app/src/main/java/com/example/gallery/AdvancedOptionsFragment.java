@@ -68,7 +68,12 @@ public class AdvancedOptionsFragment extends Fragment {
             int itemId = item.getItemId();
 
             if (itemId == R.id.option1) {
-
+                SupportAdvancedOptionsFragment supportAdvancedOptionsFragment = SupportAdvancedOptionsFragment.newInstance("Faces Detection");
+                transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.toDoWith, supportAdvancedOptionsFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
+                detailsActivity.FacesDetection();
                 return true;
             } else if (itemId == R.id.option2) {
                 SupportAdvancedOptionsFragment supportAdvancedOptionsFragment = SupportAdvancedOptionsFragment.newInstance("Text Extraction");
