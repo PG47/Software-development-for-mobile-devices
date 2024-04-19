@@ -79,7 +79,7 @@ public class AdvancedOptionsFragment extends Fragment {
                 detailsActivity.showCropOverlay();
                 return true;
             } else if (itemId == R.id.option3) {
-
+                detailsActivity.findSimular_images();
                 return true;
             } else if (itemId == R.id.option4) {
 

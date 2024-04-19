@@ -269,7 +269,6 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                 // Xử lý sự kiện khi click vào một item
                 Intent intent = new Intent(requireContext(), DetailsActivity.class);
                 intent.putExtra("SelectedImage", images.get(position));
-                //startActivity(intent);
                 startActivityForResult(intent, DETAILS_ACTIVITY_REQUEST_CODE);
             } else {
                 if (adapter.securedIndices.contains(position)) return;
@@ -402,6 +401,12 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                 // Handle the result here, such as reloading images
                 adapter.reloadImages();
             }
+        }
+        if (requestCode == DETAILS_ACTIVITY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            // Handle the data received from DetailsActivity
+            // For example:
+            ArrayList<String> images = data.getStringArrayListExtra("Images");
+            // Now you have the images data from DetailsActivity, you can use it as needed
         }
     }
 
@@ -564,7 +569,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             notifyDataSetChanged();
         }
 
-        private ArrayList<String> getAllShownImagesPath(Activity activity) {
+        public ArrayList<String> getAllShownImagesPath(Activity activity) {
             Uri uri;
             Cursor cursor;
             int column_index_data;
