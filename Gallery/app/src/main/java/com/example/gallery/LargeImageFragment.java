@@ -4,6 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,11 +19,14 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 
+import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.vision.Frame;
+import com.google.android.gms.vision.face.Face;
+import com.google.android.gms.vision.face.FaceDetector;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 import com.theartofdev.edmodo.cropper.CropImageView;
@@ -99,5 +105,40 @@ public class LargeImageFragment extends Fragment {
         }
 
         return extractedText.toString();
+    }
+    public void executeFacesDetection() {
+        FaceDetector faceDetector = new FaceDetector.Builder(context)
+                .setTrackingEnabled(false)
+                .build();
+
+        if (!faceDetector.isOperational()) {
+            Log.d("Error:", "Get errors when setting up");
+            return;
+        }
+
+        Frame frame = new Frame.Builder().setBitmap(originalBitmap).build();
+        SparseArray<Face> faces = faceDetector.detect(frame);
+        tempBitmap = drawRectanglesOnBitmap(faces);
+        cropImageView.setImageBitmap(tempBitmap);
+    }
+    public Bitmap drawRectanglesOnBitmap(@NonNull SparseArray<Face> faces) {
+        Bitmap bitmapCopy = originalBitmap.copy(Bitmap.Config.ARGB_8888, true);
+
+        Canvas canvas = new Canvas(bitmapCopy);
+        Paint paint = new Paint();
+        paint.setColor(Color.RED);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(15);
+
+        for (int i = 0; i < faces.size(); i++) {
+            Face face = faces.valueAt(i);
+            float x = face.getPosition().x;
+            float y = face.getPosition().y;
+            float width = face.getWidth();
+            float height = face.getHeight();
+            canvas.drawRect(x, y, x + width, y + height, paint);
+        }
+
+        return bitmapCopy;
     }
 }

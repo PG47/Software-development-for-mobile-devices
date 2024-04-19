@@ -2,12 +2,15 @@ package com.example.gallery;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
@@ -24,6 +27,9 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentTransaction;
+
+import java.io.File;
+import java.util.ArrayList;
 
 public class DetailsActivity extends AppCompatActivity {
     FragmentTransaction ft;
@@ -134,4 +140,59 @@ public class DetailsActivity extends AppCompatActivity {
 
     public void showCropOverlay() { fragmentImage.executeShowCropOverlay(); }
     public String extractText() { return fragmentImage.executeExtractText(); }
+    public void FacesDetection() { fragmentImage.executeFacesDetection(); }
+
+    public void findSimular_images() {
+        ArrayList<String> images = getAllShownImagesPath(this);
+        // Assuming you have the required data in 'images' ArrayList
+        // Now, you can send this data back to ImagesFragment
+        Intent resultIntent = new Intent();
+        resultIntent.putStringArrayListExtra("Images", images);
+        setResult(Activity.RESULT_OK, resultIntent);
+        // Finish DetailsActivity, but keep it hidden
+        moveTaskToBack(true); // Hide the activity without finishing
+    }
+
+    @Override
+    public void onBackPressed() {
+        moveTaskToBack(true); // Hide the activity without finishing when back button is pressed
+    }
+
+
+    private ArrayList<String> getAllShownImagesPath(Activity activity) {
+        Uri uri;
+        Cursor cursor;
+        int column_index_data;
+        DatabaseHelper databaseHelper = new DatabaseHelper(activity);
+        ArrayList<String> secureAlbums = databaseHelper.getAllAlbums();
+        ArrayList<String> listOfAllImages = new ArrayList<>();
+        uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+
+        String[] projection = {MediaStore.MediaColumns.DATA,
+                MediaStore.Images.Media.DATE_TAKEN};
+
+        cursor = activity.getContentResolver().query(uri, projection, null,
+                null, MediaStore.Images.Media.DATE_TAKEN + " DESC");
+
+        if (cursor != null) {
+            column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+
+            while (cursor.moveToNext()) {
+                String absolutePathOfImage = cursor.getString(column_index_data);
+                // Extract the folder name from the absolute path
+                String folderName = new File(absolutePathOfImage).getParentFile().getName();
+                // Check if the folder name is not in any of the secure albums
+                if (!secureAlbums.contains(folderName)) {
+                    listOfAllImages.add(absolutePathOfImage);
+                }
+
+            }
+
+            cursor.close();
+        }
+
+        return listOfAllImages;
+    }
+
+
 }
