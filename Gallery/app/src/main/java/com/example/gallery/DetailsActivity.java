@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,6 +24,7 @@ import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
@@ -35,6 +38,7 @@ public class DetailsActivity extends AppCompatActivity {
     FragmentTransaction ft;
     HeadDetailsFragment headDetailsFragment;
     LargeImageFragment fragmentImage;
+    String img_path;
     OptionFragment fragmentOption;
     Boolean optionsHidden;
     Boolean showAdvancedOptions = false;
@@ -60,9 +64,10 @@ public class DetailsActivity extends AppCompatActivity {
         fragmentOption = OptionFragment.newInstance("option");
 
         Intent intent = getIntent();
-        String selectedImage = intent.getStringExtra("SelectedImage");
+        img_path = intent.getStringExtra("SelectedImage");
         Bundle bundle = new Bundle();
-        bundle.putString("selectedImage", selectedImage);
+        bundle.putString("selectedImage", img_path);
+
 
         headDetailsFragment.setArguments(bundle);
         fragmentImage.setArguments(bundle);
@@ -141,23 +146,20 @@ public class DetailsActivity extends AppCompatActivity {
     public void showCropOverlay() { fragmentImage.executeShowCropOverlay(); }
     public String extractText() { return fragmentImage.executeExtractText(); }
 
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     public void findSimular_images() {
         ArrayList<String> images = getAllShownImagesPath(this);
-        // Assuming you have the required data in 'images' ArrayList
-        // Now, you can send this data back to ImagesFragment
-        Intent resultIntent = new Intent();
-        resultIntent.putStringArrayListExtra("Images", images);
-        setResult(Activity.RESULT_OK, resultIntent);
-        // Finish DetailsActivity, but keep it hidden
-        moveTaskToBack(true); // Hide the activity without finishing
+        ArrayList<String> result = null;
+        for (String img:images){
+            if(compare(img,img_path, 20)) {
+                result.add(img);
+            }
+        }
+
+        Intent intent = new Intent(this, SimularResult.class);
+        intent.putExtra("ResultImages", result);
+        startActivity(intent);
     }
-
-    @Override
-    public void onBackPressed() {
-        moveTaskToBack(true); // Hide the activity without finishing when back button is pressed
-    }
-
-
     private ArrayList<String> getAllShownImagesPath(Activity activity) {
         Uri uri;
         Cursor cursor;
@@ -181,7 +183,7 @@ public class DetailsActivity extends AppCompatActivity {
                 // Extract the folder name from the absolute path
                 String folderName = new File(absolutePathOfImage).getParentFile().getName();
                 // Check if the folder name is not in any of the secure albums
-                if (!secureAlbums.contains(folderName)) {
+                if (!secureAlbums.contains(folderName) && !absolutePathOfImage.equals(img_path)) {
                     listOfAllImages.add(absolutePathOfImage);
                 }
 
@@ -193,5 +195,56 @@ public class DetailsActivity extends AppCompatActivity {
         return listOfAllImages;
     }
 
+    boolean compare(String img1, String img2, int threshold) {
+        // Load images from file paths
+        Bitmap bitmap1 = BitmapFactory.decodeFile(img1);
+        Bitmap bitmap2 = BitmapFactory.decodeFile(img2);
+
+        // Check if bitmaps were loaded successfully
+        if (bitmap1 == null || bitmap2 == null) {
+            return false; // Images couldn't be loaded
+        }
+
+        // Call the original method to compare the bitmaps
+        return areImagesSimilar(bitmap1, bitmap2, threshold);
+    }
+
+    private boolean areImagesSimilar(Bitmap bitmap1, Bitmap bitmap2, int threshold) {
+        // Convert Bitmaps to OpenCV Mat objects
+        Mat mat1 = new Mat();
+        Mat mat2 = new Mat();
+        Utils.bitmapToMat(bitmap1, mat1);
+        Utils.bitmapToMat(bitmap2, mat2);
+
+        // Resize images for faster processing (optional)
+        Size size = new Size(400, 300);
+        Imgproc.resize(mat1, mat1, size);
+        Imgproc.resize(mat2, mat2, size);
+
+        // Extract keypoints and descriptors using ORB
+        ORB orb = ORB.create();
+        MatOfKeyPoint keypoints1 = new MatOfKeyPoint();
+        MatOfKeyPoint keypoints2 = new MatOfKeyPoint();
+        Mat descriptors1 = new Mat();
+        Mat descriptors2 = new Mat();
+        orb.detectAndCompute(mat1, new Mat(), keypoints1, descriptors1);
+        orb.detectAndCompute(mat2, new Mat(), keypoints2, descriptors2);
+
+        // Match descriptors using a DescriptorMatcher (here we use BruteForce)
+        DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
+        MatOfDMatch matches = new MatOfDMatch();
+        matcher.match(descriptors1, descriptors2, matches);
+
+        // Count the number of good matches based on a threshold
+        int goodMatches = 0;
+        for (DMatch match : matches.toList()) {
+            if (match.distance <= threshold) {
+                goodMatches++;
+            }
+        }
+
+        // Decide similarity based on the number of good matches
+        return goodMatches >= threshold;
+    }
 
 }
