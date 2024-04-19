@@ -49,6 +49,13 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.Scope;
+import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption;
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -84,6 +91,7 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
     MapFragment mapFragment;
     SearchFragment searchFragment;
     CredentialManager credentialManager;
+    GoogleSignInClient mGoogleSignInClient;
     private final OkHttpClient client = new OkHttpClient();
     private boolean insideAlbum = false;
     private boolean insideSearch = false;
@@ -119,73 +127,64 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
 
     @Override
     public void loginGoogle() {
-        GetGoogleIdOption googleIdOption = new GetGoogleIdOption.Builder()
-                .setFilterByAuthorizedAccounts(false)
-                .setServerClientId(getString(R.string.server_client_id))
-                .build();
-
-        GetCredentialRequest request = new GetCredentialRequest.Builder()
-                .addCredentialOption(googleIdOption)
-                .build();
-
-        credentialManager.getCredentialAsync(
-            this,
-            request,
-            null,
-            getMainExecutor(),
-            new CredentialManagerCallback<GetCredentialResponse, GetCredentialException>() {
-                @Override
-                public void onResult(GetCredentialResponse result) {
-                    handleSignIn(result);
-                }
-
-                @Override
-                public void onError(GetCredentialException e) {
-                    Log.e("CRED", "Credential failure", e);
-                }
-            }
-        );
+        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+        startActivityForResult(signInIntent, 123);
     }
 
-    public void handleSignIn(GetCredentialResponse result) {
-        Credential credential = result.getCredential();
-        if (credential instanceof CustomCredential) {
-            if (GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL.equals(credential.getType())) {
-                GoogleIdTokenCredential googleIdTokenCredential = GoogleIdTokenCredential.createFrom(((CustomCredential) credential).getData());
-                RequestBody requestBody = new FormBody.Builder()
-                        .add("token", googleIdTokenCredential.getIdToken())
-                        .build();
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
-                Request request = new Request.Builder()
-                        .url("http://royalmike.com/php/google/token_sign_in")
-                        .post(requestBody)
-                        .build();
+        // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
+        if (requestCode == 123) {
+            // The Task returned from this call is always completed, no need to attach
+            // a listener.
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            handleSignInResult(task);
+        }
+    }
 
-                Thread thread = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try (Response response = client.newCall(request).execute()) {
-                            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+    private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
+        try {
+            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
+            String idToken = account.getIdToken();
+            String authCode = account.getServerAuthCode();
 
-                            Headers responseHeaders = response.headers();
-                            for (int i = 0; i < responseHeaders.size(); i++) {
-                                Log.d("CRED", responseHeaders.name(i) + ": " + responseHeaders.value(i));
-                            }
+            assert idToken != null;
+            assert authCode != null;
 
-                            assert response.body() != null;
-                            Log.d("CRED", response.body().string());
-                        } catch (IOException e) {
-                            Log.d("CRED", "Error", e);
+            RequestBody requestBody = new FormBody.Builder()
+                    .add("token", idToken)
+                    .add("auth", authCode)
+                    .build();
+
+            Request request = new Request.Builder()
+                    .url("http://royalmike.com/php/google/token_sign_in")
+                    .post(requestBody)
+                    .build();
+
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try (Response response = client.newCall(request).execute()) {
+                        if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+                        Headers responseHeaders = response.headers();
+                        for (int i = 0; i < responseHeaders.size(); i++) {
+                            Log.d("CRED", responseHeaders.name(i) + ": " + responseHeaders.value(i));
                         }
-                    }
-                });
 
-                thread.start();
-            } else {
-                Log.e("CRED", "Unexpected type of credential");
-            }
-        } else {
-            Log.e("CRED", "Unexpected type of credential");
+                        assert response.body() != null;
+                        Log.d("CRED", response.body().string());
+                    } catch (IOException e) {
+                        Log.d("CRED", "Error", e);
+                    }
+                }
+            });
+
+            thread.start();
+        } catch (ApiException e) {
+            Log.e("CRED", "Google sign in error", e);
         }
     }
 
@@ -203,7 +202,13 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
             loadImages();
         }
 
-        credentialManager = CredentialManager.create(this);
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestScopes(new Scope("https://www.googleapis.com/auth/photoslibrary"))
+                .requestServerAuthCode(getString(R.string.server_client_id))
+                .requestIdToken(getString(R.string.server_client_id))
+                .requestEmail()
+                .build();
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
 //        ImageButton sortButton = findViewById(R.id.sort_button);
 //        sortButton.setOnClickListener(new View.OnClickListener() {
