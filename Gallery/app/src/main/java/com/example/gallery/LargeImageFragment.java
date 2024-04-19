@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,14 +16,20 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.vision.Frame;
+import com.google.android.gms.vision.text.TextBlock;
+import com.google.android.gms.vision.text.TextRecognizer;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
 public class LargeImageFragment extends Fragment {
-    DetailsActivity mainActivity;
+    DetailsActivity detailsActivity;
     Context context = null;
-    ImageView selectedImage;
+    CropImageView cropImageView;
+    Bitmap originalBitmap, tempBitmap;
 
     public static LargeImageFragment newInstance(String strArg) {
         LargeImageFragment fragment = new LargeImageFragment();
@@ -38,7 +45,7 @@ public class LargeImageFragment extends Fragment {
         try {
             context = getActivity();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                mainActivity = (DetailsActivity) context;
+                detailsActivity = (DetailsActivity) context;
             }
         }
         catch (IllegalStateException e) {
@@ -48,22 +55,49 @@ public class LargeImageFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        RelativeLayout layoutImage = (RelativeLayout)inflater.inflate(R.layout.fragment_large_image, null);
+        ConstraintLayout layoutImage = (ConstraintLayout) inflater.inflate(R.layout.fragment_large_image, null);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (getActivity() instanceof DetailsActivity) {
-                mainActivity = (DetailsActivity) context;
+                detailsActivity = (DetailsActivity) context;
             } else {
                 throw new IllegalStateException("MainActivity must implement callbacks");
             }
         }
 
         String selectedImage = getArguments().getString("selectedImage");
-        Bitmap originalBitmap = BitmapFactory.decodeFile(selectedImage);
+        originalBitmap = BitmapFactory.decodeFile(selectedImage);
+        tempBitmap = originalBitmap;
 
-        ImageView myImage = (ImageView) layoutImage.findViewById(R.id.imageSelected);
-        myImage.setImageBitmap(originalBitmap);
+        cropImageView = (CropImageView) layoutImage.findViewById(R.id.cropImageView);
+        cropImageView.setImageBitmap(originalBitmap);
+        cropImageView.setShowCropOverlay(false);
 
         return layoutImage;
+    }
+
+    public void executeShowCropOverlay() {
+        cropImageView.setShowCropOverlay(true);
+    }
+    public String executeExtractText() {
+        tempBitmap = cropImageView.getCroppedImage();
+        cropImageView.setShowCropOverlay(false);
+
+        TextRecognizer textRecognizer = new TextRecognizer.Builder(context).build();
+        if (!textRecognizer.isOperational()) {
+            return "Text recognizer not operational";
+        }
+
+        Frame frame = new Frame.Builder().setBitmap(tempBitmap).build();
+        SparseArray<TextBlock> textBlocks = textRecognizer.detect(frame);
+
+        StringBuilder extractedText = new StringBuilder();
+        for (int i = 0; i < textBlocks.size(); i++) {
+            TextBlock textBlock = textBlocks.valueAt(i);
+            extractedText.append(textBlock.getValue());
+            extractedText.append("\n");
+        }
+
+        return extractedText.toString();
     }
 }

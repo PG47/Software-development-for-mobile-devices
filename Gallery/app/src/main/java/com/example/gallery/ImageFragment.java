@@ -2,11 +2,14 @@ package com.example.gallery;
 
 import static androidx.core.content.ContextCompat.getSystemService;
 
+import static java.lang.Math.tan;
+
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Camera;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorMatrix;
@@ -18,6 +21,8 @@ import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.opengl.GLES20;
+import android.opengl.GLUtils;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -46,6 +51,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
@@ -68,14 +74,17 @@ public class ImageFragment extends Fragment {
     Context context;
     private Bitmap originalBitmap;
     private Bitmap adjustedBitmap;
+    private Bitmap tempBitmap;
     private int bitmapWidth, bitmapHeight;
     String selectedImage;
-    RelativeLayout layoutImage;
+    ConstraintLayout layoutImage;
     EditText editText;
     CropImageView cropImageView;
     String fontFamily, fontSize = "11";
     Boolean italic, bold;
     Integer color;
+    Boolean horizontalFlip = false, verticalFlip = false;
+    float xText, yText;
     public static ImageFragment newInstance(String strArg) {
         ImageFragment fragment = new ImageFragment();
         Bundle args = new Bundle();
@@ -108,7 +117,7 @@ public class ImageFragment extends Fragment {
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        layoutImage = (RelativeLayout)inflater.inflate(R.layout.fragment_image, null);
+        layoutImage = (ConstraintLayout) inflater.inflate(R.layout.fragment_image, null);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (getActivity() instanceof EditActivity) {
@@ -120,7 +129,8 @@ public class ImageFragment extends Fragment {
 
         selectedImage = getArguments().getString("selectedImage");
         originalBitmap = BitmapFactory.decodeFile(selectedImage);
-        adjustedBitmap = originalBitmap;
+        adjustedBitmap = Bitmap.createBitmap(originalBitmap);
+
         bitmapWidth = originalBitmap.getWidth();
         bitmapHeight = originalBitmap.getHeight();
 
@@ -143,7 +153,7 @@ public class ImageFragment extends Fragment {
     }
     public void executeRotate(int value) {
         cropImageView.setShowCropOverlay(true);
-        BitmapDrawable drawable = new BitmapDrawable(getResources(), originalBitmap);
+        BitmapDrawable drawable = new BitmapDrawable(getResources(), adjustedBitmap);
         drawable.setBounds(0, 0, bitmapWidth, bitmapHeight);
 
         Bitmap rotatedBitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
@@ -152,13 +162,13 @@ public class ImageFragment extends Fragment {
         canvas.rotate(value - 180, bitmapWidth / 2f, bitmapHeight / 2f);
         drawable.draw(canvas);
 
-        adjustedBitmap = rotatedBitmap;
+        tempBitmap = rotatedBitmap;
 
-        cropImageView.setImageBitmap(adjustedBitmap);
+        cropImageView.setImageBitmap(tempBitmap);
     }
     public void executeFastRotate(int value) {
         cropImageView.setShowCropOverlay(true);
-        BitmapDrawable drawable = new BitmapDrawable(getResources(), originalBitmap);
+        BitmapDrawable drawable = new BitmapDrawable(getResources(), adjustedBitmap);
         drawable.setBounds(0, 0, bitmapWidth, bitmapHeight);
 
         Bitmap rotatedBitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
@@ -167,25 +177,25 @@ public class ImageFragment extends Fragment {
         canvas.rotate(value, bitmapWidth / 2f, bitmapHeight / 2f);
         drawable.draw(canvas);
 
-        adjustedBitmap = rotatedBitmap;
+        tempBitmap = rotatedBitmap;
 
-        cropImageView.setImageBitmap(adjustedBitmap);
+        cropImageView.setImageBitmap(tempBitmap);
     }
     public void executeCropImage() {
         cropImageView.setShowCropOverlay(false);
-        Bitmap rotatedImage = cropImageView.getCroppedImage();
+        Bitmap croppedBitmap = cropImageView.getCroppedImage();
 
-        adjustedBitmap = rotatedImage;
+        adjustedBitmap = croppedBitmap;
         bitmapWidth = adjustedBitmap.getWidth();
         bitmapHeight = adjustedBitmap.getHeight();
 
-        cropImageView.setImageBitmap(rotatedImage);
+        cropImageView.setImageBitmap(adjustedBitmap);
     }
     public void executeChangeBrightness(int value) {
         float brightnessFactor = Math.max(0, Math.min(100, value));;
 
         int[] pixels = new int[bitmapWidth * bitmapHeight];
-        originalBitmap.getPixels(pixels, 0, bitmapWidth, 0, 0, bitmapWidth, bitmapHeight);
+        adjustedBitmap.getPixels(pixels, 0, bitmapWidth, 0, 0, bitmapWidth, bitmapHeight);
 
         for (int i = 0; i < pixels.length; i++) {
             int alpha = (pixels[i] >> 24) & 0xFF;
@@ -204,14 +214,20 @@ public class ImageFragment extends Fragment {
             pixels[i] = (alpha << 24) | (red << 16) | (green << 8) | blue;
         }
 
-        adjustedBitmap = Bitmap.createBitmap(pixels, bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
-        cropImageView.setImageBitmap(adjustedBitmap);
+        tempBitmap = Bitmap.createBitmap(pixels, bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
+        cropImageView.setImageBitmap(tempBitmap);
+    }
+    public void executeSaveChangeBrightness() {
+        if (tempBitmap != null) {
+            adjustedBitmap = tempBitmap;
+            cropImageView.setImageBitmap(adjustedBitmap);
+        }
     }
     public void executeChangeContrast(int value) {
         float contrastLevel = value / 10F;
 
         int[] pixels = new int[bitmapWidth * bitmapHeight];
-        originalBitmap.getPixels(pixels, 0, bitmapWidth, 0, 0, bitmapWidth, bitmapHeight);
+        adjustedBitmap.getPixels(pixels, 0, bitmapWidth, 0, 0, bitmapWidth, bitmapHeight);
 
         for (int i = 0; i < pixels.length; i++) {
             int alpha = (pixels[i] >> 24) & 0xFF;
@@ -399,14 +415,20 @@ public class ImageFragment extends Fragment {
 
     public void executeAddEditText() {
         editText = new EditText(context);
-        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
+        ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(
+                ConstraintLayout.LayoutParams.WRAP_CONTENT,
+                ConstraintLayout.LayoutParams.WRAP_CONTENT
         );
-        layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+        layoutParams.leftToLeft = R.id.cropImageView;
+        layoutParams.rightToRight = R.id.cropImageView;
+        layoutParams.topToTop = R.id.cropImageView;
+        layoutParams.bottomToBottom = R.id.cropImageView;
+
         editText.setLayoutParams(layoutParams);
         editText.setHint("Enter text here");
         editText.setInputType(InputType.TYPE_CLASS_TEXT);
+        editText.setPadding(0, 0, 0, 0);
+        editText.setBackground(null);
 
         editText.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -426,8 +448,20 @@ public class ImageFragment extends Fragment {
                         v.clearFocus();
                         break;
                     case MotionEvent.ACTION_MOVE:
-                        v.setX(event.getRawX() + dX);
-                        v.setY(event.getRawY() + dY);
+                        float newX = event.getRawX() + dX;
+                        float newY = event.getRawY() + dY;
+
+                        newX = Math.max(0, Math.min(newX, cropImageView.getWidth()));
+                        newY = Math.max(0, Math.min(newY, cropImageView.getHeight()));
+
+                        float relativeX = newX / cropImageView.getWidth();
+                        float relativeY = newY / cropImageView.getHeight();
+
+                        xText = (float) (relativeX * adjustedBitmap.getWidth());
+                        yText = (float) (relativeY * adjustedBitmap.getHeight());
+
+                        v.setX(newX);
+                        v.setY(newY);
                         break;
                     case MotionEvent.ACTION_UP:
                         v.requestFocus();
@@ -523,13 +557,14 @@ public class ImageFragment extends Fragment {
         }
     }
     public void executeAddTextToImage() {
-        editText.setVisibility(View.INVISIBLE);
+        editText.setVisibility(View.GONE);
         Bitmap mutableBitmap = adjustedBitmap.copy(Bitmap.Config.ARGB_8888, true);
         Canvas canvas = new Canvas(mutableBitmap);
         canvas.drawBitmap(adjustedBitmap, 0, 0, null);
 
         Paint paint = new Paint();
-        paint.setTextSize(Integer.parseInt(fontSize) * 10);
+        float fontSizePx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, Float.parseFloat(fontSize) * 3.5F, getResources().getDisplayMetrics());
+        paint.setTextSize(fontSizePx);
         paint.setColor(color);
 
         Typeface typeface = Typeface.create(fontFamily, Typeface.NORMAL);
@@ -540,13 +575,65 @@ public class ImageFragment extends Fragment {
         } else if (bold) {
             paint.setTypeface(Typeface.create(typeface, Typeface.BOLD));
         }
-        canvas.drawText(String.valueOf(editText.getText()), bitmapWidth / 10f, bitmapHeight / 2f, paint);
+        canvas.drawText(String.valueOf(editText.getText()), xText, yText, paint);
 
         adjustedBitmap = mutableBitmap;
         cropImageView.setImageBitmap(adjustedBitmap);
     }
-
     public void executeSaveImage() {
         saveImageToDevices(adjustedBitmap);
+    }
+    public void executeSetCropOverlay() {
+        cropImageView.setAspectRatio(1, 1);
+        cropImageView.setShowCropOverlay(true);
+    }
+    public void executeSetUpNormal() {
+        cropImageView.setImageBitmap(adjustedBitmap);
+    }
+    public void executeSetUpHorizontalFlip() {
+        Matrix matrix = new Matrix();
+        matrix.setScale(-1, 1);
+        if (horizontalFlip == false && verticalFlip == false) {
+            tempBitmap = Bitmap.createBitmap(adjustedBitmap, 0, 0, bitmapWidth, bitmapHeight, matrix, true);
+            horizontalFlip = true;
+        } else {
+            tempBitmap = Bitmap.createBitmap(tempBitmap, 0, 0, bitmapWidth, bitmapHeight, matrix, true);
+            horizontalFlip = false;
+        }
+        cropImageView.setImageBitmap(tempBitmap);
+    }
+    public void executeSetUpVerticalFlip() {
+        Matrix matrix = new Matrix();
+        matrix.setScale(1, -1);
+        if (verticalFlip == false && horizontalFlip == false) {
+            tempBitmap = Bitmap.createBitmap(adjustedBitmap, 0, 0, bitmapWidth, bitmapHeight, matrix, true);
+            verticalFlip = true;
+        } else {
+            tempBitmap = Bitmap.createBitmap(tempBitmap, 0, 0, bitmapWidth, bitmapHeight, matrix, true);
+            verticalFlip = false;
+        }
+        cropImageView.setImageBitmap(tempBitmap);
+    }
+    public void executeSetRatio1() { cropImageView.setAspectRatio(1,1); }
+    public void executeSetRatio2() { cropImageView.setAspectRatio(3,2); }
+    public void executeSetRatio3() { cropImageView.setAspectRatio(4,3); }
+    public void executeSetRatio4() { cropImageView.setAspectRatio(5,4); }
+    public void executeSetRatio5() { cropImageView.setAspectRatio(16,9); }
+    public boolean executeCheckChange() {
+        if (originalBitmap.getWidth() != adjustedBitmap.getWidth() || originalBitmap.getHeight() != adjustedBitmap.getHeight()) {
+            return true;
+        }
+
+        int width = originalBitmap.getWidth();
+        int height = originalBitmap.getHeight();
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                if (originalBitmap.getPixel(x, y) != adjustedBitmap.getPixel(x, y)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

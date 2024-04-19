@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.util.ArrayList;
+
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "team7_gallery.db";
     private static final int DATABASE_VERSION = 1;
@@ -87,6 +89,43 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return albumId;
     }
 
+    public ArrayList<String> getAllAlbums() {
+        ArrayList<String> albums = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        String sql = "SELECT " + COLUMN_ALBUM_NAME + " FROM " + SECURE_ALBUM;
+
+        Cursor cursor = db.rawQuery(sql, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                @SuppressLint("Range") String albumName = cursor.getString(cursor.getColumnIndex(COLUMN_ALBUM_NAME));
+                albums.add(albumName);
+            } while (cursor.moveToNext());
+
+            // Close the cursor to free up resources
+            cursor.close();
+        }
+
+        // Close the database connection
+        db.close();
+        return albums;
+    }
+
+    public boolean checkPass(String AlbumName, String pass) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String sql = "SELECT " + COLUMN_PASSWORD + " FROM " + SECURE_ALBUM
+                + " WHERE " + COLUMN_ALBUM_NAME + " = ?";
+        Cursor cursor = db.rawQuery(sql, new String[]{AlbumName});
+        if (cursor.moveToFirst()) {
+            @SuppressLint("Range") String password = cursor.getString(cursor.getColumnIndex(COLUMN_PASSWORD));
+            cursor.close();
+            if(password.equals(pass)) {
+                return true;
+            }
+            else  return false;
+        }
+        cursor.close();
+        return false;
+    }
 
 
     public Cursor find_image_ID(long id) {

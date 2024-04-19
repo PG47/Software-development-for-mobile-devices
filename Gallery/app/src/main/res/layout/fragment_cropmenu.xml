@@ -9,13 +9,31 @@
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/editToolbar"
         android:layout_width="match_parent"
-        android:layout_height="90dp"
+        android:layout_height="50dp"
         android:layout_gravity="center_vertical"
-        app:itemIconSize="70dp"
+        app:itemIconSize="30dp"
         app:itemPaddingTop="0dp"
-        app:labelVisibilityMode="unlabeled"
+        app:labelVisibilityMode="labeled"
+        app:itemTextAppearanceActiveBoldEnabled="true"
+        app:itemTextAppearanceInactive="@color/white"
         app:itemActiveIndicatorStyle="@color/white"
         app:menu="@menu/bottom_crop_menu">
+
+    </com.google.android.material.bottomnavigation.BottomNavigationView>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/aspectRatio"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_gravity="center_vertical"
+        app:itemIconSize="15dp"
+        app:itemPaddingTop="0dp"
+        app:labelVisibilityMode="labeled"
+        app:itemTextAppearanceActiveBoldEnabled="true"
+        app:itemTextAppearanceInactive="@color/white"
+        app:itemActiveIndicatorStyle="@color/white"
+        app:menu="@menu/bottom_aspect_ratio"
+        android:layout_below="@id/editToolbar">
 
     </com.google.android.material.bottomnavigation.BottomNavigationView>
 

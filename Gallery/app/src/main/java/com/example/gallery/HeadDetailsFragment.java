@@ -1,6 +1,9 @@
 package com.example.gallery;
 
+import android.app.WallpaperManager;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -13,9 +16,9 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
 public class HeadDetailsFragment extends Fragment {
-    DetailsActivity mainActivity;
+    DetailsActivity detailsActivity;
     Context context = null;
-    ImageButton exit;
+    ImageButton exit, addTag, addToAlbum, setWallpaper, advancedOption;
 
     public static HeadDetailsFragment newInstance(String strArg) {
         HeadDetailsFragment fragment = new HeadDetailsFragment();
@@ -31,11 +34,21 @@ public class HeadDetailsFragment extends Fragment {
         try {
             context = getActivity();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                mainActivity = (DetailsActivity) context;
+                detailsActivity = (DetailsActivity) context;
             }
         }
         catch (IllegalStateException e) {
             throw new IllegalStateException("MainActivity must implement callbacks");
+        }
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof DetailsActivity) {
+            detailsActivity = (DetailsActivity) context;
+        } else {
+            throw new IllegalStateException("EditActivity must implement callbacks");
         }
     }
 
@@ -45,22 +58,49 @@ public class HeadDetailsFragment extends Fragment {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (getActivity() instanceof DetailsActivity) {
-                mainActivity = (DetailsActivity) context;
+                detailsActivity = (DetailsActivity) context;
             } else {
                 throw new IllegalStateException("MainActivity must implement callbacks");
             }
         }
 
         exit = (ImageButton) layoutImage.findViewById(R.id.getBackButton);
+        addTag = (ImageButton) layoutImage.findViewById(R.id.component1);
+        addToAlbum = (ImageButton) layoutImage.findViewById(R.id.component2);
+        setWallpaper = (ImageButton) layoutImage.findViewById(R.id.component3);
+        advancedOption = (ImageButton) layoutImage.findViewById(R.id.component4);
         exit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mainActivity != null) {
-                    mainActivity.finish();
+                if (detailsActivity != null) {
+                    detailsActivity.finish();
                 }
             }
         });
+        addTag.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
 
+            }
+        });
+        addToAlbum.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+        setWallpaper.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+        advancedOption.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                detailsActivity.replaceAdvancedOptionFragment();
+            }
+        });
         return layoutImage;
     }
 }

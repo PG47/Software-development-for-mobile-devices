@@ -484,17 +484,16 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
 
     @Override
     public void onBackPressed() {
+        if (imagesFragment.isSelectionMode == true) {
+            imagesFragment.ExitSelection();
+            return;
+        }
         if (insideAlbum) {
             closeAlbum();
             return;
         }
         if (insideSearch) {
             closeSearch();
-            return;
-        }
-
-        if (imagesFragment != null) {
-            imagesFragment.ExitSelection();
             return;
         }
 
