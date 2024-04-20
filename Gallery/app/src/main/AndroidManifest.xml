@@ -3,6 +3,8 @@
     package="com.example.gallery">
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" />
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
@@ -36,6 +38,10 @@
         <activity android:name=".EditActivity"
             android:exported="true">
         </activity>
+        <activity android:name=".SimularResult"
+            android:exported="true">
+        </activity>
+
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -46,6 +52,10 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"/>
         </provider>
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBebRjJy8Hdw_CgxGrRHAKjXkRg1bsrjiE" />
     </application>
     <meta-data android:name="asset_statements" android:resource="@string/asset_statements" />
 

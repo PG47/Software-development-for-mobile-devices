@@ -19,6 +19,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_PASSWORD = "password";
     private static final String COLUMN_MEDIA_ID = "media_id";
     private static final String COLUMN_ALBUM_ID = "album_id";
+    private static final String COLUMN_ORIGIN_PATH = "old_dir";
 
     private static final String SQL_CREATE_SECURE_ALBUM = "CREATE TABLE IF NOT EXISTS " + SECURE_ALBUM + " (" +
             COLUMN_ALBUM_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -26,21 +27,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             COLUMN_PASSWORD + " VARCHAR(4))";
 
     private static final String SQL_CREATE_SECURE_IMAGES = "CREATE TABLE IF NOT EXISTS " + SECURE_IMAGES + " (" +
-            COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-            COLUMN_MEDIA_ID + " LONG," +
-            COLUMN_ALBUM_ID + " INTERGER," +
+            COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            COLUMN_MEDIA_ID + " LONG, " +
+            COLUMN_ALBUM_ID + " INTERGER, " +
+            COLUMN_ORIGIN_PATH + " TEXT, " +
             "FOREIGN KEY(" + COLUMN_ALBUM_ID + ") REFERENCES " + SECURE_ALBUM + "(" + COLUMN_ALBUM_ID + "))";
 
 
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL(SQL_CREATE_SECURE_ALBUM);
+        db.execSQL(SQL_CREATE_SECURE_IMAGES);
+
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(SQL_CREATE_SECURE_ALBUM);
-        db.execSQL(SQL_CREATE_SECURE_IMAGES);
+
     }
 
     @Override
@@ -54,10 +59,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    public void insertImage(long img_id, int al_id) {
+    public void insertImage(long img_id, int al_id, String old_path) {
         SQLiteDatabase db = this.getWritableDatabase();
-        String sql = "INSERT INTO " + SECURE_IMAGES + " (" + COLUMN_MEDIA_ID + ", " + COLUMN_ALBUM_ID + ") " +
-                "VALUES ('" + img_id + "', " + al_id + ")";
+        String sql = "INSERT INTO " + SECURE_IMAGES + " (" + COLUMN_MEDIA_ID + ", " + COLUMN_ALBUM_ID + ", " + COLUMN_ORIGIN_PATH + ") " +
+                "VALUES ('" + img_id + "', " + al_id + "', " + old_path + ")";
         db.execSQL(sql);
         db.close();
     }

@@ -6,4 +6,5 @@ public interface SelectOptions {
     public void newAlbum();
     public void secure();
     public void delete();
+    public void unlockSecure();
 }

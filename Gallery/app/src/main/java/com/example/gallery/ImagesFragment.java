@@ -66,6 +66,8 @@ public class ImagesFragment extends Fragment implements SelectOptions {
     ImageAdapter adapter;
     Boolean album = false;
     Boolean search = false;
+
+    String Secured_album = null;
     DatabaseHelper databaseHelper;
 //    private ArrayList<String> images = new ArrayList<>();
 //    private ImageAdapter adapter;
@@ -81,11 +83,19 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         // Required empty public constructor
     }
 
+    //Show images in album
     public ImagesFragment(ArrayList<String> _images) {
         album = true;
         images = _images;
     }
 
+    //Show secured images in album
+    public ImagesFragment(ArrayList<String> _images, String album_name) {
+        images = _images;
+        Secured_album = album_name;
+    }
+
+    //Show search result images
     public ImagesFragment(ArrayList<String> _images, Boolean srh) {
         search = srh;
         images = _images;
@@ -269,17 +279,15 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                 // Xử lý sự kiện khi click vào một item
                 Intent intent = new Intent(requireContext(), DetailsActivity.class);
                 intent.putExtra("SelectedImage", images.get(position));
+                //startActivity(intent);
                 startActivityForResult(intent, DETAILS_ACTIVITY_REQUEST_CODE);
             } else {
-                if (adapter.securedIndices.contains(position)) return;
                 adapter.toggleSelection(position);
             }
         });
 
         // Xử lý sự kiện khi long click vào một item
         gallery.setOnItemLongClickListener((parent, view, position, id) -> {
-            if (adapter.securedIndices.contains(position)) return true;
-
             if (!isSelectionMode) {
                 // Thay đổi trạng thái khi chọn nhiều item
                 active = false;
@@ -333,6 +341,8 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
         // Xử lý khi click vào nút exit_album_button
         exitAlbum = rootView.findViewById(R.id.exit_button);
+        if(album || search) exitAlbum.setVisibility(View.VISIBLE);
+        else exitAlbum.setVisibility(View.GONE);
         exitAlbum.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -402,12 +412,6 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                 adapter.reloadImages();
             }
         }
-        if (requestCode == DETAILS_ACTIVITY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            // Handle the data received from DetailsActivity
-            // For example:
-            ArrayList<String> images = data.getStringArrayListExtra("Images");
-            // Now you have the images data from DetailsActivity, you can use it as needed
-        }
     }
 
     public AlertDialog.Builder inputPasswordAlert(EditText input, String title) {
@@ -438,15 +442,10 @@ public class ImagesFragment extends Fragment implements SelectOptions {
     public class ImageAdapter extends BaseAdapter {
         private final Activity context;
         private final ArrayList<Integer> selectedPositions;
-        private final ArrayList<Integer> securedIndices;
-        private final ArrayList<String> securedPasswords;
 
         public ImageAdapter(Activity localContext) {
             context = localContext;
-            securedIndices = new ArrayList<>();
-            securedPasswords = new ArrayList<>();
             if (!album && !search) {
-                getAllSecuredIDs();
                 images = getAllShownImagesPath(context);
             }
             selectedPositions = new ArrayList<>();
@@ -492,53 +491,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
             Glide.with(context).load(images.get(position)).centerCrop().into(imageView);
 
-            Log.d("TEST", String.valueOf(securedIndices));
-
             return imageView;
-        }
-
-        public void getAllSecuredIDs() {
-            securedIndices.clear();
-            securedPasswords.clear();
-            ArrayList<String> l_images = getAllShownImagesPath(context);
-
-            Cursor cursor = databaseHelper.getData();
-
-            if (cursor != null && cursor.moveToFirst()) {
-                do {
-                    int column_index_id = cursor.getColumnIndex("media_id");
-                    //int column_index_password = cursor.getColumnIndex("password");
-
-                    long media_id = cursor.getLong(column_index_id);
-                    //String password = cursor.getString(column_index_password);
-
-                    String[] projection = {MediaStore.Images.Media.DATA};
-
-                    String selection = MediaStore.Images.Media._ID + " = ?";
-                    Uri queryUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-                    ContentResolver contentResolver = requireActivity().getContentResolver();
-
-                    String[] selectionArgs = new String[] {String.valueOf(media_id)};
-
-                    Cursor cursorToData = contentResolver.query(queryUri, projection, selection, selectionArgs, null);
-
-                    assert cursorToData != null;
-                    int column_index_data = cursorToData.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-
-                    if (cursorToData.moveToFirst()) {
-                        String path = cursorToData.getString(column_index_data);
-                        int index = l_images.indexOf(path);
-                        securedIndices.add(index);
-                        //securedPasswords.add(password);
-                    }
-
-                    cursorToData.close();
-                } while (cursor.moveToNext());
-
-                cursor.close();
-            }
-
-            Collections.sort(securedIndices);
         }
 
         public void toggleSelection(int position) {
@@ -569,12 +522,13 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             notifyDataSetChanged();
         }
 
-        public ArrayList<String> getAllShownImagesPath(Activity activity) {
+        private ArrayList<String> getAllShownImagesPath(Activity activity) {
             Uri uri;
             Cursor cursor;
             int column_index_data;
+            ArrayList<String> secureAlbums = databaseHelper.getAllAlbums();
             ArrayList<String> listOfAllImages = new ArrayList<>();
-            uri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+            uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 
             String[] projection = {MediaStore.MediaColumns.DATA,
                     MediaStore.Images.Media.DATE_TAKEN};
@@ -582,27 +536,25 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             cursor = activity.getContentResolver().query(uri, projection, null,
                     null, MediaStore.Images.Media.DATE_TAKEN + " DESC");
 
-            assert cursor != null;
-            column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+            if (cursor != null) {
+                column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
 
-            while (cursor.moveToNext()) {
-                String absolutePathOfImage = cursor.getString(column_index_data);
-                listOfAllImages.add(absolutePathOfImage);
-            }
+                while (cursor.moveToNext()) {
+                    String absolutePathOfImage = cursor.getString(column_index_data);
+                    // Extract the folder name from the absolute path
+                    String folderName = new File(absolutePathOfImage).getParentFile().getName();
+                    // Check if the folder name is not in any of the secure albums
+                    if (!secureAlbums.contains(folderName)) {
+                        listOfAllImages.add(absolutePathOfImage);
+                    }
 
-            cursor.close();
-            if(securedIndices != null) {
-                int de = 0;
-                for(int i: securedIndices) {
-                    listOfAllImages.remove(i- de);
-                    de++;
                 }
+
+                cursor.close();
             }
 
             return listOfAllImages;
         }
-
-
 
         private ArrayList<String> getAllAlbums() {
             ArrayList<String> albumNames = new ArrayList<>();
@@ -834,8 +786,6 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
                 cursor.close();
             }
-
-            getAllSecuredIDs();
             images = getAllShownImagesPath(context);
             notifyDataSetChanged();
             ExitSelection();
@@ -874,6 +824,10 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                             }
                         });
             }
+        }
+
+        public void unlockSecure(){
+
         }
 
         public void startShareIntent(ArrayList<Uri> selectedUris) {
@@ -995,7 +949,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                         }
 
                         else {
-                            databaseHelper.insertImage(id, album_id);
+                            databaseHelper.insertImage(id, album_id, images.get(i));
                         }
                     }
 
@@ -1014,7 +968,6 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
         //Load lại ảnh khi cân thiết
         public void reloadImages() {
-            getAllSecuredIDs();
             images = getAllShownImagesPath(context);
             adapter.notifyDataSetChanged();
         }
@@ -1076,6 +1029,12 @@ public class ImagesFragment extends Fragment implements SelectOptions {
     public void delete() {
         adapter.confirmDeleteSelections();
     }
+
+    @Override
+    public void unlockSecure() {
+        adapter.unlockSecure();
+    }
+
 
     public void reloadImages() {
         if (adapter != null) {

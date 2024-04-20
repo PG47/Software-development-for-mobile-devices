@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,6 +24,7 @@ import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
@@ -31,10 +34,20 @@ import androidx.fragment.app.FragmentTransaction;
 import java.io.File;
 import java.util.ArrayList;
 
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfFloat;
+import org.opencv.core.MatOfInt;
+import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
+
 public class DetailsActivity extends AppCompatActivity {
     FragmentTransaction ft;
     HeadDetailsFragment headDetailsFragment;
     LargeImageFragment fragmentImage;
+    String img_path;
     OptionFragment fragmentOption;
     Boolean optionsHidden;
     Boolean showAdvancedOptions = false;
@@ -60,9 +73,10 @@ public class DetailsActivity extends AppCompatActivity {
         fragmentOption = OptionFragment.newInstance("option");
 
         Intent intent = getIntent();
-        String selectedImage = intent.getStringExtra("SelectedImage");
+        img_path = intent.getStringExtra("SelectedImage");
         Bundle bundle = new Bundle();
-        bundle.putString("selectedImage", selectedImage);
+        bundle.putString("selectedImage", img_path);
+
 
         headDetailsFragment.setArguments(bundle);
         fragmentImage.setArguments(bundle);
@@ -151,22 +165,21 @@ public class DetailsActivity extends AppCompatActivity {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     public void findSimular_images() {
         ArrayList<String> images = getAllShownImagesPath(this);
-        // Assuming you have the required data in 'images' ArrayList
-        // Now, you can send this data back to ImagesFragment
-        Intent resultIntent = new Intent();
-        resultIntent.putStringArrayListExtra("Images", images);
-        setResult(Activity.RESULT_OK, resultIntent);
-        // Finish DetailsActivity, but keep it hidden
-        moveTaskToBack(true); // Hide the activity without finishing
-    }
+        ArrayList<String> result = new ArrayList<>(); // Initialize the result ArrayList
 
-    @Override
-    public void onBackPressed() {
-        moveTaskToBack(true); // Hide the activity without finishing when back button is pressed
-    }
+        for (String img : images) {
+            if (compare(img, img_path, 90)) { // Assuming img_path is the path of the image to compare with
+                result.add(img);
+            }
+        }
 
+        Intent intent = new Intent(this, SimularResult.class);
+        intent.putStringArrayListExtra("ResultImages", result); // Use putStringArrayListExtra for ArrayList<String>
+        startActivity(intent);
+    }
 
     private ArrayList<String> getAllShownImagesPath(Activity activity) {
         Uri uri;
@@ -191,7 +204,7 @@ public class DetailsActivity extends AppCompatActivity {
                 // Extract the folder name from the absolute path
                 String folderName = new File(absolutePathOfImage).getParentFile().getName();
                 // Check if the folder name is not in any of the secure albums
-                if (!secureAlbums.contains(folderName)) {
+                if (!secureAlbums.contains(folderName) && !absolutePathOfImage.equals(img_path)) {
                     listOfAllImages.add(absolutePathOfImage);
                 }
 
@@ -203,5 +216,51 @@ public class DetailsActivity extends AppCompatActivity {
         return listOfAllImages;
     }
 
+    boolean compare(String img1, String img2, int threshold) {
+        // Load images from file paths
+        Mat mat1 = Imgcodecs.imread(img1);
+        Mat mat2 = Imgcodecs.imread(img2);
+
+        // Check if images were loaded successfully
+        if (mat1.empty() || mat2.empty()) {
+            return false; // Images couldn't be loaded
+        }
+
+        // Convert images to grayscale
+        Mat grayMat1 = new Mat();
+        Mat grayMat2 = new Mat();
+
+        Imgproc.cvtColor(mat1, grayMat1, Imgproc.COLOR_BGR2GRAY);
+        Imgproc.cvtColor(mat2, grayMat2, Imgproc.COLOR_BGR2GRAY);
+
+        // Resize images to a fixed size (if needed)
+        Mat resizedMat1 = new Mat();
+        Mat resizedMat2 = new Mat();
+        Imgproc.resize(grayMat1, resizedMat1, new Size(64, 64)); // Resize to match the size used in hashing
+        Imgproc.resize(grayMat2, resizedMat2, new Size(64, 64)); // Resize to match the size used in hashing
+
+        // Compute histograms
+        MatOfFloat ranges = new MatOfFloat(0, 256);
+        MatOfInt histSize = new MatOfInt(256);
+        MatOfInt channels = new MatOfInt(0);
+        Mat hist1 = new Mat();
+        Mat hist2 = new Mat();
+        ArrayList<Mat> images1 = new ArrayList<>();
+        ArrayList<Mat> images2 = new ArrayList<>();
+        images1.add(grayMat1);
+        images2.add(grayMat2);
+        Imgproc.calcHist(images1, channels, new Mat(), hist1, histSize, ranges);
+        Imgproc.calcHist(images2, channels, new Mat(), hist2, histSize, ranges);
+
+        // Normalize histograms
+        Core.normalize(hist1, hist1, 0, 1, Core.NORM_MINMAX, -1, new Mat());
+        Core.normalize(hist2, hist2, 0, 1, Core.NORM_MINMAX, -1, new Mat());
+
+        // Compute histogram intersection similarity
+        double similarity = Imgproc.compareHist(hist1, hist2, Imgproc.HISTCMP_INTERSECT);
+
+        // Check if similarity meets the threshold
+        return similarity >= threshold;
+    }
 
 }

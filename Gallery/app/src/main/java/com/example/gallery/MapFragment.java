@@ -1,64 +1,142 @@
 package com.example.gallery;
 
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
+import androidx.exifinterface.media.ExifInterface;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link MapFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class MapFragment extends Fragment {
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+public class MapFragment extends Fragment implements OnMapReadyCallback {
+    private ArrayList<String> images;
+    private ArrayList<String> imagesName;
 
     public MapFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment MapFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static MapFragment newInstance(String param1, String param2) {
-        MapFragment fragment = new MapFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+        images = new ArrayList<>();
+        imagesName = new ArrayList<>();
+        getAllImages();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_map, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_map, container, false);
+
+        FragmentManager manager = getFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        SupportMapFragment fragment = new SupportMapFragment();
+        transaction.add(R.id.google_map, fragment);
+        transaction.commit();
+
+        fragment.getMapAsync(this);
+
+        return rootView;
+    }
+
+    @Override
+    public void onMapReady(@NonNull GoogleMap googleMap) {
+        for (int i = 0; i < images.size(); i++) {
+            String path = images.get(i), name = imagesName.get(i);
+            name = name.substring(0, Math.min(name.length(), 10)) + "...";
+
+            ExifInterface exif = null;
+            try {
+                exif = new ExifInterface(path);
+            } catch (IOException e) {
+                Log.d("GEO", "No Exif");
+            }
+
+            float[] latLong = new float[2];
+
+            try {
+                exif = new ExifInterface(path);
+                boolean hasLatLong = exif.getLatLong(latLong);
+
+                if (hasLatLong) {
+                    String finalName = name;
+                    Glide.with(requireContext())
+                            .asBitmap()
+                            .load(path)
+                            .into(new CustomTarget<Bitmap>() {
+                                @Override
+                                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                    Bitmap smallMarker = Bitmap.createScaledBitmap(resource, 150, 150, false);
+                                    LatLng latLng = new LatLng(latLong[0], latLong[1]);
+                                    googleMap.addMarker(new MarkerOptions().position(latLng).title(finalName)
+                                            .icon(BitmapDescriptorFactory.fromBitmap(smallMarker)));
+                                    googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                                }
+
+                                @Override
+                                public void onLoadCleared(@Nullable Drawable placeholder) { }
+                            });
+                }
+            } catch (IOException e) {
+                Log.e("MapFragment", "Error reading EXIF data: " + e.getMessage());
+                e.printStackTrace();
+                // Handle the error gracefully, for example, by skipping this image
+            }
+        }
+    }
+
+    private void getAllImages() {
+        Uri uri;
+        Cursor cursor;
+        int column_index_data, column_index_name;
+        uri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+
+        String[] projection = {MediaStore.MediaColumns.DATA, MediaStore.MediaColumns.DISPLAY_NAME };
+
+        cursor = requireActivity().getContentResolver().query(uri, projection, null,
+                null, null);
+
+        assert cursor != null;
+        column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+        column_index_name = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME);
+
+        while (cursor.moveToNext()) {
+            String absolutePathOfImage = cursor.getString(column_index_data);
+            images.add(absolutePathOfImage);
+            String nameOfImage = cursor.getString(column_index_name);
+            imagesName.add(nameOfImage);
+        }
+
+        cursor.close();
     }
 }

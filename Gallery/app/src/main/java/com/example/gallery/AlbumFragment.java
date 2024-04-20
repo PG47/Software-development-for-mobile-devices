@@ -80,7 +80,7 @@ public class AlbumFragment extends Fragment {
                         }
                         else {
                             // Xử lý sự kiện khi click vào một item
-                            openAlbum.openAlbum(albumsImages.get(position));
+                            openAlbum.openAlbum(albumsImages.get(position), true, albums.get(position));
                         }
                     }
                 });
@@ -88,7 +88,7 @@ public class AlbumFragment extends Fragment {
                 builder.show();
                 return;
             }
-            openAlbum.openAlbum(albumsImages.get(position));
+            openAlbum.openAlbum(albumsImages.get(position), false,albums.get(position));
         });
 
         return rootView;
