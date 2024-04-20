@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
@@ -34,7 +35,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             "FOREIGN KEY(" + COLUMN_ALBUM_ID + ") REFERENCES " + SECURE_ALBUM + "(" + COLUMN_ALBUM_ID + "))";
 
 
-
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         SQLiteDatabase db = this.getWritableDatabase();
@@ -49,7 +49,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) { }
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+    }
 
     public void creat_secure_album(String album_name, String password) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -62,10 +63,62 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void insertImage(long img_id, int al_id, String old_path) {
         SQLiteDatabase db = this.getWritableDatabase();
         String sql = "INSERT INTO " + SECURE_IMAGES + " (" + COLUMN_MEDIA_ID + ", " + COLUMN_ALBUM_ID + ", " + COLUMN_ORIGIN_PATH + ") " +
-                "VALUES ('" + img_id + "', " + al_id + "', " + old_path + ")";
+                "VALUES ('" + img_id + "', " + al_id + ", '" + old_path + "')";
         db.execSQL(sql);
         db.close();
     }
+
+    public long deleteImage(long img_id, String album_name) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        long result = db.delete(SECURE_IMAGES, COLUMN_MEDIA_ID + " = ? AND " + COLUMN_ALBUM_ID + " = (SELECT " + COLUMN_ALBUM_ID + " FROM " + SECURE_ALBUM + " WHERE " + COLUMN_ALBUM_NAME + " = ?)",
+                new String[]{String.valueOf(img_id), album_name});
+
+        db.close();
+        return result;
+    }
+
+    public int countImages_in_Album(String album_name) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String countQuery = "SELECT COUNT(*) FROM " + SECURE_IMAGES + " WHERE " + COLUMN_ALBUM_ID + " = (SELECT " + COLUMN_ALBUM_ID + " FROM " + SECURE_ALBUM + " WHERE " + COLUMN_ALBUM_NAME + " = ?)";
+        Cursor cursor = db.rawQuery(countQuery, new String[]{album_name});
+        int count = 0;
+        if (cursor != null) {
+            cursor.moveToFirst();
+            count = cursor.getInt(0);
+            cursor.close();
+        }
+        db.close();
+        return count;
+    }
+
+    public void delete_Album(String album_name) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(SECURE_ALBUM, COLUMN_ALBUM_NAME + " = ?", new String[]{album_name});
+        db.close();
+
+        // Delete the directory from the file system
+        String path = "/storage/emulated/0/DCIM/" + album_name;
+        File directory = new File(path);
+        if (directory.exists() && directory.isDirectory()) {
+            boolean success = deleteRecursive(directory);
+        }
+    }
+
+    private boolean deleteRecursive(File fileOrDirectory) {
+        if (fileOrDirectory.isDirectory()) {
+            File[] contents = fileOrDirectory.listFiles();
+            if (contents != null) {
+                for (File child : contents) {
+                    boolean success = deleteRecursive(child);
+                    if (!success) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return fileOrDirectory.delete();
+    }
+
 
     public void updateData(long id, int al_id) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -123,10 +176,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             @SuppressLint("Range") String password = cursor.getString(cursor.getColumnIndex(COLUMN_PASSWORD));
             cursor.close();
-            if(password.equals(pass)) {
+            if (password.equals(pass)) {
                 return true;
-            }
-            else  return false;
+            } else return false;
         }
         cursor.close();
         return false;
@@ -138,4 +190,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String sql = "SELECT * FROM " + SECURE_IMAGES + " WHERE " + COLUMN_MEDIA_ID + " = " + id;
         return db.rawQuery(sql, null);
     }
+
+    @SuppressLint("Range")
+    public String deleteImage(long id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String sql = "SELECT " + COLUMN_ORIGIN_PATH + " FROM " + SECURE_IMAGES + " WHERE " + COLUMN_MEDIA_ID + " = ?";
+        Cursor cursor = db.rawQuery(sql, new String[]{String.valueOf(id)});
+        String oldpath = "";
+        if (cursor.moveToFirst()) {
+            oldpath = cursor.getString(cursor.getColumnIndex(COLUMN_ORIGIN_PATH));
+        }
+        long result = db.delete(SECURE_IMAGES, COLUMN_MEDIA_ID + " = ?", new String[]{String.valueOf(id)});
+        db.close();
+        return oldpath;
+    }
 }
+

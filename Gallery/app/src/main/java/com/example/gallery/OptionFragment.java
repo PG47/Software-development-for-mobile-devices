@@ -4,28 +4,28 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.ContentUris;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Path;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 
 public class OptionFragment extends Fragment {
@@ -85,8 +85,8 @@ public class OptionFragment extends Fragment {
                 intent.putExtra("SelectedImage", selectedImage);
                 startActivity(intent);
                 return true;
-            } else if (itemId == R.id.camera) {
-
+            } else if (itemId == R.id.info) {
+                showImageInfoDialog(selectedImage);
                 return true;
             } else if (itemId == R.id.delete) {
                 confirmDeleteSelectedImage(selectedImage);
@@ -97,6 +97,41 @@ public class OptionFragment extends Fragment {
         });
 
         return layoutOption;
+    }
+
+    private void showImageInfoDialog(String selectedImage) {
+        // Extract basic information
+        File imageFile = new File(selectedImage);
+        String name = imageFile.getName();
+        String path = imageFile.getAbsolutePath();
+        String size = formatSize(imageFile.length());
+        String date = getModifiedDate(imageFile);
+
+        // Create and show the dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Image Information");
+        builder.setMessage("Name: " + name + "\n"
+                + "Path: " + path + "\n"
+                + "Size: " + size + "\n"
+                + "Date: " + date);
+        builder.setPositiveButton("OK", null);
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    // Method to format file size in human-readable format
+    private String formatSize(long size) {
+        if (size <= 0) return "0 B";
+        final String[] units = new String[]{"B", "KB", "MB", "GB", "TB"};
+        int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
+        return String.format(Locale.getDefault(), "%.1f %s", size / Math.pow(1024, digitGroups), units[digitGroups]);
+    }
+
+    // Method to get the last modified date of the file
+    private String getModifiedDate(File file) {
+        long lastModified = file.lastModified();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        return sdf.format(new Date(lastModified));
     }
 
     private void confirmDeleteSelectedImage(String selectedImage) {
