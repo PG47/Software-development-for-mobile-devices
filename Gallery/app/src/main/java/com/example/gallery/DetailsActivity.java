@@ -141,6 +141,15 @@ public class DetailsActivity extends AppCompatActivity {
     public void showCropOverlay() { fragmentImage.executeShowCropOverlay(); }
     public String extractText() { return fragmentImage.executeExtractText(); }
     public void FacesDetection() { fragmentImage.executeFacesDetection(); }
+    public String getCurrentName() { return fragmentImage.executeGetCurrentName(); }
+    public void setNewNameForImage(String name) { 
+        boolean res = fragmentImage.executeSetNewNameForImage(name);
+        if (res) {
+            Toast.makeText(this, "Change successfully", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show();
+        }
+    }
 
     public void findSimular_images() {
         ArrayList<String> images = getAllShownImagesPath(this);

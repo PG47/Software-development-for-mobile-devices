@@ -87,7 +87,11 @@ public class AdvancedOptionsFragment extends Fragment {
                 detailsActivity.findSimular_images();
                 return true;
             } else if (itemId == R.id.option4) {
-
+                SupportAdvancedOptionsFragment supportAdvancedOptionsFragment = SupportAdvancedOptionsFragment.newInstance("Change Name");
+                transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.toDoWith, supportAdvancedOptionsFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
                 return true;
             } else if (itemId == R.id.option5) {
 

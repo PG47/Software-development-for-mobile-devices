@@ -31,11 +31,14 @@ import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.io.File;
+
 public class LargeImageFragment extends Fragment {
     DetailsActivity detailsActivity;
     Context context = null;
     CropImageView cropImageView;
     Bitmap originalBitmap, tempBitmap;
+    String imagePath;
 
     public static LargeImageFragment newInstance(String strArg) {
         LargeImageFragment fragment = new LargeImageFragment();
@@ -72,6 +75,7 @@ public class LargeImageFragment extends Fragment {
         }
 
         String selectedImage = getArguments().getString("selectedImage");
+        imagePath = selectedImage;
         originalBitmap = BitmapFactory.decodeFile(selectedImage);
         tempBitmap = originalBitmap;
 
@@ -140,5 +144,25 @@ public class LargeImageFragment extends Fragment {
         }
 
         return bitmapCopy;
+    }
+    public String executeGetCurrentName() {
+        String[] comps = imagePath.split("/");
+        return comps[comps.length - 1];
+    }
+    public boolean executeSetNewNameForImage(String name) {
+        File oldFile = new File(imagePath);
+
+        if (!oldFile.exists()) {
+            return false;
+        }
+
+        File parentDir = oldFile.getParentFile();
+        File newFile = new File(parentDir, name);
+
+        Boolean res = oldFile.renameTo(newFile);
+        if (res) {
+            return true;
+        }
+        return false;
     }
 }

@@ -27,4 +27,45 @@
         android:id="@+id/getImageDone"
         android:visibility="gone"/>
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Current name: "
+        android:id="@+id/currentName"
+        android:textSize="12dp"
+        android:visibility="gone"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New name: "
+        android:id="@+id/newName"
+        android:layout_below="@id/currentName"
+        android:textSize="12dp"
+        android:visibility="gone"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter image's new name"
+        android:textSize="12dp"
+        android:id="@+id/setNewName"
+        android:layout_toRightOf="@id/newName"
+        android:layout_below="@id/currentName"
+        android:background="@android:color/transparent"
+        android:visibility="gone"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/newName"
+        android:layout_centerHorizontal="true"
+        android:textSize="15dp"
+        android:text="Change"
+        android:id="@+id/changeBtn"
+        android:visibility="gone"
+        android:background="@drawable/btn_border"
+        android:layout_marginTop="7dp"
+        android:padding="4dp"/>
+
 </RelativeLayout>

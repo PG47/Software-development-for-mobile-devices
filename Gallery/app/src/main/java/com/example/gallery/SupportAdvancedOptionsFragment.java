@@ -3,10 +3,12 @@ package com.example.gallery;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -19,7 +21,8 @@ public class SupportAdvancedOptionsFragment extends Fragment {
     DetailsActivity detailsActivity;
     Context context;
     private static String option;
-    TextView textFromImage;
+    TextView textFromImage, curName, newName, changeBtn;
+    EditText inputNewName;
     Button actionDone;
     String text;
     ScrollView textScroll;
@@ -72,6 +75,10 @@ public class SupportAdvancedOptionsFragment extends Fragment {
         textFromImage = (TextView) layoutSupport.findViewById(R.id.textFromImage);
         actionDone = (Button) layoutSupport.findViewById(R.id.getImageDone);
         textScroll = (ScrollView) layoutSupport.findViewById(R.id.textScroll);
+        curName = (TextView) layoutSupport.findViewById(R.id.currentName);
+        newName = (TextView) layoutSupport.findViewById(R.id.newName);
+        inputNewName = (EditText) layoutSupport.findViewById(R.id.setNewName);
+        changeBtn = (TextView) layoutSupport.findViewById(R.id.changeBtn);
 
         actionDone.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,12 +91,29 @@ public class SupportAdvancedOptionsFragment extends Fragment {
             }
         });
 
+        changeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!TextUtils.isEmpty(inputNewName.getText())) {
+                    String name = String.valueOf(inputNewName.getText());
+                    detailsActivity.setNewNameForImage(name);
+                } else {
+                    return;
+                }
+            }
+        });
+
         if (Objects.equals(option, "Faces Detection")) {
-            textScroll.setVisibility(View.GONE);
-            actionDone.setVisibility(View.GONE);
-            textFromImage.setVisibility(View.GONE);
+
         } else if (Objects.equals(option, "Text Extraction")) {
             actionDone.setVisibility(View.VISIBLE);
+        } else if (Objects.equals(option, "Change Name")) {
+            String currentName = detailsActivity.getCurrentName();
+            curName.setVisibility(View.VISIBLE);
+            curName.setText("Current name: " + currentName);
+            newName.setVisibility(View.VISIBLE);
+            inputNewName.setVisibility(View.VISIBLE);
+            changeBtn.setVisibility(View.VISIBLE);
         }
 
         return layoutSupport;
