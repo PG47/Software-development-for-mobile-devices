@@ -83,27 +83,34 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             }
 
             float[] latLong = new float[2];
-            assert exif != null;
-            boolean hasLatLong = exif.getLatLong(latLong);
 
-            if (hasLatLong) {
-                String finalName = name;
-                Glide.with(requireContext())
-                        .asBitmap()
-                        .load(path)
-                        .into(new CustomTarget<Bitmap>() {
-                            @Override
-                            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                                Bitmap smallMarker = Bitmap.createScaledBitmap(resource, 150, 150, false);
-                                LatLng latLng = new LatLng(latLong[0], latLong[1]);
-                                googleMap.addMarker(new MarkerOptions().position(latLng).title(finalName)
-                                        .icon(BitmapDescriptorFactory.fromBitmap(smallMarker)));
-                                googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                            }
+            try {
+                exif = new ExifInterface(path);
+                boolean hasLatLong = exif.getLatLong(latLong);
 
-                            @Override
-                            public void onLoadCleared(@Nullable Drawable placeholder) { }
-                        });
+                if (hasLatLong) {
+                    String finalName = name;
+                    Glide.with(requireContext())
+                            .asBitmap()
+                            .load(path)
+                            .into(new CustomTarget<Bitmap>() {
+                                @Override
+                                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                    Bitmap smallMarker = Bitmap.createScaledBitmap(resource, 150, 150, false);
+                                    LatLng latLng = new LatLng(latLong[0], latLong[1]);
+                                    googleMap.addMarker(new MarkerOptions().position(latLng).title(finalName)
+                                            .icon(BitmapDescriptorFactory.fromBitmap(smallMarker)));
+                                    googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                                }
+
+                                @Override
+                                public void onLoadCleared(@Nullable Drawable placeholder) { }
+                            });
+                }
+            } catch (IOException e) {
+                Log.e("MapFragment", "Error reading EXIF data: " + e.getMessage());
+                e.printStackTrace();
+                // Handle the error gracefully, for example, by skipping this image
             }
         }
     }

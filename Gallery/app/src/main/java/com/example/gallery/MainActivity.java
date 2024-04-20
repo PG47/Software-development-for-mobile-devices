@@ -5,33 +5,16 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.credentials.ClearCredentialStateRequest;
-import androidx.credentials.CreateCredentialRequest;
-import androidx.credentials.CreateCredentialResponse;
-import androidx.credentials.Credential;
 import androidx.credentials.CredentialManager;
-import androidx.credentials.CredentialManagerCallback;
-import androidx.credentials.CustomCredential;
-import androidx.credentials.GetCredentialRequest;
-import androidx.credentials.GetCredentialResponse;
-import androidx.credentials.PrepareGetCredentialResponse;
-import androidx.credentials.exceptions.ClearCredentialException;
-import androidx.credentials.exceptions.CreateCredentialException;
-import androidx.credentials.exceptions.GetCredentialException;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.annotation.SuppressLint;
-import android.app.PendingIntent;
-import android.content.Context;
 import android.database.Cursor;
-import android.os.CancellationSignal;
+import android.os.Handler;
 import android.provider.MediaStore;
-import android.widget.ImageButton;
 
 
 import android.content.Intent;
@@ -45,7 +28,6 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
@@ -56,24 +38,15 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.tasks.Task;
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption;
-import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import org.opencv.android.OpenCVLoader;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.Executor;
 
 import okhttp3.FormBody;
 import okhttp3.Headers;
-import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -98,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
     private boolean insideAlbum = false;
     private boolean insideSearch = false;
     private boolean isSelectionMode = false;
+    private boolean isSecure = false;
     private static final String tag = "PERMISSION_TAG";
     private static final int REQUEST_PERMISSIONS = 1234;
     private static final String [] PERMISSIONS = {
@@ -229,7 +203,7 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
         f_headbar = HeadBarFragment.newInstance("first-headbar");
         ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.head_bar, f_headbar);
-        ft.addToBackStack(null); // Add transaction to the back stack
+        //ft.addToBackStack(null); // Add transaction to the back stack
         ft.commit();
 
         imagesFragment = new ImagesFragment();
@@ -278,7 +252,9 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
                 popupMenu.show();
                 return true;
             } else if (itemId == R.id.secure) {
-                selectOptions.secure();
+                if(!isSecure) {
+                    selectOptions.secure();
+                } else selectOptions.unlockSecure();
                 return true;
             } else if (itemId == R.id.delete) {
                 selectOptions.delete();
@@ -332,36 +308,6 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
         bottomNavigationView.setSelectedItemId(R.id.images);
     }
 
-//    private int sortOrder = 0; // Biến này lưu trạng thái hiện tại của thứ tự sắp xếp
-//
-//    private void sortImagesByOldestDate() {
-//        if (imagesFragment != null) {
-//            // Lấy danh sách các tệp ảnh từ imagesFragment
-//            ArrayList<File> images = imagesFragment.getImagesList();
-//
-//            // Kiểm tra xem danh sách có null hay không
-//            if (images != null) {
-//                // Sắp xếp danh sách hình ảnh theo thứ tự đã chọn
-//                Collections.sort(images, new Comparator<File>() {
-//                    @Override
-//                    public int compare(File file1, File file2) {
-//                        long lastModified1 = file1.lastModified();
-//                        long lastModified2 = file2.lastModified();
-//
-//                        // So sánh theo trạng thái sắp xếp hiện tại
-//                        if (sortOrder == 0) {
-//                            return Long.compare(lastModified1, lastModified2); // Sắp xếp theo cũ nhất
-//                        } else {
-//                            return Long.compare(lastModified2, lastModified1); // Sắp xếp theo mới nhất
-//                        }
-//                    }
-//                });
-//
-//                // Cập nhật giao diện sau khi sắp xếp
-//                imagesFragment.updateImages(images);
-//            }
-//        }
-//    }
 
     public void refreshImages() {
         if (imagesFragment != null && imagesFragment.adapter != null) {
@@ -488,6 +434,8 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
         }*/
     }
 
+
+    private boolean doubleBackToExitPressedOnce = false;
     @Override
     public void onBackPressed() {
         if (imagesFragment.isSelectionMode == true) {
@@ -502,8 +450,15 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
             closeSearch();
             return;
         }
+        if (doubleBackToExitPressedOnce) {
+            super.onBackPressed();
+            return;
+        }
 
-        super.onBackPressed();
+        this.doubleBackToExitPressedOnce = true;
+        Toast.makeText(this, "Press again to exit", Toast.LENGTH_SHORT).show();
+
+        new Handler().postDelayed(() -> doubleBackToExitPressedOnce=false, 2000);
     }
 
     @Override
@@ -519,15 +474,28 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
     }
 
     @Override
-    public void openAlbum(ArrayList<String> images) {
+    public void openAlbum(ArrayList<String> images, boolean secure, String album_name) {
         getSupportFragmentManager()
                 .beginTransaction()
                 .remove(imagesFragment)
                 .commit();
+        isSecure = secure;
 
-        imagesFragment = new ImagesFragment(images);
+        MenuItem secureMenuItem = bottomSelectView.getMenu().findItem(R.id.secure);
+
+        // Modify the icon and text based on the value of isSecure
+        if (isSecure) {
+            secureMenuItem.setIcon(R.mipmap.unclock_foreground); // Change to your unlock icon
+            secureMenuItem.setTitle("Unlock");
+            imagesFragment = new ImagesFragment(images,album_name);
+        } else {
+            imagesFragment = new ImagesFragment(images);
+        }
+
+
         selectOptions = (SelectOptions) imagesFragment;
         insideAlbum = true;
+
 
         getSupportFragmentManager()
                 .beginTransaction()

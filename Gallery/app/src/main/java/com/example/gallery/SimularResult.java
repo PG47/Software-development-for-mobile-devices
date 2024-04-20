@@ -31,8 +31,7 @@ public class SimularResult extends AppCompatActivity implements NavigationChange
         Intent intent = getIntent();
         ArrayList<String> images = intent.getStringArrayListExtra("ResultImages");
         if (images != null) {
-            imagesFragment = new ImagesFragment(images); // Pass the activity as NavigationAlbum
-
+            imagesFragment = new ImagesFragment(images,false);
         }
 
         selectOptions = (SelectOptions) imagesFragment;
@@ -126,15 +125,6 @@ public class SimularResult extends AppCompatActivity implements NavigationChange
         bottomSelectView.setVisibility(View.INVISIBLE);
     }
 
-    @Override
-    public void openAlbum(ArrayList<String> images) {
-
-    }
-
-    @Override
-    public void closeAlbum() {
-
-    }
 
     @Override
     public void openSearch(String keyword) {
@@ -143,6 +133,16 @@ public class SimularResult extends AppCompatActivity implements NavigationChange
 
     @Override
     public void closeSearch() {
+
+    }
+
+    @Override
+    public void openAlbum(ArrayList<String> images, boolean secure, String album_name) {
+
+    }
+
+    @Override
+    public void closeAlbum() {
 
     }
 }
