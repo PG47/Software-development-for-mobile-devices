@@ -9,9 +9,9 @@
         android:title="Edit"
         android:icon="@drawable/ic_edit_image_foreground"/>
     <item
-        android:id="@+id/camera"
-        android:title="Camera"
-        android:icon="@drawable/ic_camera_outline_foreground"/>
+        android:id="@+id/info"
+        android:icon="@mipmap/ic_info_foreground"
+        android:title="info" />
     <item
         android:id="@+id/delete"
         android:title="Delete"

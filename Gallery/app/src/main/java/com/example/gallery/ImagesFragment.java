@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -67,15 +68,8 @@ public class ImagesFragment extends Fragment implements SelectOptions {
     Boolean album = false;
     Boolean search = false;
 
-    String Secured_album = null;
+    String Secured_album = "";
     DatabaseHelper databaseHelper;
-//    private ArrayList<String> images = new ArrayList<>();
-//    private ImageAdapter adapter;
-//    private boolean isSelectionMode = false;
-//    private boolean active = false;
-//    private ImageButton selectAll;
-//    private ImageButton selectExit;
-//    private ImageButton exitAlbum;
     private static final int DETAILS_ACTIVITY_REQUEST_CODE = 1;
 
     private int sortOrder = 0;
@@ -92,6 +86,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
     //Show secured images in album
     public ImagesFragment(ArrayList<String> _images, String album_name) {
         images = _images;
+        album = true;
         Secured_album = album_name;
     }
 
@@ -99,10 +94,6 @@ public class ImagesFragment extends Fragment implements SelectOptions {
     public ImagesFragment(ArrayList<String> _images, Boolean srh) {
         search = srh;
         images = _images;
-    }
-
-    public void setSelectionMode(boolean st) {
-        isSelectionMode = st;
     }
 
     @Override
@@ -580,6 +571,12 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             return albumNames;
         }
 
+        private void refesh_after() {
+            for(int i:selectedPositions) {
+                images.remove(i);
+            }
+            notifyDataSetChanged();
+        }
         public void add_to_Album() {
             ArrayList<String> albumNames = getAllAlbums();
 
@@ -612,6 +609,8 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                 lp.gravity = Gravity.CENTER;
                 window.setAttributes(lp);
             }
+
+
         }
 
         private void moveImagesToAlbum(String albumName) {
@@ -629,6 +628,11 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
             // Move selected images to the target album directory
             for (int i : selectedPositions) {
+                //if it was the secured images, unlock it and remove from the secure album
+                if(!Secured_album.isEmpty()) {
+                    long r_img = databaseHelper.deleteImage(i, Secured_album);
+                }
+
                 // Get the source file
                 File sourceFile = new File(images.get(i));
 
@@ -652,6 +656,19 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                     e.printStackTrace();
                     Toast.makeText(requireContext(), "Error moving image: " + sourceFile.getName(), Toast.LENGTH_SHORT).show();
                 }
+            }
+
+            //if you moved all the img secure, delete the previous secured album
+            if(!Secured_album.isEmpty()) {
+                int count = databaseHelper.countImages_in_Album(Secured_album);
+                if(count==0) {
+                    databaseHelper.delete_Album(Secured_album);
+                }
+            }
+
+            //refresh
+            if(album){
+                refesh_after();
             }
 
             // Exit selection mode after moving images
@@ -786,7 +803,9 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
                 cursor.close();
             }
-            images = getAllShownImagesPath(context);
+            if(album || search) {
+                refesh_after();
+            } else images = getAllShownImagesPath(context);
             notifyDataSetChanged();
             ExitSelection();
         }
@@ -827,7 +846,77 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         }
 
         public void unlockSecure(){
+            int count = selectedPositions.size();
+            AlertDialog.Builder builder = getBuilder("Unlock selected images?",
+                    "This will unlock " + count + " item(s) permanently.", new CallbackDialog() {
+                        @Override
+                        public void onPositiveClick() {
+                            String[] projection = {MediaStore.Images.Media._ID};
 
+                            String selection = MediaStore.Images.Media.DATA + " = ?";
+                            Uri queryUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                            ContentResolver contentResolver = getActivity().getContentResolver();
+                            for (int i = 0; i < selectedPositions.size(); i++) {
+                                String[] selectionArgs = new String[]{images.get(selectedPositions.get(i))};
+
+                                Cursor cursor = contentResolver.query(queryUri, projection, selection, selectionArgs, null);
+
+                                assert cursor != null;
+                                int column_index_data = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
+
+                                if (cursor.moveToFirst()) {
+                                    long id = cursor.getLong(column_index_data);
+
+                                    String oldpath = databaseHelper.deleteImage(id);
+
+                                    File albumDir = new File(Environment.getExternalStorageDirectory(), "DCIM/" + oldpath);
+
+                                    if (!albumDir.exists()) {
+                                        // Create the target album directory if it doesn't exist
+                                        if (!albumDir.mkdirs()) {
+                                            // If directory creation fails, show an error toast and return
+                                            Toast.makeText(requireContext(), "Failed to create album directory", Toast.LENGTH_SHORT).show();
+                                            return;
+                                        }
+                                    }
+
+                                    // Get the source file
+                                    File sourceFile = new File(images.get(i));
+
+                                    // Get the destination file path
+                                    String destinationFilePath = albumDir.getPath() + "/" + sourceFile.getName();
+
+                                    // Create the destination file
+                                    File destinationFile = new File(destinationFilePath);
+
+                                    try {
+                                        // Perform the file move operation
+                                        if (sourceFile.renameTo(destinationFile)) {
+                                            // If move operation is successful, update the gallery database
+                                            MediaScannerConnection.scanFile(requireContext(), new String[]{destinationFilePath}, null, null);
+                                        } else {
+                                            // If move operation fails, show an error toast
+                                            Toast.makeText(requireContext(), "Failed to move image: " + sourceFile.getName(), Toast.LENGTH_SHORT).show();
+                                        }
+                                    } catch (Exception e) {
+                                        // If an exception occurs during the move operation, show an error toast
+                                        e.printStackTrace();
+                                        Toast.makeText(requireContext(), "Error moving image: " + sourceFile.getName(), Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+
+                                cursor.close();
+                            }
+                            int count = databaseHelper.countImages_in_Album(Secured_album);
+                            if (count == 0) {
+                                databaseHelper.delete_Album(Secured_album);
+                            }
+                            refesh_after();
+                            exitSelectionMode();
+                        }
+
+                    });
+            builder.show();
         }
 
         public void startShareIntent(ArrayList<Uri> selectedUris) {
@@ -949,7 +1038,8 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                         }
 
                         else {
-                            databaseHelper.insertImage(id, album_id, images.get(i));
+                            String oldpath = extractFolderPath(images.get(selectedPositions.get(i)));
+                            databaseHelper.insertImage(id, album_id, oldpath);
                         }
                     }
 
@@ -964,6 +1054,30 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                 Toast.makeText(requireContext(), "Error in securing images!", Toast.LENGTH_SHORT).show();
             }
         }
+
+        public String extractFolderPath(String oldpath) {
+            String[] parts = oldpath.split("/");
+            int dcimIndex = -1;
+            for (int i = 0; i < parts.length; i++) {
+                if (parts[i].equals("DCIM")) {
+                    dcimIndex = i;
+                    break;
+                }
+            }
+            if (dcimIndex != -1 && dcimIndex + 1 < parts.length) {
+                StringBuilder folderPath = new StringBuilder();
+                for (int i = dcimIndex + 1; i < parts.length-1; i++) {
+                    folderPath.append(parts[i]);
+                    if (i < parts.length - 2) {
+                        folderPath.append("/");
+                    }
+                }
+                return folderPath.toString();
+            }
+            return "";
+        }
+
+
 
 
         //Load lại ảnh khi cân thiết
