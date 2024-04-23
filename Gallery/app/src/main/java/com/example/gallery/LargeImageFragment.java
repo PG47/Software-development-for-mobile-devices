@@ -7,6 +7,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,7 +33,12 @@ import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LargeImageFragment extends Fragment {
     DetailsActivity detailsActivity;
@@ -39,6 +46,7 @@ public class LargeImageFragment extends Fragment {
     CropImageView cropImageView;
     Bitmap originalBitmap, tempBitmap;
     String imagePath;
+    DatabaseHelper databaseHelper;
 
     public static LargeImageFragment newInstance(String strArg) {
         LargeImageFragment fragment = new LargeImageFragment();
@@ -61,6 +69,15 @@ public class LargeImageFragment extends Fragment {
             throw new IllegalStateException("MainActivity must implement callbacks");
         }
     }
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof DetailsActivity) {
+            detailsActivity = (DetailsActivity) context;
+        } else {
+            throw new IllegalStateException("EditActivity must implement callbacks");
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -78,6 +95,8 @@ public class LargeImageFragment extends Fragment {
         imagePath = selectedImage;
         originalBitmap = BitmapFactory.decodeFile(selectedImage);
         tempBitmap = originalBitmap;
+
+        databaseHelper = new DatabaseHelper(context);
 
         cropImageView = (CropImageView) layoutImage.findViewById(R.id.cropImageView);
         cropImageView.setImageBitmap(originalBitmap);
@@ -124,6 +143,52 @@ public class LargeImageFragment extends Fragment {
         SparseArray<Face> faces = faceDetector.detect(frame);
         tempBitmap = drawRectanglesOnBitmap(faces);
         cropImageView.setImageBitmap(tempBitmap);
+        extractFaceBitmaps(faces);
+    }
+    public void extractFaceBitmaps(SparseArray<Face> faces) {
+        List<Bitmap> faceBitmaps = new ArrayList<>();
+
+        for (int i = 0; i < faces.size(); i++) {
+            Face face = faces.valueAt(i);
+
+            float x = face.getPosition().x;
+            float y = face.getPosition().y;
+            float width = face.getWidth();
+            float height = face.getHeight();
+
+            Bitmap faceBitmap = Bitmap.createBitmap(originalBitmap, (int) x, (int) y, (int) width, (int) height);
+
+            faceBitmaps.add(faceBitmap);
+        }
+
+        List<String> filePaths = new ArrayList<>();
+        List<String> expectedNames = new ArrayList<>();
+        for (Bitmap bitmap : faceBitmaps) {
+            String filePath = saveBitmapToFile(bitmap);
+            filePaths.add(filePath);
+
+            String name = databaseHelper.getExpectedName(bitmap);
+            expectedNames.add(name);
+        }
+
+        Intent intent = new Intent(detailsActivity, AddNameForFaceActivity.class);
+        intent.putStringArrayListExtra("filePaths", (ArrayList<String>) filePaths);
+        intent.putStringArrayListExtra("expectedNames", (ArrayList<String>) expectedNames);
+        startActivity(intent);
+    }
+    private String saveBitmapToFile(Bitmap bitmap) {
+        File file = new File(getContext().getCacheDir(), "temp_image_" + System.currentTimeMillis() + ".png");
+
+        try {
+            FileOutputStream fos = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.flush();
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return file.getAbsolutePath();
     }
     public Bitmap drawRectanglesOnBitmap(@NonNull SparseArray<Face> faces) {
         Bitmap bitmapCopy = originalBitmap.copy(Bitmap.Config.ARGB_8888, true);
