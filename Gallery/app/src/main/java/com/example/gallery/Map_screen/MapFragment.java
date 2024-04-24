@@ -41,6 +41,7 @@ import java.util.ArrayList;
 public class MapFragment extends Fragment implements OnMapReadyCallback {
     private ArrayList<String> images;
     private ArrayList<String> imagesName;
+    private boolean active = false;
 
     public MapFragment() {
         // Required empty public constructor
@@ -71,49 +72,62 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        active = false;
+    }
+
+    @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
-        for (int i = 0; i < images.size(); i++) {
-            String path = images.get(i), name = imagesName.get(i);
-            name = name.substring(0, Math.min(name.length(), 10)) + "...";
+        active = true;
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < images.size(); i++) {
+                    String path = images.get(i), name = imagesName.get(i);
+                    name = name.substring(0, Math.min(name.length(), 10)) + "...";
 
-            ExifInterface exif = null;
-            try {
-                exif = new ExifInterface(path);
-            } catch (IOException e) {
-                Log.d("GEO", "No Exif");
-            }
+                    ExifInterface exif = null;
+                    try {
+                        exif = new ExifInterface(path);
+                    } catch (IOException e) {
+                        Log.d("GEO", "No Exif");
+                    }
 
-            float[] latLong = new float[2];
+                    float[] latLong = new float[2];
 
-            try {
-                exif = new ExifInterface(path);
-                boolean hasLatLong = exif.getLatLong(latLong);
+                    try {
+                        exif = new ExifInterface(path);
+                        boolean hasLatLong = exif.getLatLong(latLong);
 
-                if (hasLatLong) {
-                    String finalName = name;
-                    Glide.with(requireContext())
-                            .asBitmap()
-                            .load(path)
-                            .into(new CustomTarget<Bitmap>() {
-                                @Override
-                                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                                    Bitmap smallMarker = Bitmap.createScaledBitmap(resource, 150, 150, false);
-                                    LatLng latLng = new LatLng(latLong[0], latLong[1]);
-                                    googleMap.addMarker(new MarkerOptions().position(latLng).title(finalName)
-                                            .icon(BitmapDescriptorFactory.fromBitmap(smallMarker)));
-                                    googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                                }
+                        if (hasLatLong) {
+                            if (!active) return;
+                            String finalName = name;
+                            Glide.with(requireContext())
+                                    .asBitmap()
+                                    .load(path)
+                                    .into(new CustomTarget<Bitmap>() {
+                                        @Override
+                                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                            Bitmap smallMarker = Bitmap.createScaledBitmap(resource, 150, 150, false);
+                                            LatLng latLng = new LatLng(latLong[0], latLong[1]);
+                                            googleMap.addMarker(new MarkerOptions().position(latLng).title(finalName)
+                                                    .icon(BitmapDescriptorFactory.fromBitmap(smallMarker)));
+                                            googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                                        }
 
-                                @Override
-                                public void onLoadCleared(@Nullable Drawable placeholder) { }
-                            });
+                                        @Override
+                                        public void onLoadCleared(@Nullable Drawable placeholder) { }
+                                    });
+                        }
+                    } catch (IOException e) {
+                        Log.e("MapFragment", "Error reading EXIF data: " + e.getMessage());
+                        e.printStackTrace();
+                    }
                 }
-            } catch (IOException e) {
-                Log.e("MapFragment", "Error reading EXIF data: " + e.getMessage());
-                e.printStackTrace();
-                // Handle the error gracefully, for example, by skipping this image
             }
-        }
+        });
+        thread.start();
     }
 
     private void getAllImages() {
