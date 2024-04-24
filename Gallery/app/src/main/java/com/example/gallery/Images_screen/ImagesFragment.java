@@ -150,17 +150,17 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             }
         }
         if (sortOrder == 0) {
-            Toast.makeText(requireContext(), "Sort images from newest date", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Images sorted from Newest Date", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(requireContext(), "Sort images from oldest date", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Images sorted from Oldest Date", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void showDateOptionDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle("Chọn thời gian");
+        builder.setTitle("Choose time");
 
-        String[] options = {"Chọn năm", "Toàn thời gian"};
+        String[] options = {"Specific date", "All-time"};
 
         builder.setItems(options, new DialogInterface.OnClickListener() {
             @Override
@@ -180,7 +180,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
     private void showYearPickerDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle("Chọn năm");
+        builder.setTitle("Choose year");
 
         // Tính toán danh sách các năm từ năm 1970 đến năm hiện tại
         int currentYear = Calendar.getInstance().get(Calendar.YEAR);
@@ -201,11 +201,11 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         builder.show();
     }
 
+    private final String[] monthsArray = new String[]{"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+
     private void showMonthPickerDialog(final int selectedYear) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle("Chọn tháng");
-
-        String[] monthsArray = new String[]{"Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"};
+        builder.setTitle("Choose month");
 
         builder.setItems(monthsArray, new DialogInterface.OnClickListener() {
             @Override
@@ -241,7 +241,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         }
 
         if (imagesInRange.isEmpty()) {
-            Toast.makeText(requireContext(), "Không có ảnh trong tháng " + month + " năm " + year, Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "No images found in " + monthsArray[month - 1] + " of " + year, Toast.LENGTH_SHORT).show();
         } else {
             updateImage(imagesInRange);
         }
