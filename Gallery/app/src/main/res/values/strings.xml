@@ -13,4 +13,5 @@
     \"include\": \"https://royalmike.com/.well-known/assetlinks.json\"
     }]
     </string>
+    <string name="search_hint">Search for images...</string>
 </resources>

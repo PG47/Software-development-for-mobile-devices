@@ -48,6 +48,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
@@ -70,7 +71,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class SearchFragment extends Fragment {
-    ImageButton Search_button;
+    Button Search_button;
     TextInputLayout InputLayout;
     TextInputEditText TextField;
     //AlbumAdapter adapter;
@@ -99,7 +100,9 @@ public class SearchFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 // Get the text from the TextInputEditText
-                String searchText = TextField.getText().toString().trim();
+                String searchText = TextField.getText().toString();
+                if (searchText.isEmpty()) return;
+                searchText = searchText.trim();
                 openSearch.openSearch(searchText);
             }
         });

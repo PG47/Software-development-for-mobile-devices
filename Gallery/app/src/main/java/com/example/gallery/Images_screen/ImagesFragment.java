@@ -150,9 +150,9 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             }
         }
         if (sortOrder == 0) {
-            Toast.makeText(requireContext(), "Images sorted from Newest Date", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Images sorted from\nNewest Date", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(requireContext(), "Images sorted from Oldest Date", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Images sorted from\nOldest Date", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -241,7 +241,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         }
 
         if (imagesInRange.isEmpty()) {
-            Toast.makeText(requireContext(), "No images found in " + monthsArray[month - 1] + " of " + year, Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "No images found in\n" + monthsArray[month - 1] + " of " + year, Toast.LENGTH_SHORT).show();
         } else {
             updateImage(imagesInRange);
         }
