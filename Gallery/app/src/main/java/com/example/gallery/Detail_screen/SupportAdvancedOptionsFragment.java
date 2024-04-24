@@ -1,9 +1,15 @@
 package com.example.gallery.Detail_screen;
 
+import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +18,7 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
@@ -85,11 +92,54 @@ public class SupportAdvancedOptionsFragment extends Fragment {
         actionDone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // Extract text
                 text = detailsActivity.extractText();
-                textFromImage.setText(text);
-                textScroll.setVisibility(View.VISIBLE);
-                textFromImage.setVisibility(View.VISIBLE);
-                view.setVisibility(View.GONE);
+
+                // Create a dialog
+                AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+                builder.setTitle("Text from Image");
+
+                // Set the text
+                final TextView textView = new TextView(requireContext());
+                textView.setText(text);
+                textView.setBackgroundColor(Color.WHITE);
+                textView.setTextColor(Color.BLACK);
+                textView.setPadding(16, 16, 16, 16);
+                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+                textView.setTextIsSelectable(true); // Allow text selection
+
+                // Add long-click listener to copy text
+                textView.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        // Copy text to clipboard
+                        ClipboardManager clipboard = (ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                        ClipData clip = ClipData.newPlainText("Text", textView.getText());
+                        clipboard.setPrimaryClip(clip);
+
+                        // Show toast indicating text is copied
+                        Toast.makeText(requireContext(), "Text copied to clipboard", Toast.LENGTH_SHORT).show();
+
+                        return true; // Indicate that the long-click event is consumed
+                    }
+                });
+
+                // Add the text view to the dialog layout
+                builder.setView(textView);
+
+                // Set buttons
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                        // Call the listener method to dismiss the fragment
+                        requireActivity().getSupportFragmentManager().popBackStack();
+                    }
+                });
+
+                // Show the dialog
+                AlertDialog dialog = builder.create();
+                dialog.show();
             }
         });
 

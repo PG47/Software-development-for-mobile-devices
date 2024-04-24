@@ -6,7 +6,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.media.ExifInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -42,7 +44,8 @@ import java.util.List;
 public class LargeImageFragment extends Fragment {
     DetailsActivity detailsActivity;
     Context context = null;
-    CropImageView cropImageView;
+    CropImageView cropImageView=null;
+    PhotoView photoView;
     Bitmap originalBitmap, tempBitmap;
     String imagePath;
     DatabaseHelper databaseHelper;
@@ -61,18 +64,7 @@ public class LargeImageFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        PhotoView photoView = view.findViewById(R.id.photoView);
-        photoView.setOnTouchListener(new OnSwipeTouchListener(requireContext()) {
-            public void onSwipeRight() {
-                imagePath = getNextImagePath(imagePath, images, -1);
-                updateImage();
-            }
-
-            public void onSwipeLeft() {
-                imagePath = getNextImagePath(imagePath, images, 1);
-                updateImage();
-            }
-        });
+        photoView = view.findViewById(R.id.photoView);
     }
 
     @Override
@@ -119,14 +111,35 @@ public class LargeImageFragment extends Fragment {
         tempBitmap = originalBitmap;
 
         databaseHelper = new DatabaseHelper(context);
+        int orientation = getOrientation(imagePath);
+
+        // Rotate the bitmap based on the orientation
+        Bitmap rotatedBitmap = rotateBitmap(originalBitmap, orientation);
 
         PhotoView photoView = layoutImage.findViewById(R.id.photoView);
-        photoView.setImageBitmap(originalBitmap);
+        photoView.setImageBitmap(rotatedBitmap);
+
+        photoView.setOnTouchListener(new OnSwipeTouchListener(requireContext()) {
+            public void onSwipeRight() {
+                imagePath = getNextImagePath(imagePath, images, -1);
+                updateImage();
+            }
+
+            public void onSwipeLeft() {
+                imagePath = getNextImagePath(imagePath, images, 1);
+                updateImage();
+            }
+        });
+
+        cropImageView = layoutImage.findViewById(R.id.cropImageView);
+        cropImageView.setImageBitmap(rotatedBitmap);
+        cropImageView.setVisibility(View.GONE);
 
         return layoutImage;
     }
 
     public void executeShowCropOverlay() {
+        cropImageView.setVisibility(View.VISIBLE); // Show CropImageView
         cropImageView.setShowCropOverlay(true);
     }
     public String executeExtractText() {
@@ -254,15 +267,49 @@ public class LargeImageFragment extends Fragment {
 
     public void updateImage() {
         originalBitmap = BitmapFactory.decodeFile(imagePath);
-        tempBitmap = originalBitmap;
 
-        // Update the ImageView with the new bitmap
+        // Read the orientation information from the image file
+        int orientation = getOrientation(imagePath);
+
+        // Rotate the bitmap based on the orientation
+        Bitmap rotatedBitmap = rotateBitmap(originalBitmap, orientation);
+
+        // Update the ImageView with the rotated bitmap
         if (getView() != null) {
             PhotoView photoView = getView().findViewById(R.id.photoView);
-            photoView.setImageBitmap(originalBitmap);
+            photoView.setImageBitmap(rotatedBitmap);
+            cropImageView = getView().findViewById(R.id.cropImageView);
+            cropImageView.setImageBitmap(rotatedBitmap);
         }
     }
 
+    // Method to get the orientation of the image
+    private int getOrientation(String imagePath) {
+        try {
+            ExifInterface exif = new ExifInterface(imagePath);
+            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+            switch (orientation) {
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    return 90;
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    return 180;
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    return 270;
+                default:
+                    return 0;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    // Method to rotate the bitmap based on orientation
+    private Bitmap rotateBitmap(Bitmap bitmap, int orientation) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(orientation);
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+    }
     private String getNextImagePath(String currentImagePath, ArrayList<String> imageList, int direction) {
         int currentIndex = imageList.indexOf(currentImagePath);
         int nextIndex = currentIndex + direction;
@@ -276,4 +323,5 @@ public class LargeImageFragment extends Fragment {
 
         return imageList.get(nextIndex);
     }
+
 }
