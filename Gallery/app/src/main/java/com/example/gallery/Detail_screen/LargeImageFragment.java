@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
@@ -45,6 +46,7 @@ public class LargeImageFragment extends Fragment {
     Bitmap originalBitmap, tempBitmap;
     String imagePath;
     DatabaseHelper databaseHelper;
+    private ArrayList<String> images;
 
     public static LargeImageFragment newInstance(String strArg) {
         LargeImageFragment fragment = new LargeImageFragment();
@@ -52,6 +54,25 @@ public class LargeImageFragment extends Fragment {
         args.putString("strArg1", strArg);
         fragment.setArguments(args);
         return fragment;
+    }
+
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        PhotoView photoView = view.findViewById(R.id.photoView);
+        photoView.setOnTouchListener(new OnSwipeTouchListener(requireContext()) {
+            public void onSwipeRight() {
+                imagePath = getNextImagePath(imagePath, images, -1);
+                updateImage();
+            }
+
+            public void onSwipeLeft() {
+                imagePath = getNextImagePath(imagePath, images, 1);
+                updateImage();
+            }
+        });
     }
 
     @Override
@@ -89,9 +110,12 @@ public class LargeImageFragment extends Fragment {
             }
         }
 
-        String selectedImage = getArguments().getString("selectedImage");
-        imagePath = selectedImage;
-        originalBitmap = BitmapFactory.decodeFile(selectedImage);
+        Bundle args = getArguments();
+        if (args != null) {
+            imagePath = args.getString("selectedImage");
+            images = args.getStringArrayList("imageList");
+        }
+        originalBitmap = BitmapFactory.decodeFile(imagePath);
         tempBitmap = originalBitmap;
 
         databaseHelper = new DatabaseHelper(context);
@@ -226,5 +250,30 @@ public class LargeImageFragment extends Fragment {
             return true;
         }
         return false;
+    }
+
+    public void updateImage() {
+        originalBitmap = BitmapFactory.decodeFile(imagePath);
+        tempBitmap = originalBitmap;
+
+        // Update the ImageView with the new bitmap
+        if (getView() != null) {
+            PhotoView photoView = getView().findViewById(R.id.photoView);
+            photoView.setImageBitmap(originalBitmap);
+        }
+    }
+
+    private String getNextImagePath(String currentImagePath, ArrayList<String> imageList, int direction) {
+        int currentIndex = imageList.indexOf(currentImagePath);
+        int nextIndex = currentIndex + direction;
+
+        // Ensure next index stays within bounds
+        if (nextIndex < 0) {
+            nextIndex = imageList.size() - 1; // Wrap around to the last image
+        } else if (nextIndex >= imageList.size()) {
+            nextIndex = 0; // Wrap around to the first image
+        }
+
+        return imageList.get(nextIndex);
     }
 }

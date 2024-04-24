@@ -275,6 +275,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                 // Xử lý sự kiện khi click vào một item
                 Intent intent = new Intent(requireContext(), DetailsActivity.class);
                 intent.putExtra("SelectedImage", images.get(position));
+                intent.putStringArrayListExtra("ImageList", images);
                 //startActivity(intent);
                 startActivityForResult(intent, DETAILS_ACTIVITY_REQUEST_CODE);
             } else {

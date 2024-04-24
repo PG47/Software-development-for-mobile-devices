@@ -1,5 +1,7 @@
 package com.example.gallery.Detail_screen;
 
+import static androidx.core.content.ContentProviderCompat.requireContext;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
@@ -11,6 +13,8 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -40,6 +44,7 @@ public class DetailsActivity extends AppCompatActivity {
     OptionFragment fragmentOption;
     Boolean optionsHidden;
     Boolean showAdvancedOptions = false;
+    private ArrayList<String> images;
 
     private OnImageChangeListener onImageNewChangeListener;
 
@@ -50,6 +55,7 @@ public class DetailsActivity extends AppCompatActivity {
     public interface OnImageChangeListener {
         void onChange();
     }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,8 +69,11 @@ public class DetailsActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         img_path = intent.getStringExtra("SelectedImage");
+        ArrayList<String> images = intent.getStringArrayListExtra("ImageList"); // Receive the list of images
+
         Bundle bundle = new Bundle();
         bundle.putString("selectedImage", img_path);
+        bundle.putStringArrayList("imageList", images);
 
 
         headDetailsFragment.setArguments(bundle);
@@ -113,6 +122,7 @@ public class DetailsActivity extends AppCompatActivity {
             }
         });
 
+
         fragmentOption.setOnImageDeleteListener(new OptionFragment.OnImageDeleteListener() {
             @Override
             public void onImageDeleted() {
@@ -124,6 +134,8 @@ public class DetailsActivity extends AppCompatActivity {
             }
         });
     }
+
+
     public void replaceAdvancedOptionFragment() {
         if (showAdvancedOptions == false) {
             AdvancedOptionsFragment advancedOptionsFragment = AdvancedOptionsFragment.newInstance("AdvancedOptions");
