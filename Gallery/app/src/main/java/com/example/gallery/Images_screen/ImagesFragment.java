@@ -307,7 +307,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                 if (!active) {
                     adapter.toggleSelectAll();
                     active = true;
-                    icon.setColorFilter(Color.GREEN, PorterDuff.Mode.SRC_IN);
+                    icon.setColorFilter(getResources().getColor(R.color.selected_color), PorterDuff.Mode.SRC_IN);
                     selectAll.setImageDrawable(icon);
                 } else {
                     adapter.toggleDeSelectAll();
@@ -947,14 +947,14 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
             // Create an AlertDialog name album
             AlertDialog.Builder album = new AlertDialog.Builder(requireContext());
-            album.setTitle("Create a new secure Album");
-            album.setMessage("Enter the name for the secure album:");
+            album.setTitle("Create a new Secured Album");
+            album.setMessage("Enter the name for the Secured Album:");
 
             // Add the EditText view to the dialog
             album.setView(name);
 
             // Set positive button for user confirmation
-            album.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            album.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     String albumName = name.getText().toString().trim();
