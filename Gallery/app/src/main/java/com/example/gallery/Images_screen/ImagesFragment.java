@@ -158,9 +158,9 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
     private void showDateOptionDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle("Choose time");
+        builder.setTitle("Chọn thời gian");
 
-        String[] options = {"Specific date", "All-time"};
+        String[] options = {"Chọn năm", "Toàn thời gian"};
 
         builder.setItems(options, new DialogInterface.OnClickListener() {
             @Override
@@ -180,7 +180,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
     private void showYearPickerDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle("Choose year");
+        builder.setTitle("Chọn năm");
 
         // Tính toán danh sách các năm từ năm 1970 đến năm hiện tại
         int currentYear = Calendar.getInstance().get(Calendar.YEAR);
@@ -201,11 +201,11 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         builder.show();
     }
 
-    private final String[] monthsArray = new String[]{"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
-
     private void showMonthPickerDialog(final int selectedYear) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle("Choose month");
+        builder.setTitle("Chọn tháng");
+
+        String[] monthsArray = new String[]{"Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"};
 
         builder.setItems(monthsArray, new DialogInterface.OnClickListener() {
             @Override
@@ -241,21 +241,49 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         }
 
         if (imagesInRange.isEmpty()) {
-            Toast.makeText(requireContext(), "No images found in\n" + monthsArray[month - 1] + " of " + year, Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Không có ảnh trong tháng " + month + " năm " + year, Toast.LENGTH_SHORT).show();
         } else {
-            updateImage(imagesInRange);
+            updateImages(imagesInRange);
         }
     }
 
     private void displayAllImages() {
         // Hiển thị toàn bộ các ảnh trong ứng dụng
-        updateImage(images);
+        updateImages(getAllImagesPaths()); // Cập nhật danh sách ảnh với tất cả ảnh trong hệ thống
     }
 
-    private void updateImage(ArrayList<String> updatedImages) {
+    private ArrayList<String> getAllImagesPaths() {
+        ArrayList<String> allImagesPaths = new ArrayList<>();
+
+        // Lấy tất cả các ảnh từ MediaStore và thêm vào danh sách
+        ContentResolver contentResolver = requireContext().getContentResolver(); // Truy cập ContentResolver thông qua Context
+        Cursor cursor = contentResolver.query(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                new String[]{MediaStore.Images.Media.DATA},
+                null,
+                null,
+                null
+        );
+
+        if (cursor != null) {
+            int dataIndex = cursor.getColumnIndex(MediaStore.Images.Media.DATA); // Lấy chỉ mục của cột DATA
+            while (cursor.moveToNext()) {
+                String imagePath = cursor.getString(dataIndex);
+                allImagesPaths.add(imagePath);
+            }
+            cursor.close();
+        }
+
+        return allImagesPaths;
+    }
+
+
+
+    // Thay đổi phương thức updateImages để nhận danh sách đường dẫn của ảnh
+    public void updateImages(ArrayList<String> updatedImagePaths) {
         // Cập nhật danh sách ảnh với danh sách mới
         images.clear();
-        images.addAll(updatedImages);
+        images.addAll(updatedImagePaths);
 
         // Cập nhật adapter
         if (adapter != null) {
@@ -1173,16 +1201,5 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         return fileList;
     }
 
-    public void updateImages(ArrayList<File> sortedImages) {
-        // Cập nhật danh sách ảnh mới
-        this.images.clear();
-        for (File file : sortedImages) {
-            this.images.add(file.getPath()); // Chuyển đổi File thành đường dẫn String
-        }
 
-        // Cập nhật lại giao diện
-        if (adapter != null) {
-            adapter.notifyDataSetChanged();
-        }
-    }
 }
