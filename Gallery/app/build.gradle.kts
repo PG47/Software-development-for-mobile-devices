@@ -56,7 +56,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:3.10.0")
     implementation("com.google.android.gms:play-services-vision:20.1.3")
 
-
+    implementation ("com.github.chrisbanes:PhotoView:2.0.0")
 
     implementation("com.google.android.gms:play-services-maps:18.2.0")
 }
