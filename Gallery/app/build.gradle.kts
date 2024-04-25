@@ -32,6 +32,7 @@ android {
 }
 
 dependencies {
+    implementation(platform("com.google.firebase:firebase-bom:32.8.1"))
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation(project(":OpenCC"))
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")

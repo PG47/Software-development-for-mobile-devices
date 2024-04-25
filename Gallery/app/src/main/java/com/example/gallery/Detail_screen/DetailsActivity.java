@@ -1,7 +1,5 @@
 package com.example.gallery.Detail_screen;
 
-import static androidx.core.content.ContentProviderCompat.requireContext;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
@@ -13,8 +11,6 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -22,7 +18,6 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.example.gallery.DatabaseHelper;
 import com.example.gallery.Edit_tool_screen.SimularResult;
-import com.example.gallery.Images_screen.OptionFragment;
 import com.example.gallery.R;
 
 import java.io.File;
@@ -36,7 +31,7 @@ import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
-public class DetailsActivity extends AppCompatActivity {
+public class DetailsActivity extends AppCompatActivity implements LargeImageFragment.OnImageChangeListener {
     FragmentTransaction ft;
     HeadDetailsFragment headDetailsFragment;
     LargeImageFragment fragmentImage;
@@ -48,14 +43,14 @@ public class DetailsActivity extends AppCompatActivity {
 
     private OnImageChangeListener onImageNewChangeListener;
 
-    public void setOnImageChangeListener(OnImageChangeListener onImageChangeListener) {
-        this.onImageNewChangeListener = onImageChangeListener;
-    }
-
     public interface OnImageChangeListener {
         void onChange();
     }
 
+    @Override
+    public void onImageChanged(String newImagePath) {
+        fragmentOption.OnChangeImage(newImagePath);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +60,7 @@ public class DetailsActivity extends AppCompatActivity {
 
         headDetailsFragment = HeadDetailsFragment.newInstance("header");
         fragmentImage = LargeImageFragment.newInstance("image");
+        fragmentImage.setOnImageChangeListener(this);
         fragmentOption = OptionFragment.newInstance("option");
 
         Intent intent = getIntent();
