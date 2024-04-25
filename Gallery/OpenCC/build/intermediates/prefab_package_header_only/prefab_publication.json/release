@@ -1,5 +1,5 @@
 {
-  "installationFolder": "C:\\Users\\ASUS\\Documents\\mobile app dev\\Software-development-for-mobile-devices\\Gallery\\OpenCC\\build\\intermediates\\prefab_package\\release\\prefab",
+  "installationFolder": "D:\\GitHub\\Software-development-for-mobile-devices\\Gallery\\OpenCC\\build\\intermediates\\prefab_package\\release\\prefab",
   "gradlePath": ":OpenCC",
   "packageInfo": {
     "packageName": "OpenCC",
@@ -8,7 +8,7 @@
     "modules": [
       {
         "moduleName": "opencv_jni_shared",
-        "moduleHeaders": "C:\\Users\\ASUS\\Documents\\mobile app dev\\Software-development-for-mobile-devices\\Gallery\\OpenCC\\native\\jni\\include",
+        "moduleHeaders": "D:\\GitHub\\Software-development-for-mobile-devices\\Gallery\\OpenCC\\native\\jni\\include",
         "moduleExportLibraries": [],
         "abis": []
       }
