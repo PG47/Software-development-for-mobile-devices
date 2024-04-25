@@ -53,11 +53,17 @@ import com.example.gallery.NavigationAlbum;
 import com.example.gallery.NavigationChange;
 import com.example.gallery.NavigationSearch;
 import com.example.gallery.R;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.UUID;
 
 public class ImagesFragment extends Fragment implements SelectOptions {
     ImageButton selectAll;
@@ -72,7 +78,8 @@ public class ImagesFragment extends Fragment implements SelectOptions {
     public ImageAdapter adapter;
     Boolean album = false;
     Boolean search = false;
-
+    private FirebaseStorage storage;
+    private StorageReference storageReference;
     String Secured_album = "";
     DatabaseHelper databaseHelper;
     private static final int DETAILS_ACTIVITY_REQUEST_CODE = 1;
@@ -108,6 +115,8 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         closeAlbum = (NavigationAlbum) requireActivity();
         closeSearch = (NavigationSearch) requireActivity();
         databaseHelper = new DatabaseHelper(requireActivity());
+        storage = FirebaseStorage.getInstance();
+        storageReference = storage.getReference();
     }
 
     @Override
@@ -1111,13 +1120,85 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             return "";
         }
 
-
-
-
         //Load lại ảnh khi cân thiết
         public void reloadImages() {
             images = getAllShownImagesPath(context);
             adapter.notifyDataSetChanged();
+        }
+
+        public void getUriForCloud() {
+            ArrayList<Uri> selectedUris = new ArrayList<>();
+            for (int i : selectedPositions) {
+                Glide.with(requireContext())
+                        .asBitmap()
+                        .load(images.get(i))
+                        .into(new CustomTarget<Bitmap>() {
+                            @Override
+                            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                try {
+                                    File tempFile = File.createTempFile("image", ".jpg", context.getCacheDir());
+                                    FileOutputStream outputStream = new FileOutputStream(tempFile);
+
+                                    resource.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+                                    outputStream.flush();
+                                    outputStream.close();
+
+                                    Uri uri = FileProvider.getUriForFile(context, context.getPackageName() + ".file-provider", tempFile);
+                                    selectedUris.add(uri);
+
+                                    if (selectedUris.size() == selectedPositions.size()) {
+                                        uploadCloud(selectedUris);
+                                    }
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+
+                            @Override
+                            public void onLoadCleared(@Nullable Drawable placeholder) {
+                            }
+                        });
+            }
+        }
+
+        public void uploadCloud(ArrayList<Uri> selectedUris) {
+            final boolean[] failed = {false};
+            final int[] count = {0};
+            final int size = selectedUris.size();
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
+            builder.setTitle("Uploading images...");
+            builder.setMessage("Uploaded 0 of " + size + " image(s)");
+
+            AlertDialog dialog = builder.create();
+            dialog.show();
+
+            for (Uri uri : selectedUris) {
+                if (failed[0]) break;
+                final String randomKey = UUID.randomUUID().toString();
+                StorageReference uploadRef = storageReference.child("images/" + randomKey);
+
+                uploadRef.putFile(uri)
+                        .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                count[0]++;
+                                dialog.setMessage("Uploaded " + count[0] + " of " + size + " image(s)");
+                                if (count[0] == size) {
+                                    dialog.dismiss();
+                                    Toast.makeText(context, "Uploaded " + selectedUris.size() + " image(s) to Cloud.", Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                failed[0] = true;
+                                dialog.dismiss();
+                                Toast.makeText(context, "Failed to upload, please try again later.", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+            }
         }
     }
 
@@ -1166,6 +1247,11 @@ public class ImagesFragment extends Fragment implements SelectOptions {
     @Override
     public void newAlbum() {
         adapter.add_to_new_Album();
+    }
+
+    @Override
+    public void uploadCloud() {
+        adapter.getUriForCloud();
     }
 
     @Override
