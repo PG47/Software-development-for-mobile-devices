@@ -7,7 +7,7 @@
         <item>Serif</item>
         <item>Default bold</item>
     </string-array>
-    <string name="server_client_id">940590519147-pe9khmstolbsdeb4tngd8t8dprf217pp.apps.googleusercontent.com</string>
+    <string name="server_client_id">940590519147-20ita3dogec0hb685bcfpp2mnqi9akl5.apps.googleusercontent.com</string>
     <string name="asset_statements" translatable="false">
     [{
     \"include\": \"https://royalmike.com/.well-known/assetlinks.json\"
