@@ -167,9 +167,9 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
     private void showDateOptionDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle("Chọn thời gian");
+        builder.setTitle("Choose time:");
 
-        String[] options = {"Chọn năm", "Toàn thời gian"};
+        String[] options = {"Choose year", "All time"};
 
         builder.setItems(options, new DialogInterface.OnClickListener() {
             @Override
@@ -189,7 +189,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
     private void showYearPickerDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle("Chọn năm");
+        builder.setTitle("Choose year");
 
         // Tính toán danh sách các năm từ năm 1970 đến năm hiện tại
         int currentYear = Calendar.getInstance().get(Calendar.YEAR);
@@ -212,9 +212,9 @@ public class ImagesFragment extends Fragment implements SelectOptions {
 
     private void showMonthPickerDialog(final int selectedYear) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle("Chọn tháng");
+        builder.setTitle("Choose month");
 
-        String[] monthsArray = new String[]{"Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"};
+        String[] monthsArray = new String[]{"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 
         builder.setItems(monthsArray, new DialogInterface.OnClickListener() {
             @Override
