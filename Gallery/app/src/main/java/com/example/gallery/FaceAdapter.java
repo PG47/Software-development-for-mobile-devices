@@ -14,15 +14,17 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.Objects;
+
 public class FaceAdapter extends BaseAdapter {
     private Context context;
     Bitmap[] facesBitmap;
     String[] names;
 
-    public FaceAdapter(Context activityContext, Bitmap[] allFaces) {
+    public FaceAdapter(Context activityContext, Bitmap[] allFaces, String[] allNames) {
         context = activityContext;
         facesBitmap = allFaces;
-        names = new String[allFaces.length];
+        names = allNames;
     }
 
     @Override
@@ -89,7 +91,7 @@ public class FaceAdapter extends BaseAdapter {
         holder.imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         holder.imageView.setImageBitmap(facesBitmap[i]);
         holder.textView.setText("Name:");
-        holder.editText.setHint("Enter name");
+        holder.editText.setText(names[i]);
 
         return view;
     }

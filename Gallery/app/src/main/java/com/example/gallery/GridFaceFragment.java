@@ -19,12 +19,14 @@ public class GridFaceFragment extends Fragment {
     Context context;
     GridView gridView;
     static Bitmap[] bitmaps;
+    static String[] names;
 
-    public static GridFaceFragment newInstance(String strArg, Bitmap[] listBitmaps) {
+    public static GridFaceFragment newInstance(String strArg, Bitmap[] listBitmaps, String[] listNames) {
         GridFaceFragment fragment = new GridFaceFragment();
         Bundle args = new Bundle();
         args.putString("strArg1", strArg);
         bitmaps = listBitmaps;
+        names = listNames;
         fragment.setArguments(args);
         return fragment;
     }
@@ -66,7 +68,7 @@ public class GridFaceFragment extends Fragment {
         }
 
         gridView = (GridView) gridLayer.findViewById(R.id.myGrid);
-        gridView.setAdapter(new FaceAdapter(context, bitmaps));
+        gridView.setAdapter(new FaceAdapter(context, bitmaps, names));
 
         return gridLayer;
     }

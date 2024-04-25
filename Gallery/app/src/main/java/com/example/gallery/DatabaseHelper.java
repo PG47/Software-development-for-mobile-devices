@@ -14,12 +14,23 @@ import android.util.SparseArray;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Objects;
 
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
+
+import org.opencv.android.Utils;
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfFloat;
+import org.opencv.core.MatOfInt;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.objdetect.CascadeClassifier;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "team7_gallery.db";
@@ -66,6 +77,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_SECURE_IMAGES);
         db.execSQL(SQL_CREATE_FACES);
         db.execSQL(SQL_LIST_FACES);
+//        db.execSQL("DROP TABLE IF EXISTS " + FACES);
+//        db.execSQL("DROP TABLE IF EXISTS " + LIST_FACES);
     }
 
     @Override
@@ -95,8 +108,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return listInt;
     }
     public String getExpectedName(Bitmap bitmap) {
-        String expectedName = "";
+        String expectedName = "Unknown", tempName = "";
         Bitmap[] listBitmaps;
+        float result = 0F;
         Cursor cursor = null;
         Cursor cursor1 = null;
         SQLiteDatabase db = this.getReadableDatabase();
@@ -107,11 +121,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             if (cursor.moveToFirst()) {
                 do {
                     String allIdImages = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LIST_INT));
-                    expectedName = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAME));
+                    tempName = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAME));
+                    Log.d("test name", "value + " + tempName);
+
                     String[] splitIdImages = allIdImages.split(", ");
                     listBitmaps = new Bitmap[splitIdImages.length];
 
-                    String idList = allIdImages;
+                    String idList = allIdImages.replaceAll(" ", "");
                     query = "SELECT " + COLUMN_IMAGE + " FROM " + LIST_FACES +
                             " WHERE " + COLUMN_ID + " IN (" + idList + ")";
                     cursor1 = db.rawQuery(query, null);
@@ -125,7 +141,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         } while (cursor1.moveToNext());
                     }
 
-                    float result = compareSimilarity(listBitmaps, bitmap);
+                    float tempResult = compareSimilarity(listBitmaps, bitmap);
+
+                    if (tempResult > result) {
+                        result = tempResult;
+                        expectedName = tempName;
+                    }
 
                 } while (cursor.moveToNext());
             }
@@ -140,10 +161,45 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
             db.close();
         }
+
         return expectedName;
     }
     public float compareSimilarity(Bitmap[] listBitmaps, Bitmap bitmap) {
-        return 0.1F;
+        Mat mat1 = new Mat();
+        Mat mat2 = new Mat();
+
+        Utils.bitmapToMat(bitmap, mat1);
+        double[] result = new double[listBitmaps.length];
+        for (int i = 0; i < listBitmaps.length; i++) {
+            Utils.bitmapToMat(listBitmaps[i], mat2);
+
+            Imgproc.cvtColor(mat1, mat1, Imgproc.COLOR_BGR2GRAY);
+            Imgproc.cvtColor(mat2, mat2, Imgproc.COLOR_BGR2GRAY);
+
+            MatOfInt histSize = new MatOfInt(256);
+            MatOfFloat ranges = new MatOfFloat(0f, 256f);
+            Mat hist1 = new Mat();
+            Mat hist2 = new Mat();
+            Imgproc.calcHist(Arrays.asList(mat1), new MatOfInt(0), new Mat(), hist1, histSize, ranges);
+            Imgproc.calcHist(Arrays.asList(mat2), new MatOfInt(0), new Mat(), hist2, histSize, ranges);
+
+            Core.normalize(hist1, hist1, 0, 1, Core.NORM_MINMAX, -1, new Mat());
+            Core.normalize(hist2, hist2, 0, 1, Core.NORM_MINMAX, -1, new Mat());
+
+            double score = Imgproc.compareHist(hist1, hist2, Imgproc.CV_COMP_CHISQR_ALT);
+            result[i] = score;
+        }
+
+        double avgValue = 0;
+        for (int i = 0; i < result.length; i++) {
+            avgValue += result[i];
+        }
+
+        avgValue = avgValue / result.length;
+
+        Log.d("test", "value + " + avgValue);
+
+        return (float) avgValue;
     }
     public void saveFaceToDB(String[] names, Bitmap[] images) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -153,7 +209,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 long imageId = insertFaceImage(db, images[i]);
                 String name = getFullName(db, names[i]);
 
-                if (name == "-1") {
+                if (Objects.equals(name, "-1")) {
                     insertListFace(db, names[i], imageId);
                 } else {
                     updateListFace(db, name, imageId);
@@ -179,7 +235,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = db.query(FACES, new String[]{COLUMN_NAME}, COLUMN_NAME + "=?", new String[]{name}, null, null, null);
         String fullName = "-1";
         if (cursor.moveToFirst()) {
-            fullName = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ID));
+            fullName = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAME));
         }
         cursor.close();
         return fullName;
@@ -189,15 +245,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_NAME, name);
         values.put(COLUMN_LIST_INT, String.valueOf(imageId));
         db.insert(FACES, null, values);
+        Log.d("check", "value + " + name + ", " + imageId);
     }
     private void updateListFace(SQLiteDatabase db, String name, long imageId) {
-        Cursor cursor = db.query(FACES, new String[]{COLUMN_LIST_INT}, COLUMN_ID + "=?", new String[]{name}, null, null, null);
+        Cursor cursor = db.query(FACES, new String[]{COLUMN_LIST_INT}, COLUMN_NAME + "=?", new String[]{name}, null, null, null);
         if (cursor.moveToFirst()) {
             String existingList = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LIST_INT));
-            String updatedList = existingList + "," + imageId;
+            String updatedList = existingList + ", " + imageId;
             ContentValues values = new ContentValues();
             values.put(COLUMN_LIST_INT, updatedList);
-            db.update(FACES, values, COLUMN_ID + "=?", new String[]{name});
+            db.update(FACES, values, COLUMN_NAME + "=?", new String[]{name});
+            Log.d("check", "value + " + name + ", " + updatedList);
         }
         cursor.close();
     }

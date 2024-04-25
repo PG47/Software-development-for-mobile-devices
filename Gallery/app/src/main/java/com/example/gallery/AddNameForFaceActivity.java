@@ -17,6 +17,7 @@ public class AddNameForFaceActivity extends AppCompatActivity {
     SaveNameFragment saveNameFragment;
     GridFaceFragment gridFaceFragment;
     Bitmap[] listBitmaps;
+    String[] listNames;
     DatabaseHelper databaseHelper;
 
     @Override
@@ -27,14 +28,18 @@ public class AddNameForFaceActivity extends AppCompatActivity {
         Intent intent = getIntent();
         if (intent != null) {
             ArrayList<String> filePaths = intent.getStringArrayListExtra("filePaths");
+            ArrayList<String> name = intent.getStringArrayListExtra("expectedNames");
             if (filePaths != null) {
                 List<Bitmap> bitmaps = loadBitmapsFromFilePaths(filePaths);
                 listBitmaps = bitmaps.toArray(new Bitmap[0]);
             }
+            if (name != null) {
+                listNames = name.toArray(new String[0]);
+            }
         }
 
         saveNameFragment = SaveNameFragment.newInstance("save");
-        gridFaceFragment = GridFaceFragment.newInstance("grid", listBitmaps);
+        gridFaceFragment = GridFaceFragment.newInstance("grid", listBitmaps, listNames);
         databaseHelper = new DatabaseHelper(this);
 
 
