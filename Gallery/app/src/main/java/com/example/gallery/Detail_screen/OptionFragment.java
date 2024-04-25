@@ -1,12 +1,15 @@
-package com.example.gallery.Images_screen;
+package com.example.gallery.Detail_screen;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,17 +17,24 @@ import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
-import com.example.gallery.Detail_screen.DetailsActivity;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.example.gallery.Edit_tool_screen.EditActivity;
 import com.example.gallery.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -81,8 +91,7 @@ public class OptionFragment extends Fragment {
             int itemId = item.getItemId();
 
             if (itemId == R.id.share) {
-
-                return true;
+                shareSelections(selectedImage);
             } else if (itemId == R.id.edit) {
                 Intent intent = new Intent(requireContext(), EditActivity.class);
                 intent.putExtra("SelectedImage", selectedImage);
@@ -200,6 +209,59 @@ public class OptionFragment extends Fragment {
                 onImageDeleteListener.onImageDeleted();
             }
         }
+    }
+
+    public void shareSelections(String selectedImage) {
+        Glide.with(requireContext())
+                .asBitmap()
+                .load(selectedImage)
+                .into(new CustomTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                        try {
+                            // Create a temporary file
+                            File tempFile = File.createTempFile("image", ".jpg", requireContext().getCacheDir());
+                            FileOutputStream outputStream = new FileOutputStream(tempFile);
+
+                            // Compress bitmap into the temporary file
+                            resource.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+                            outputStream.flush();
+                            outputStream.close();
+
+                            // Get the URI of the temporary file
+                            Uri uri = FileProvider.getUriForFile(requireContext(), requireContext().getPackageName() + ".file-provider", tempFile);
+
+                            // Start share intent
+                            startShareIntent(uri);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+
+                    @Override
+                    public void onLoadCleared(@Nullable Drawable placeholder) {
+                    }
+                });
+    }
+
+    public void startShareIntent(Uri selectedUri) {
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.putExtra(Intent.EXTRA_TEXT, "Shared from Group 7 Gallery App!");
+        shareIntent.putExtra(Intent.EXTRA_STREAM, selectedUri);
+        shareIntent.setType("image/jpeg"); // Set the MIME type to image/jpeg for sharing images
+
+        // Grant temporary permissions to the receiving app
+        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        try {
+            startActivity(Intent.createChooser(shareIntent, "Share to..."));
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(requireActivity(), "No Apps Available", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void OnChangeImage(String img) {
+        selectedImage = img;
     }
 
 }

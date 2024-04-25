@@ -51,6 +51,16 @@ public class LargeImageFragment extends Fragment {
     DatabaseHelper databaseHelper;
     private ArrayList<String> images;
 
+    public interface OnImageChangeListener {
+        void onImageChanged(String newImagePath);
+    }
+    private OnImageChangeListener onImageChangeListener;
+
+    public void setOnImageChangeListener(OnImageChangeListener listener) {
+        this.onImageChangeListener = listener;
+    }
+
+
     public static LargeImageFragment newInstance(String strArg) {
         LargeImageFragment fragment = new LargeImageFragment();
         Bundle args = new Bundle();
@@ -280,6 +290,9 @@ public class LargeImageFragment extends Fragment {
             photoView.setImageBitmap(rotatedBitmap);
             cropImageView = getView().findViewById(R.id.cropImageView);
             cropImageView.setImageBitmap(rotatedBitmap);
+        }
+        if (onImageChangeListener != null) {
+            onImageChangeListener.onImageChanged(imagePath);
         }
     }
 
