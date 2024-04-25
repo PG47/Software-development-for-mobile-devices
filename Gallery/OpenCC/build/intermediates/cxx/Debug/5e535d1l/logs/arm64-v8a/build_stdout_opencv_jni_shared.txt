@@ -1,2 +1,2 @@
-ninja: Entering directory `C:\Users\Windows\Documents\GitHub\Software-development-for-mobile-devices\Gallery\OpenCC\.cxx\Debug\5e535d1l\arm64-v8a'
+ninja: Entering directory `D:\GitHub\Software-development-for-mobile-devices\Gallery\OpenCC\.cxx\Debug\5e535d1l\arm64-v8a'
 ninja: no work to do.

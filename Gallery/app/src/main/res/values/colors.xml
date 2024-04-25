@@ -15,4 +15,5 @@
     <color name="gray">#808080</color>
     <color name="yellowgreen">#9ACD32</color>
     <color name="selected_color">#EDD4FF</color>
+    <color name="theme_color">#B5A1FF</color>
 </resources>

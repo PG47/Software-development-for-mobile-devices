@@ -11,8 +11,8 @@
     <FrameLayout
         android:id="@+id/head_bar"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:layout_weight="7"
+        android:layout_height="wrap_content"
+        android:layout_weight="6"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -33,9 +33,9 @@
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomToolbar"
         android:layout_width="match_parent"
-        android:layout_height="75dp"
-        app:itemIconSize="60dp"
-        app:itemPaddingTop="-3dp"
+        android:layout_height="60dp"
+        app:itemIconSize="40dp"
+        app:itemPaddingTop="0dp"
         app:labelVisibilityMode="labeled"
         app:itemActiveIndicatorStyle="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -49,9 +49,9 @@
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/selectToolbar"
         android:layout_width="match_parent"
-        android:layout_height="75dp"
-        app:itemIconSize="60dp"
-        app:itemPaddingTop="-3dp"
+        android:layout_height="60dp"
+        app:itemIconSize="40dp"
+        app:itemPaddingTop="0dp"
         app:labelVisibilityMode="labeled"
         app:itemActiveIndicatorStyle="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"

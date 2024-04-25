@@ -2,7 +2,7 @@
   {
     "level_": 0,
     "message_": "Start JSON generation. Platform version: 21 min SDK version: arm64-v8a",
-    "file_": "C:\\Users\\Windows\\Documents\\GitHub\\Software-development-for-mobile-devices\\Gallery\\OpenCC\\libcxx_helper\\CMakeLists.txt",
+    "file_": "D:\\GitHub\\Software-development-for-mobile-devices\\Gallery\\OpenCC\\libcxx_helper\\CMakeLists.txt",
     "tag_": "debug|arm64-v8a",
     "diagnosticCode_": 0,
     "memoizedIsInitialized": 1,
@@ -14,8 +14,8 @@
   },
   {
     "level_": 0,
-    "message_": "JSON \u0027C:\\Users\\Windows\\Documents\\GitHub\\Software-development-for-mobile-devices\\Gallery\\OpenCC\\.cxx\\Debug\\5e535d1l\\arm64-v8a\\android_gradle_build.json\u0027 was up-to-date",
-    "file_": "C:\\Users\\Windows\\Documents\\GitHub\\Software-development-for-mobile-devices\\Gallery\\OpenCC\\libcxx_helper\\CMakeLists.txt",
+    "message_": "JSON \u0027D:\\GitHub\\Software-development-for-mobile-devices\\Gallery\\OpenCC\\.cxx\\Debug\\5e535d1l\\arm64-v8a\\android_gradle_build.json\u0027 was up-to-date",
+    "file_": "D:\\GitHub\\Software-development-for-mobile-devices\\Gallery\\OpenCC\\libcxx_helper\\CMakeLists.txt",
     "tag_": "debug|arm64-v8a",
     "diagnosticCode_": 0,
     "memoizedIsInitialized": 1,
@@ -28,7 +28,7 @@
   {
     "level_": 0,
     "message_": "JSON generation completed without problems",
-    "file_": "C:\\Users\\Windows\\Documents\\GitHub\\Software-development-for-mobile-devices\\Gallery\\OpenCC\\libcxx_helper\\CMakeLists.txt",
+    "file_": "D:\\GitHub\\Software-development-for-mobile-devices\\Gallery\\OpenCC\\libcxx_helper\\CMakeLists.txt",
     "tag_": "debug|arm64-v8a",
     "diagnosticCode_": 0,
     "memoizedIsInitialized": 1,

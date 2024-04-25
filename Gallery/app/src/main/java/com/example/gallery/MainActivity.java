@@ -31,6 +31,12 @@ import android.view.View;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
+import com.example.gallery.Album_screen.AlbumFragment;
+import com.example.gallery.Detail_screen.HeadBarOptions;
+import com.example.gallery.Images_screen.ImagesFragment;
+import com.example.gallery.Images_screen.SelectOptions;
+import com.example.gallery.Map_screen.MapFragment;
+import com.example.gallery.Search_screen.SearchFragment;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
