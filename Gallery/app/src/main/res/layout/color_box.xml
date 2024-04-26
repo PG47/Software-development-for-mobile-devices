@@ -4,8 +4,8 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
     <ImageView
-        android:layout_width="20dp"
-        android:layout_height="20dp"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:id="@+id/boxColor"
-        android:src="#80808080"/>
+        android:background="@drawable/circle_shape"/>
 </LinearLayout>
