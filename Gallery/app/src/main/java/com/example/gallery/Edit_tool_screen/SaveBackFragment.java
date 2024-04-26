@@ -77,7 +77,7 @@ public class SaveBackFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if (editActivity != null) {
-                    editActivity.finish();
+                    editActivity.getBack();
                 }
             }
         });

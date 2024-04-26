@@ -15,6 +15,7 @@ public class EditActivity extends AppCompatActivity {
     SaveBackFragment fragmentSaveBack;
     EditFragment fragmentOptions;
     ImageFragment fragmentImage;
+    boolean checkExistOptions = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,4 +83,25 @@ public class EditActivity extends AppCompatActivity {
     public void setRatio5() { fragmentImage.executeSetRatio5(); }
     public void invisibleSave(String option) { fragmentSaveBack.executeInvisibleSave(option); }
     public boolean checkChange() { return fragmentImage.executeCheckChange(); }
+    public void updateReplaceInfo() {
+        checkExistOptions = false;
+    }
+    public void getBack() {
+        if (checkExistOptions) {
+            this.finish();
+        } else {
+            checkExistOptions = true;
+
+            ft = getSupportFragmentManager().beginTransaction();
+
+            fragmentSaveBack = SaveBackFragment.newInstance("SaveBack");
+            fragmentOptions = EditFragment.newInstance("Options");
+
+            ft.replace(R.id.SaveAndBack, fragmentSaveBack);
+            ft.replace(R.id.AllOptions, fragmentOptions);
+
+            ft.addToBackStack(null);
+            ft.commit();
+        }
+    }
 }

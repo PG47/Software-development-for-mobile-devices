@@ -99,6 +99,7 @@ public class EditFragment extends Fragment {
 
                             editActivity.setCropOverlay();
                             editActivity.invisibleSave("rotate");
+                            editActivity.updateReplaceInfo();
                             break;
                         }
                         case 1: {
@@ -109,6 +110,7 @@ public class EditFragment extends Fragment {
                             transaction.commit();
 
                             editActivity.invisibleSave("text");
+                            editActivity.updateReplaceInfo();
                             break;
                         }
                         case 2: {
@@ -119,6 +121,7 @@ public class EditFragment extends Fragment {
                             transaction.commit();
 
                             editActivity.invisibleSave("filter");
+                            editActivity.updateReplaceInfo();
                             break;
                         }
                         case 3: {
@@ -129,6 +132,7 @@ public class EditFragment extends Fragment {
                             transaction.commit();
 
                             editActivity.invisibleSave("blur");
+                            editActivity.updateReplaceInfo();
                             break;
                         }
                         case 4: {
@@ -140,6 +144,7 @@ public class EditFragment extends Fragment {
 
                             editActivity.setCropOverlay();
                             editActivity.invisibleSave("crop");
+                            editActivity.updateReplaceInfo();
                             break;
                         }
                         case 5:
