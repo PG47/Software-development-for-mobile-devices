@@ -3,7 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="#686868"
     android:id="@+id/myRl">
 
     <com.theartofdev.edmodo.cropper.CropImageView
@@ -11,6 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:cropScaleType="fitCenter"
+        android:background="@color/black"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"

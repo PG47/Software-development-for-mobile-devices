@@ -1,27 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#D9D9D9">
+    android:layout_height="wrap_content"
+    android:background="@color/black">
 
     <ImageButton
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_marginStart="-10dp"
-        android:layout_marginTop="-10dp"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="-5dp"
         android:adjustViewBounds="true"
         android:background="#00000000"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_back_arrow_foreground"
         android:contentDescription="TODO"
-        android:id="@+id/backToDetails"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:id="@+id/backToDetails" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="Function's name"
+        android:textColor="@color/white"
+        android:textSize="20sp"/>
 
     <ImageButton
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:layout_marginTop="-10dp"
         android:layout_marginEnd="-10dp"
         android:adjustViewBounds="true"
@@ -30,21 +35,17 @@
         android:src="@drawable/ic_save_foreground"
         android:contentDescription="TODO"
         android:id="@+id/saveImage"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         android:visibility="gone" />
 
     <TextView
         android:layout_width="wrap_content"
-        android:layout_height="80dp"
-        android:text="DONE"
-        android:layout_marginEnd="5dp"
-        android:textSize="30sp"
+        android:layout_height="wrap_content"
+        android:text="Save"
+        android:textColor="@color/white"
+        android:layout_marginEnd="10dp"
+        android:textSize="20sp"
         android:id="@+id/actionDone"
-        android:paddingVertical="20dp"
-        android:layout_marginTop="-10dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:visibility="gone"/>
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</RelativeLayout>

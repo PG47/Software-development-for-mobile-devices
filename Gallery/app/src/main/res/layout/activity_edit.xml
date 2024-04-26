@@ -1,33 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#686868">
+    android:orientation="vertical"
+    android:background="@color/black">
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="65dp"
-        android:id="@+id/SaveAndBack"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        android:layout_height="20dp" />
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:id="@+id/Image"
-        app:layout_constraintTop_toBottomOf="@id/SaveAndBack"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/AllOptions"
-        app:layout_constraintVertical_bias="0.0"
-        app:layout_constraintVertical_weight="7"/>
+        android:layout_weight="1"
+        android:id="@+id/Image" />
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/AllOptions"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/Image"
-        app:layout_constraintStart_toStartOf="parent" />
+        android:layout_height="200dp"
+        android:id="@+id/AllOptions" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:id="@+id/SaveAndBack" />
+
+</LinearLayout>

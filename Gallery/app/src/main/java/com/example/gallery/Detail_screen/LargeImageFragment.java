@@ -25,7 +25,7 @@ import androidx.fragment.app.Fragment;
 import com.example.gallery.DatabaseHelper;
 import com.example.gallery.Edit_tool_screen.AddNameForFaceActivity;
 import com.example.gallery.R;
-import com.github.chrisbanes.photoview.PhotoView;
+//import com.github.chrisbanes.photoview.PhotoView;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
@@ -45,7 +45,7 @@ public class LargeImageFragment extends Fragment {
     DetailsActivity detailsActivity;
     Context context = null;
     CropImageView cropImageView=null;
-    PhotoView photoView;
+//    PhotoView photoView;
     Bitmap originalBitmap, tempBitmap;
     String imagePath;
     DatabaseHelper databaseHelper;
@@ -74,7 +74,7 @@ public class LargeImageFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        photoView = view.findViewById(R.id.photoView);
+//        photoView = view.findViewById(R.id.photoView);
     }
 
     @Override
@@ -126,24 +126,25 @@ public class LargeImageFragment extends Fragment {
         // Rotate the bitmap based on the orientation
         Bitmap rotatedBitmap = rotateBitmap(originalBitmap, orientation);
 
-        PhotoView photoView = layoutImage.findViewById(R.id.photoView);
-        photoView.setImageBitmap(rotatedBitmap);
-
-        photoView.setOnTouchListener(new OnSwipeTouchListener(requireContext()) {
-            public void onSwipeRight() {
-                imagePath = getNextImagePath(imagePath, images, -1);
-                updateImage();
-            }
-
-            public void onSwipeLeft() {
-                imagePath = getNextImagePath(imagePath, images, 1);
-                updateImage();
-            }
-        });
+//        PhotoView photoView = layoutImage.findViewById(R.id.photoView);
+//        photoView.setImageBitmap(rotatedBitmap);
+//
+//        photoView.setOnTouchListener(new OnSwipeTouchListener(requireContext()) {
+//            public void onSwipeRight() {
+//                imagePath = getNextImagePath(imagePath, images, -1);
+//                updateImage();
+//            }
+//
+//            public void onSwipeLeft() {
+//                imagePath = getNextImagePath(imagePath, images, 1);
+//                updateImage();
+//            }
+//        });
 
         cropImageView = layoutImage.findViewById(R.id.cropImageView);
         cropImageView.setImageBitmap(rotatedBitmap);
-        cropImageView.setVisibility(View.GONE);
+        cropImageView.setShowCropOverlay(false);
+//        cropImageView.setVisibility(View.GONE);
 
         return layoutImage;
     }
@@ -286,8 +287,8 @@ public class LargeImageFragment extends Fragment {
 
         // Update the ImageView with the rotated bitmap
         if (getView() != null) {
-            PhotoView photoView = getView().findViewById(R.id.photoView);
-            photoView.setImageBitmap(rotatedBitmap);
+//            PhotoView photoView = getView().findViewById(R.id.photoView);
+//            photoView.setImageBitmap(rotatedBitmap);
             cropImageView = getView().findViewById(R.id.cropImageView);
             cropImageView.setImageBitmap(rotatedBitmap);
         }

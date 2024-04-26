@@ -2,8 +2,8 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#D9D9D9">
+    android:layout_height="wrap_content"
+    android:background="#80000000">
 
     <ImageButton
         android:id="@+id/getBackButton"
@@ -40,7 +40,7 @@
         android:adjustViewBounds="true"
         android:background="#00000000"
         android:scaleType="fitCenter"
-        android:src="@drawable/ic_album_foreground"
+        android:src="@drawable/ic_album_white_foreground"
         app:layout_constraintEnd_toStartOf="@+id/component3"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -53,7 +53,7 @@
         android:adjustViewBounds="true"
         android:background="#00000000"
         android:scaleType="fitCenter"
-        android:src="@drawable/ic_wallpaper_foreground"
+        android:src="@drawable/ic_wallpaper_white_foreground"
         app:layout_constraintEnd_toStartOf="@+id/component4"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -66,7 +66,7 @@
         android:adjustViewBounds="true"
         android:background="#00000000"
         android:scaleType="fitCenter"
-        android:src="@drawable/ic_more_foreground"
+        android:src="@drawable/ic_more_white_foreground"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

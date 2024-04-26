@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -57,7 +58,7 @@ public class SaveBackFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        ConstraintLayout layoutSaveBack = (ConstraintLayout)inflater.inflate(R.layout.fragment_save_back, null);
+        RelativeLayout layoutSaveBack = (RelativeLayout)inflater.inflate(R.layout.fragment_save_back, null);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (getActivity() instanceof EditActivity) {

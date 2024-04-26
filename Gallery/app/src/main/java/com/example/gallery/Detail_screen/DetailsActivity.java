@@ -8,6 +8,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
@@ -101,17 +103,23 @@ public class DetailsActivity extends AppCompatActivity implements LargeImageFrag
 
         optionsHidden = false;
 
-        ConstraintLayout layout = (ConstraintLayout) findViewById(R.id.detailsLayout);
+        FrameLayout layout = (FrameLayout) findViewById(R.id.overlay);
         layout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ft = getSupportFragmentManager().beginTransaction();
-                ft.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
                 if (!optionsHidden) {
-                    ft.hide(headDetailsFragment).hide(fragmentOption);
+                    ft.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+                    ft.hide(headDetailsFragment);
+                    ft.setCustomAnimations(R.anim.slide_up, R.anim.slide_down);
+                    ft.hide(fragmentOption);
                 }
                 else {
-                    ft.show(headDetailsFragment).show(fragmentOption);
+                    ft.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+
+                    ft.show(headDetailsFragment);
+                    ft.setCustomAnimations(R.anim.slide_up, R.anim.slide_down);
+                    ft.show(fragmentOption);
                 }
                 ft.commit();
                 optionsHidden = !optionsHidden;
