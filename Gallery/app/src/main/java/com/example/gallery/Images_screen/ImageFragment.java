@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaScannerConnection;
@@ -58,7 +59,7 @@ public class ImageFragment extends Fragment {
     CropImageView cropImageView;
     String fontFamily, fontSize = "11";
     Boolean italic, bold;
-    Integer color;
+    Integer color, degValue = 0;
     Boolean horizontalFlip = false, verticalFlip = false;
     float xText, yText;
     public static ImageFragment newInstance(String strArg) {
@@ -128,7 +129,6 @@ public class ImageFragment extends Fragment {
         return layoutImage;
     }
     public void executeRotate(int value) {
-        cropImageView.setShowCropOverlay(true);
         BitmapDrawable drawable = new BitmapDrawable(getResources(), adjustedBitmap);
         drawable.setBounds(0, 0, bitmapWidth, bitmapHeight);
 
@@ -139,11 +139,11 @@ public class ImageFragment extends Fragment {
         drawable.draw(canvas);
 
         tempBitmap = rotatedBitmap;
+        degValue = value - 180;
 
         cropImageView.setImageBitmap(tempBitmap);
     }
     public void executeFastRotate(int value) {
-        cropImageView.setShowCropOverlay(true);
         BitmapDrawable drawable = new BitmapDrawable(getResources(), adjustedBitmap);
         drawable.setBounds(0, 0, bitmapWidth, bitmapHeight);
 
@@ -154,8 +154,17 @@ public class ImageFragment extends Fragment {
         drawable.draw(canvas);
 
         tempBitmap = rotatedBitmap;
+        degValue = value;
 
         cropImageView.setImageBitmap(tempBitmap);
+    }
+    public void executeMinus90Deg() {
+        degValue = degValue - 90;
+        cropImageView.setRotatedDegrees(degValue);
+    }
+    public void executePlus90Deg() {
+        degValue = degValue + 90;
+        cropImageView.setRotatedDegrees(degValue);
     }
     public void executeCropImage() {
         cropImageView.setShowCropOverlay(false);

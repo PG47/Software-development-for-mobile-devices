@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -22,6 +23,7 @@ public class RotateFragment extends Fragment {
     TextView rotate30deg, rotate45deg, rotate60deg, rotate90deg, rotate180deg;
     SeekBar changeValue;
     TextView rotateAngle;
+    ImageView minus90deg, plus90deg;
 
     public static RotateFragment newInstance(String strArg) {
         RotateFragment fragment = new RotateFragment();
@@ -75,6 +77,8 @@ public class RotateFragment extends Fragment {
         rotate60deg = (TextView) rotateOption.findViewById(R.id.rotate60deg);
         rotate90deg = (TextView) rotateOption.findViewById(R.id.rotate90deg);
         rotate180deg = (TextView) rotateOption.findViewById(R.id.rotate180deg);
+        minus90deg = (ImageView) rotateOption.findViewById(R.id.minus90deg);
+        plus90deg = (ImageView) rotateOption.findViewById(R.id.plus90deg);
         changeValue.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -132,7 +136,18 @@ public class RotateFragment extends Fragment {
                 changeValue.setProgress(180 + 180);
             }
         });
-
+        minus90deg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                editActivity.minus90deg();
+            }
+        });
+        plus90deg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                editActivity.plus90deg();
+            }
+        });
         return rotateOption;
     }
 }

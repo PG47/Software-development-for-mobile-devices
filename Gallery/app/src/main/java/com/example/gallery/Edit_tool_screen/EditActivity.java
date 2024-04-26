@@ -54,6 +54,8 @@ public class EditActivity extends AppCompatActivity {
         fragmentImage.executeRotate(value);
     }
     public void fastRotate(int value) { fragmentImage.executeFastRotate(value); }
+    public void minus90deg() { fragmentImage.executeMinus90Deg(); }
+    public void plus90deg() { fragmentImage.executePlus90Deg(); }
     public void cropTheImage() { fragmentImage.executeCropImage(); }
     public void startToZoom() {fragmentImage.executeZoom();}
     public void changeBrightness(int value) { fragmentImage.executeChangeBrightness(value); }

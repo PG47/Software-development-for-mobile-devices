@@ -13,3 +13,8 @@
 .externalNativeBuild
 .cxx
 local.properties
+*.txt
+*.json
+*.bat
+*.dex
+*.bin

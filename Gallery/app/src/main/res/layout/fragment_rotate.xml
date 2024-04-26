@@ -4,12 +4,60 @@
     android:layout_height="match_parent"
     android:layout_centerVertical="true">
 
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/outerLayout"
+        android:layout_marginStart="10dp"
+        android:layout_marginBottom="5dp">
+
+        <ImageView
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:src="@drawable/ic_minus_90_foreground"
+            android:background="@drawable/btn_border"
+            android:id="@+id/minus90deg"/>
+
+        <TextView
+            android:layout_width="45dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/minus90deg"
+            android:text="-90°"
+            android:textColor="@color/white"
+            android:textAlignment="center"/>
+
+        <ImageView
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:src="@drawable/ic_plus_90_foreground"
+            android:background="@drawable/btn_border"
+            android:layout_toRightOf="@id/minus90deg"
+            android:layout_marginLeft="10dp"
+            android:id="@+id/plus90deg"/>
+
+        <TextView
+            android:layout_width="45dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/plus90deg"
+            android:text="+90°"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:layout_marginStart="55dp"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:id="@+id/tempLayout"/>
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@id/tempLayout"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:id="@+id/outerLayout">
+        android:id="@+id/outerLayout"
+        android:layout_marginTop="10dp">
         <RelativeLayout
             android:layout_width="45dp"
             android:layout_height="45dp">
