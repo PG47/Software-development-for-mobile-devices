@@ -3,6 +3,7 @@ package com.example.gallery.Edit_tool_screen;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -87,7 +88,65 @@ public class EditFragment extends Fragment {
             singleFrame.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    Integer id = view.getId();
+                    switch (id) {
+                        case 0: {
+                            RotateFragment rotateFragment = RotateFragment.newInstance("Rotate");
+                            transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+                            transaction.replace(R.id.AllOptions, rotateFragment);
+                            transaction.addToBackStack(null);
+                            transaction.commit();
 
+                            editActivity.setCropOverlay();
+                            editActivity.invisibleSave("rotate");
+                            break;
+                        }
+                        case 1: {
+                            AddTextFragment addTextFragment = AddTextFragment.newInstance("Text");
+                            transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+                            transaction.replace(R.id.AllOptions, addTextFragment);
+                            transaction.addToBackStack(null);
+                            transaction.commit();
+
+                            editActivity.invisibleSave("text");
+                            break;
+                        }
+                        case 2: {
+                            FilterFragment filterFragment = FilterFragment.newInstance("Filter");
+                            transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                            transaction.replace(R.id.AllOptions, filterFragment);
+                            transaction.addToBackStack(null);
+                            transaction.commit();
+
+                            editActivity.invisibleSave("filter");
+                            break;
+                        }
+                        case 3: {
+                            ChangeFragment changeFragment = ChangeFragment.newInstance("Blur");
+                            transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                            transaction.replace(R.id.AllOptions, changeFragment);
+                            transaction.addToBackStack(null);
+                            transaction.commit();
+
+                            editActivity.invisibleSave("blur");
+                            break;
+                        }
+                        case 4: {
+                            Fragment cropMenuFragment = CropMenuFragment.newInstance("Crop");
+                            transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                            transaction.replace(R.id.AllOptions, cropMenuFragment);
+                            transaction.addToBackStack(null);
+                            transaction.commit();
+
+                            editActivity.setCropOverlay();
+                            editActivity.invisibleSave("crop");
+                            break;
+                        }
+                        case 5:
+                            break;
+                        default:
+                            Log.d("Error", "Option is not defined!");
+                    }
                 }
             });
 

@@ -19,7 +19,7 @@ import com.example.gallery.R;
 public class RotateFragment extends Fragment {
     EditActivity editActivity;
     Context context;
-    Button rotate30deg, rotate45deg, rotate60deg, rotate90deg, rotate180deg;
+    TextView rotate30deg, rotate45deg, rotate60deg, rotate90deg, rotate180deg;
     SeekBar changeValue;
     TextView rotateAngle;
 
@@ -70,11 +70,11 @@ public class RotateFragment extends Fragment {
 
         changeValue = (SeekBar) rotateOption.findViewById(R.id.testSeekBar);
         rotateAngle = (TextView) rotateOption.findViewById(R.id.rotateAngle);
-        rotate30deg = (Button) rotateOption.findViewById(R.id.rotate30deg);
-        rotate45deg = (Button) rotateOption.findViewById(R.id.rotate45deg);
-        rotate60deg = (Button) rotateOption.findViewById(R.id.rotate60deg);
-        rotate90deg = (Button) rotateOption.findViewById(R.id.rotate90deg);
-        rotate180deg = (Button) rotateOption.findViewById(R.id.rotate180deg);
+        rotate30deg = (TextView) rotateOption.findViewById(R.id.rotate30deg);
+        rotate45deg = (TextView) rotateOption.findViewById(R.id.rotate45deg);
+        rotate60deg = (TextView) rotateOption.findViewById(R.id.rotate60deg);
+        rotate90deg = (TextView) rotateOption.findViewById(R.id.rotate90deg);
+        rotate180deg = (TextView) rotateOption.findViewById(R.id.rotate180deg);
         changeValue.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {

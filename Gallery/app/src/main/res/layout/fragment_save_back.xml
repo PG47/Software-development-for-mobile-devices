@@ -22,7 +22,9 @@
         android:layout_centerInParent="true"
         android:text="Function's name"
         android:textColor="@color/white"
-        android:textSize="20sp"/>
+        android:textSize="20sp"
+        android:id="@+id/functionName"
+        android:visibility="gone"/>
 
     <ImageButton
         android:layout_width="60dp"

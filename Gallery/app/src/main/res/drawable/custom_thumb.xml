@@ -4,7 +4,7 @@
     <item android:id="@android:id/secondaryProgress">
         <shape android:shape="rectangle">
             <size android:width="1dp" android:height="30dp" />
-            <solid android:color="#FFF455" /> <!-- Icon color -->
+            <solid android:color="@color/white" /> <!-- Icon color -->
         </shape>
     </item>
 </layer-list>

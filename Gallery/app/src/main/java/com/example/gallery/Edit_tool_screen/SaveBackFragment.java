@@ -20,7 +20,7 @@ public class SaveBackFragment extends Fragment {
     EditActivity editActivity;
     Context context;
     ImageButton getBack, save;
-    TextView doneAction;
+    TextView doneAction, functionName;
     FragmentTransaction transaction;
     String option;
 
@@ -71,6 +71,7 @@ public class SaveBackFragment extends Fragment {
         getBack = (ImageButton) layoutSaveBack.findViewById(R.id.backToDetails);
         save = (ImageButton) layoutSaveBack.findViewById(R.id.saveImage);
         doneAction = (TextView) layoutSaveBack.findViewById(R.id.actionDone);
+        functionName = (TextView) layoutSaveBack.findViewById(R.id.functionName);
 
         getBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -122,6 +123,18 @@ public class SaveBackFragment extends Fragment {
     }
 
     public void executeInvisibleSave(String option) {
+        if (option == "rotate") {
+            functionName.setText("Rotation");
+        } else if (option == "text") {
+            functionName.setText("Text");
+        } else if (option == "filter") {
+            functionName.setText("Filtering");
+        } else if (option == "blur") {
+            functionName.setText("Blurring");
+        } else if (option == "crop") {
+            functionName.setText("Cropping");
+        }
+        functionName.setVisibility(View.VISIBLE);
         save.setVisibility(View.GONE);
         doneAction.setVisibility(View.VISIBLE);
         this.option = option;
