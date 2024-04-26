@@ -6,8 +6,12 @@
         android:icon="@drawable/ic_share_foreground"/>
     <item
         android:id="@+id/add"
-        android:title="Add to album"
+        android:title="Add"
         android:icon="@drawable/ic_add_album_foreground"/>
+    <item
+        android:id="@+id/cloud"
+        android:title="Upload"
+        android:icon="@drawable/ic_cloud_upload_foreground"/>
     <item
         android:id="@+id/secure"
         android:title="Secure"

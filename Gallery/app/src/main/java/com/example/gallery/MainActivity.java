@@ -257,7 +257,11 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
                 popupMenu.setOnDismissListener(menu -> {Log.d("PopupMenu", "Dismissed");});
                 popupMenu.show();
                 return true;
-            } else if (itemId == R.id.secure) {
+            } else if (itemId == R.id.cloud) {
+                selectOptions.uploadCloud();
+                return true;
+            }
+            else if (itemId == R.id.secure) {
                 if(!isSecure) {
                     selectOptions.secure();
                 } else selectOptions.unlockSecure();
