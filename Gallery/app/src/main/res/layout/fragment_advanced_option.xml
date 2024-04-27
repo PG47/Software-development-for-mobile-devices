@@ -95,4 +95,17 @@
         android:paddingHorizontal="5dp"
         android:text="Add name for face(s)"
         android:background="@drawable/border"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/setLoading"
+        android:layout_marginTop="5dp"
+        android:visibility="gone"
+        android:layout_centerHorizontal="true"
+        android:paddingVertical="10dp"
+        android:id="@+id/scanText"
+        android:paddingHorizontal="20dp"
+        android:text="Scan"
+        android:background="@drawable/border"/>
 </RelativeLayout>

@@ -112,4 +112,5 @@ public class EditActivity extends AppCompatActivity {
         }
     }
     public void setOriginalImage() { fragmentImage.executeSetOriginalImage(); }
+    public String extractText() { return fragmentImage.executeExtractText(); }
 }

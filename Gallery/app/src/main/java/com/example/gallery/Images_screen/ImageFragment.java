@@ -49,6 +49,8 @@ import com.example.gallery.R;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
+import com.google.android.gms.vision.text.TextBlock;
+import com.google.android.gms.vision.text.TextRecognizer;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.File;
@@ -817,5 +819,26 @@ public class ImageFragment extends Fragment {
         }
 
         return file.getAbsolutePath();
+    }
+    public String executeExtractText() {
+        tempBitmap = cropImageView.getCroppedImage();
+        cropImageView.setShowCropOverlay(false);
+
+        TextRecognizer textRecognizer = new TextRecognizer.Builder(context).build();
+        if (!textRecognizer.isOperational()) {
+            return "Text recognizer not operational";
+        }
+
+        Frame frame = new Frame.Builder().setBitmap(tempBitmap).build();
+        SparseArray<TextBlock> textBlocks = textRecognizer.detect(frame);
+
+        StringBuilder extractedText = new StringBuilder();
+        for (int i = 0; i < textBlocks.size(); i++) {
+            TextBlock textBlock = textBlocks.valueAt(i);
+            extractedText.append(textBlock.getValue());
+            extractedText.append("\n");
+        }
+
+        return extractedText.toString();
     }
 }
