@@ -129,6 +129,12 @@ public class AdvancedFragment extends Fragment implements View.OnClickListener {
             layout.setVisibility(View.GONE);
             textView.setText("Finding similar photos...");
             textView.setVisibility(View.VISIBLE);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    editActivity.findSimular_images();
+                }
+            }, 100);
         } else if (id == R.id.addName) {
             editActivity.extractFaces(faces);
         } else if (id == R.id.scanText) {
