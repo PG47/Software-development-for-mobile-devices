@@ -7,5 +7,5 @@
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:id="@+id/boxColor"
-        android:background="@drawable/circle_shape"/>
+        android:background="@drawable/circle_shape_white"/>
 </LinearLayout>

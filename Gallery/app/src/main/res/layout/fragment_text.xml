@@ -20,7 +20,7 @@
             android:textSize="13sp"/>
 
         <Spinner
-            android:layout_width="100dp"
+            android:layout_width="120dp"
             android:layout_height="48dp"
             android:background="@drawable/border"
             android:layout_marginLeft="4dp"

@@ -50,6 +50,22 @@ public class AddTextFragment extends Fragment {
             R.color.gray,
             R.color.yellowgreen
     };
+    int[] circleColor = {
+            R.drawable.circle_shape_white,
+            R.drawable.circle_shape_red,
+            R.drawable.circle_shape_orange,
+            R.drawable.circle_shape_yellow,
+            R.drawable.circle_shape_green,
+            R.drawable.circle_shape_blue,
+            R.drawable.circle_shape_indigo,
+            R.drawable.circle_shape_purple,
+            R.drawable.circle_shape_black,
+            R.drawable.circle_shape_pink,
+            R.drawable.circle_shape_brown,
+            R.drawable.circle_shape_cyan,
+            R.drawable.circle_shape_gray,
+            R.drawable.circle_shape_yellowgreen
+    };
 
     public static AddTextFragment newInstance(String strArg) {
         AddTextFragment fragment = new AddTextFragment();
@@ -186,7 +202,7 @@ public class AddTextFragment extends Fragment {
                 }
             });
 
-            boxOfColor.setImageResource(colorInt[i]);
+            boxOfColor.setImageResource(circleColor[i]);
             scrollViewGroup.addView(singleFrame);
         }
 

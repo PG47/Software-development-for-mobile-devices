@@ -65,6 +65,8 @@ public class EditActivity extends AppCompatActivity {
     public void changeSepia(int value) { fragmentImage.executeChangeSepia(value); }
     public void changeGrayscale(int value) { fragmentImage.executeChangeGrayscale(value); }
     public void changeSharpen(int value) { fragmentImage.executeChangeSharpen(value); }
+    public void updateColorSet(int index) { fragmentImage.executeUpdateColorSet(index); }
+    public void setValuePercentage(int value) { fragmentImage.executeColorFilter(value); }
 
 
 
@@ -101,6 +103,8 @@ public class EditActivity extends AppCompatActivity {
 
             ft.replace(R.id.SaveAndBack, fragmentSaveBack);
             ft.replace(R.id.AllOptions, fragmentOptions);
+
+            fragmentImage.invisibleEditText();
 
             ft.addToBackStack(null);
             ft.commit();

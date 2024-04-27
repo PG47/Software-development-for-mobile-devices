@@ -1,6 +1,7 @@
 package com.example.gallery.Edit_tool_screen;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,8 +26,8 @@ public class EditFragment extends Fragment {
     Context context;
     FragmentTransaction transaction;
     BottomNavigationView bottomEditView;
-    Integer[] iconImages = {R.drawable.ic_rotate_foreground, R.drawable.ic_text_foreground, R.mipmap.ic_filter_new_foreground, R.drawable.ic_blur_foreground, R.drawable.ic_crop_foreground, R.mipmap.ic_ai_foreground};
-    String[] iconNames = {"Rotate", "Text", "Filter", "Blur", "Crop", "AI"};
+    Integer[] iconImages = {R.drawable.ic_rotate_foreground, R.drawable.ic_text_foreground, R.mipmap.ic_setting_foreground, R.mipmap.ic_filter_new_foreground, R.drawable.ic_blur_foreground, R.drawable.ic_crop_foreground, R.mipmap.ic_ai_foreground};
+    String[] iconNames = {"Rotate", "Text", "Color Set", "Filter", "Blur", "Crop", "AI"};
     ViewGroup scrollView;
     public static EditFragment newInstance(String strArg) {
         EditFragment fragment = new EditFragment();
@@ -114,6 +115,15 @@ public class EditFragment extends Fragment {
                             break;
                         }
                         case 2: {
+                            ColorSetFragment colorSetFragment = ColorSetFragment.newInstance("Color Set");
+                            transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+                            transaction.replace(R.id.AllOptions, colorSetFragment);
+                            transaction.addToBackStack(null);
+                            transaction.commit();
+
+                            break;
+                        }
+                        case 3: {
                             FilterFragment filterFragment = FilterFragment.newInstance("Filter");
                             transaction = getActivity().getSupportFragmentManager().beginTransaction();
                             transaction.replace(R.id.AllOptions, filterFragment);
@@ -124,7 +134,7 @@ public class EditFragment extends Fragment {
                             editActivity.updateReplaceInfo();
                             break;
                         }
-                        case 3: {
+                        case 4: {
                             ChangeFragment changeFragment = ChangeFragment.newInstance("Blur");
                             transaction = getActivity().getSupportFragmentManager().beginTransaction();
                             transaction.replace(R.id.AllOptions, changeFragment);
@@ -135,7 +145,7 @@ public class EditFragment extends Fragment {
                             editActivity.updateReplaceInfo();
                             break;
                         }
-                        case 4: {
+                        case 5: {
                             Fragment cropMenuFragment = CropMenuFragment.newInstance("Crop");
                             transaction = getActivity().getSupportFragmentManager().beginTransaction();
                             transaction.replace(R.id.AllOptions, cropMenuFragment);
@@ -147,7 +157,7 @@ public class EditFragment extends Fragment {
                             editActivity.updateReplaceInfo();
                             break;
                         }
-                        case 5:
+                        case 6:
                             break;
                         default:
                             Log.d("Error", "Option is not defined!");
@@ -159,58 +169,6 @@ public class EditFragment extends Fragment {
             name.setText(iconNames[i]);
             scrollView.addView(singleFrame);
         }
-
-//        bottomEditView = layoutOption.findViewById(R.id.editToolbar);
-//        bottomEditView.setOnItemSelectedListener(item -> {
-//            int itemId = item.getItemId();
-//
-//            if (itemId == R.id.rotate) {
-//                RotateFragment rotateFragment = RotateFragment.newInstance("Rotate");
-//                transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-//                transaction.replace(R.id.AllOptions, rotateFragment);
-//                transaction.addToBackStack(null);
-//                transaction.commit();
-//                editActivity.setCropOverlay();
-//                editActivity.invisibleSave("rotate");
-//                return true;
-//            } else if (itemId == R.id.text) {
-//                AddTextFragment addTextFragment = AddTextFragment.newInstance("Text");
-//                transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-//                transaction.replace(R.id.AllOptions, addTextFragment);
-//                transaction.addToBackStack(null);
-//                transaction.commit();
-//                editActivity.invisibleSave("text");
-//                return true;
-//            } else if (itemId == R.id.filter) {
-//                FilterFragment filterFragment = FilterFragment.newInstance("Filter");
-//                transaction = getActivity().getSupportFragmentManager().beginTransaction();
-//                transaction.replace(R.id.AllOptions, filterFragment);
-//                transaction.addToBackStack(null);
-//                transaction.commit();
-//                editActivity.invisibleSave("filter");
-//                return true;
-//            } else if (itemId == R.id.brightness) {
-//                ChangeFragment changeFragment = ChangeFragment.newInstance("Brightness");
-//                transaction = getActivity().getSupportFragmentManager().beginTransaction();
-//                transaction.replace(R.id.AllOptions, changeFragment);
-//                transaction.addToBackStack(null);
-//                transaction.commit();
-//                editActivity.invisibleSave("brightness");
-//                return true;
-//            } else if (itemId == R.id.crop) {
-//                CropMenuFragment cropMenuFragment = CropMenuFragment.newInstance("Crop");
-//                transaction = getActivity().getSupportFragmentManager().beginTransaction();
-//                transaction.replace(R.id.AllOptions, cropMenuFragment);
-//                transaction.addToBackStack(null);
-//                transaction.commit();
-//                editActivity.setCropOverlay();
-//                editActivity.invisibleSave("crop");
-//                return true;
-//            }
-//
-//            return false;
-//        });
-
         return layoutOption;
     }
 }

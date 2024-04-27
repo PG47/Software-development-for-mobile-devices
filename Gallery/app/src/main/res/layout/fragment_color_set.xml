@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/colorSetList"
+        android:layout_above="@id/tempLayout"
+        android:layout_marginBottom="-20dp"
+        android:scrollbarAlwaysDrawHorizontalTrack="false">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/colorSet"
+            android:orientation="horizontal"/>
+
+    </HorizontalScrollView>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:id="@+id/tempLayout"/>
+
+    <SeekBar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:max="100"
+        android:progress="0"
+        android:id="@+id/value"
+        android:visibility="gone"
+        android:progressBackgroundTint="@color/white"
+        android:layout_below="@id/tempLayout"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0"
+        android:visibility="gone"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/value"
+        android:id="@+id/showValue"/>
+
+</RelativeLayout>

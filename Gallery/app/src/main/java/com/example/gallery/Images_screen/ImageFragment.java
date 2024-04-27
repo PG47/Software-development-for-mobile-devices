@@ -6,6 +6,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -59,7 +61,7 @@ public class ImageFragment extends Fragment {
     CropImageView cropImageView;
     String fontFamily, fontSize = "11";
     Boolean italic, bold;
-    Integer color, degValue = 0;
+    Integer color, degValue = 0, optionColorSet = 0;
     Boolean horizontalFlip = false, verticalFlip = false;
     float xText, yText;
     public static ImageFragment newInstance(String strArg) {
@@ -139,7 +141,7 @@ public class ImageFragment extends Fragment {
         drawable.draw(canvas);
 
         tempBitmap = rotatedBitmap;
-        degValue = value - 180;
+        degValue = 0;
 
         cropImageView.setImageBitmap(tempBitmap);
     }
@@ -154,7 +156,7 @@ public class ImageFragment extends Fragment {
         drawable.draw(canvas);
 
         tempBitmap = rotatedBitmap;
-        degValue = value;
+        degValue = 0;
 
         cropImageView.setImageBitmap(tempBitmap);
     }
@@ -175,6 +177,128 @@ public class ImageFragment extends Fragment {
         bitmapHeight = adjustedBitmap.getHeight();
 
         cropImageView.setImageBitmap(adjustedBitmap);
+    }
+    public void executeUpdateColorSet(int option) {
+        optionColorSet = option;
+    }
+    public void executeColorFilter(int value) {
+        float valuePercentage = value / 400f;
+        ColorMatrix colorMatrix = null;
+        if (optionColorSet == 0) {
+            cropImageView.setImageBitmap(adjustedBitmap);
+        } else if (optionColorSet == 1) {
+            colorMatrix = createFreshFilter(valuePercentage);
+        } else if (optionColorSet == 2) {
+            colorMatrix = createTransparentFilter(valuePercentage);
+        } else if (optionColorSet == 3) {
+            colorMatrix = createWarmFilter(valuePercentage);
+        } else if (optionColorSet == 4) {
+            colorMatrix = createFilmFilter(valuePercentage);
+        } else if (optionColorSet == 5) {
+            colorMatrix = createModernYellowFilter(valuePercentage);
+        } else if (optionColorSet == 6) {
+            colorMatrix = createBlackWhiteFilter(valuePercentage);
+        } else if (optionColorSet == 7) {
+            colorMatrix = createSepiaFilter(valuePercentage);
+        } else if (optionColorSet == 8) {
+            colorMatrix = createFogFilter(valuePercentage);
+        } else if (optionColorSet == 9) {
+            colorMatrix = createFantasyFilter(valuePercentage);
+        }
+
+        Bitmap colorBitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(colorBitmap);
+        Paint paint = new Paint();
+        paint.setColorFilter(new ColorMatrixColorFilter(colorMatrix));
+        canvas.drawBitmap(adjustedBitmap, 0, 0, paint);
+        tempBitmap = colorBitmap;
+        cropImageView.setImageBitmap(colorBitmap);
+    }
+
+    public static ColorMatrix createFreshFilter(float valuePercentage) {
+        ColorMatrix colorMatrix = new ColorMatrix();
+        colorMatrix.set(new float[] {
+                1 + 1.2f * valuePercentage, 0, 0, 0, 0,
+                0,1 + 1.2f * valuePercentage, 0, 0, 0,
+                0, 0,1 + 1.2f * valuePercentage, 0, 0,
+                0, 0, 0, 1.0f, 0
+        });
+        return new ColorMatrix(colorMatrix);
+    }
+    public static ColorMatrix createTransparentFilter(float valuePercentage) {
+        ColorMatrix colorMatrix = new ColorMatrix();
+        colorMatrix.set(new float[] {
+                1, 0, 0, 0, 0,
+                0, 1, 0, 0, 0,
+                0, 0, 1, 0, 0,
+                0, 0, 0, 1 + valuePercentage, 0
+        });
+        return colorMatrix;
+    }
+    public static ColorMatrix createWarmFilter(float valuePercentage) {
+        ColorMatrix colorMatrix = new ColorMatrix();
+        colorMatrix.set(new float[] {
+                1 + 1.3f * valuePercentage, 0, 0, 0, 0,
+                0, 1 + 1.1f * valuePercentage, 0, 0, 0,
+                0, 0, 1 + 0.8f * valuePercentage, 0, 0,
+                0, 0, 0, 1.0f, 0
+        });
+        return colorMatrix;
+    }
+    public static ColorMatrix createFilmFilter(float valuePercentage) {
+        ColorMatrix colorMatrix = new ColorMatrix();
+        colorMatrix.set(new float[] {
+                1 + 1.2f * valuePercentage, 0, 0, 0, -10 * valuePercentage,
+                0, 1 + 1.2f * valuePercentage, 0, 0, -10 * valuePercentage,
+                0, 0, 1 + 1.2f * valuePercentage, 0, -10 * valuePercentage,
+                0, 0, 0, 1.0f, 0
+        });
+        return colorMatrix;
+    }
+    public static ColorMatrix createModernYellowFilter(float valuePercentage) {
+        ColorMatrix colorMatrix = new ColorMatrix();
+        colorMatrix.set(new float[] {
+                1 + 1.2f * valuePercentage, 0, 0, 0, 0,
+                0, 1 + 1.2f * valuePercentage, 0, 0, 0,
+                0, 0, 1 + 0.8f * valuePercentage, 0, 0,
+                0, 0, 0, 1.0f, 0
+        });
+        return colorMatrix;
+    }
+    public static ColorMatrix createBlackWhiteFilter(float valuePercentage) {
+        ColorMatrix colorMatrix = new ColorMatrix();
+        colorMatrix.setSaturation(valuePercentage);
+        return colorMatrix;
+    }
+    public static ColorMatrix createSepiaFilter(float valuePercentage) {
+        ColorMatrix colorMatrix = new ColorMatrix();
+        colorMatrix.set(new float[] {
+                0.393f + 0.607f * valuePercentage, 0.769f - 0.769f * valuePercentage, 0.189f - 0.189f * valuePercentage, 0, 0,
+                0.349f - 0.349f * valuePercentage, 0.686f + 0.314f * valuePercentage, 0.168f - 0.168f * valuePercentage, 0, 0,
+                0.272f - 0.272f * valuePercentage, 0.534f - 0.534f * valuePercentage, 0.131f + 0.869f * valuePercentage, 0, 0,
+                0, 0, 0, 1.0f, 0
+        });
+        return colorMatrix;
+    }
+    public static ColorMatrix createFogFilter(float valuePercentage) {
+        ColorMatrix colorMatrix = new ColorMatrix();
+        colorMatrix.set(new float[] {
+                1 + 0.2f * valuePercentage, 0, 0, 0, 0,
+                0, 1 + 0.2f * valuePercentage, 0, 0, 0,
+                0, 0, 1 + 0.2f * valuePercentage, 0, 0,
+                0, 0, 0, 1.0f, 0
+        });
+        return colorMatrix;
+    }
+    public static ColorMatrix createFantasyFilter(float valuePercentage) {
+        ColorMatrix colorMatrix = new ColorMatrix();
+        colorMatrix.set(new float[] {
+                1.2f + 0.5f * valuePercentage, 0, 0, 0, 0,
+                0, 1.2f + 0.5f * valuePercentage, 0, 0, 0,
+                0, 0, 1.2f + 0.5f * valuePercentage, 0, 0,
+                0, 0, 0, 1.0f, 0
+        });
+        return colorMatrix;
     }
     public void executeChangeBrightness(int value) {
         float brightnessFactor = Math.max(0, Math.min(100, value));;
@@ -505,6 +629,11 @@ public class ImageFragment extends Fragment {
     }
     public void executeZoom() {
 
+    }
+    public void invisibleEditText() {
+        if (editText != null) {
+            editText.setVisibility(View.GONE);
+        }
     }
     public void saveImageToDevices(Bitmap imageBitmap) {
         String state = Environment.getExternalStorageState();
