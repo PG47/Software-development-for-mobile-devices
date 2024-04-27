@@ -1,40 +1,182 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:orientation="horizontal"
-    android:background="#808080">
+    android:background="@color/black">
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/editToolbar"
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/tempLayout"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/listRatio">
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:background="@drawable/btn_appearance"
+                android:src="@drawable/ic_aspect_foreground"
+                android:id="@+id/op1"/>
+
+            <TextView
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:text="1 : 1"
+                android:layout_marginTop="-22dp"
+                android:textAlignment="center"
+                android:layout_below="@id/op1"
+                android:textColor="@color/white"
+                android:textSize="13sp"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp">
+            <ImageView
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:background="@drawable/btn_appearance"
+                android:src="@drawable/ic_aspect_foreground"
+                android:id="@+id/op2"/>
+
+            <TextView
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:text="3 : 2"
+                android:layout_marginTop="-22dp"
+                android:textAlignment="center"
+                android:layout_below="@id/op2"
+                android:textColor="@color/white"
+                android:textSize="13sp"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp">
+            <ImageView
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:background="@drawable/btn_appearance"
+                android:src="@drawable/ic_aspect_foreground"
+                android:id="@+id/op3"/>
+
+            <TextView
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:text="4 : 3"
+                android:layout_marginTop="-22dp"
+                android:textAlignment="center"
+                android:layout_below="@id/op3"
+                android:textColor="@color/white"
+                android:textSize="13sp"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp">
+            <ImageView
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:background="@drawable/btn_appearance"
+                android:src="@drawable/ic_aspect_foreground"
+                android:id="@+id/op4"/>
+
+            <TextView
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:text="5 : 4"
+                android:layout_marginTop="-22dp"
+                android:textAlignment="center"
+                android:layout_below="@id/op4"
+                android:textColor="@color/white"
+                android:textSize="13sp"/>
+        </RelativeLayout>
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_gravity="center_vertical"
-        app:itemIconSize="30dp"
-        app:itemPaddingTop="0dp"
-        app:labelVisibilityMode="labeled"
-        app:itemTextAppearanceActiveBoldEnabled="true"
-        app:itemTextAppearanceInactive="@color/white"
-        app:itemActiveIndicatorStyle="@color/white"
-        app:menu="@menu/bottom_crop_menu">
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:orientation="horizontal"
+        android:id="@+id/tempLayout"/>
 
-    </com.google.android.material.bottomnavigation.BottomNavigationView>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/listRatio1"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/tempLayout"
+        android:layout_marginTop="5dp">
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:background="@drawable/btn_appearance"
+                android:src="@drawable/ic_aspect_foreground"
+                android:id="@+id/op5"/>
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/aspectRatio"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_gravity="center_vertical"
-        app:itemIconSize="15dp"
-        app:itemPaddingTop="0dp"
-        app:labelVisibilityMode="labeled"
-        app:itemTextAppearanceActiveBoldEnabled="true"
-        app:itemTextAppearanceInactive="@color/white"
-        app:itemActiveIndicatorStyle="@color/white"
-        app:menu="@menu/bottom_aspect_ratio"
-        android:layout_below="@id/editToolbar">
+            <TextView
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:text="9 : 16"
+                android:layout_marginTop="-22dp"
+                android:textAlignment="center"
+                android:layout_below="@id/op5"
+                android:textColor="@color/white"
+                android:textSize="13sp"/>
+        </RelativeLayout>
 
-    </com.google.android.material.bottomnavigation.BottomNavigationView>
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp">
+            <ImageView
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:background="@drawable/btn_appearance"
+                android:src="@drawable/ic_aspect_foreground"
+                android:id="@+id/op6"/>
+
+            <TextView
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:text="16 : 9"
+                android:layout_marginTop="-22dp"
+                android:textAlignment="center"
+                android:layout_below="@id/op6"
+                android:textColor="@color/white"
+                android:textSize="13sp"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp">
+            <ImageView
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:background="@drawable/btn_appearance"
+                android:src="@drawable/ic_aspect_foreground"
+                android:id="@+id/op7"/>
+
+            <TextView
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:text="16 : 10"
+                android:layout_marginTop="-22dp"
+                android:textAlignment="center"
+                android:layout_below="@id/op7"
+                android:textColor="@color/white"
+                android:textSize="13sp"/>
+        </RelativeLayout>
+    </LinearLayout>
 
 </RelativeLayout>

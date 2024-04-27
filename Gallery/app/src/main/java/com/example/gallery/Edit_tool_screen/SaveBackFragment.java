@@ -16,6 +16,8 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.example.gallery.R;
 
+import java.util.Objects;
+
 public class SaveBackFragment extends Fragment {
     EditActivity editActivity;
     Context context;
@@ -77,6 +79,7 @@ public class SaveBackFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if (editActivity != null) {
+                    editActivity.cancelCropOverlay();
                     editActivity.getBack();
                 }
             }
@@ -100,19 +103,17 @@ public class SaveBackFragment extends Fragment {
                 transaction.replace(R.id.AllOptions, editFragment);
                 transaction.addToBackStack(null);
                 transaction.commit();
-                if (option == "rotate") {
+                if (Objects.equals(option, "rotate") || Objects.equals(option, "crop")) {
                     editActivity.cropTheImage();
-                } else if (option == "text") {
+                } else if (Objects.equals(option, "text")) {
                     editActivity.addTextToImage();
-                } else if (option == "filter") {
+                } else if (Objects.equals(option, "color") || Objects.equals(option, "filter")) {
+                    editActivity.saveChangeFilter();
+                } else if (Objects.equals(option, "blur")) {
 
-                } else if (option == "brightness") {
-                    editActivity.saveChangeBrightness();
-                } else if (option == "crop") {
-                    editActivity.cropTheImage();
                 }
 
-                if (editActivity.checkChange() == true) {
+                if (editActivity.checkChange()) {
                     save.setVisibility(View.VISIBLE);
                 }
                 doneAction.setVisibility(View.GONE);
@@ -127,6 +128,8 @@ public class SaveBackFragment extends Fragment {
             functionName.setText("Rotation");
         } else if (option == "text") {
             functionName.setText("Text");
+        } else if (option == "color") {
+            functionName.setText("Color Set");
         } else if (option == "filter") {
             functionName.setText("Filtering");
         } else if (option == "blur") {

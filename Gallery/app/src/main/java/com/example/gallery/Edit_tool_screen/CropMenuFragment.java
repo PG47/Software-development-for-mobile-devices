@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import androidx.fragment.app.Fragment;
@@ -13,11 +14,11 @@ import androidx.fragment.app.Fragment;
 import com.example.gallery.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-public class CropMenuFragment extends Fragment {
+public class CropMenuFragment extends Fragment implements View.OnClickListener {
     EditActivity editActivity;
     Context context;
-    BottomNavigationView bottomCropNav;
-    BottomNavigationView bottomAspectRatio;
+    ImageView op1, op2, op3, op4, op5, op6, op7;
+
     public static CropMenuFragment newInstance(String strArg) {
         CropMenuFragment fragment = new CropMenuFragment();
         Bundle args = new Bundle();
@@ -62,46 +63,42 @@ public class CropMenuFragment extends Fragment {
             }
         }
 
-        bottomCropNav = cropOption.findViewById(R.id.editToolbar);
-        bottomAspectRatio = cropOption.findViewById(R.id.aspectRatio);
+        op1 = (ImageView) cropOption.findViewById(R.id.op1);
+        op2 = (ImageView) cropOption.findViewById(R.id.op2);
+        op3 = (ImageView) cropOption.findViewById(R.id.op3);
+        op4 = (ImageView) cropOption.findViewById(R.id.op4);
+        op5 = (ImageView) cropOption.findViewById(R.id.op5);
+        op6 = (ImageView) cropOption.findViewById(R.id.op6);
+        op7 = (ImageView) cropOption.findViewById(R.id.op7);
 
-        bottomCropNav.setOnItemSelectedListener(item -> {
-            int itemId = item.getItemId();
+        op1.setOnClickListener(this);
+        op2.setOnClickListener(this);
+        op3.setOnClickListener(this);
+        op4.setOnClickListener(this);
+        op5.setOnClickListener(this);
+        op6.setOnClickListener(this);
+        op7.setOnClickListener(this);
 
-            if (itemId == R.id.normal) {
-                editActivity.setUpNormal();
-                return true;
-            } else if (itemId == R.id.fliphorizontally) {
-                editActivity.setUpHorizontalFlip();
-                return true;
-            } else if (itemId == R.id.flipvertically) {
-                editActivity.setUpVerticalFlip();
-                return true;
-            }
-
-            return false;
-        });
-        bottomAspectRatio.setOnItemSelectedListener(item -> {
-            int itemId = item.getItemId();
-
-            if (itemId == R.id.op1) {
-                editActivity.setRatio1();
-                return true;
-            } else if (itemId == R.id.op2) {
-                editActivity.setRatio2();
-                return true;
-            } else if (itemId == R.id.op3) {
-                editActivity.setRatio3();
-                return true;
-            } else if (itemId == R.id.op4) {
-                editActivity.setRatio4();
-                return true;
-            } else if (itemId == R.id.op5) {
-                editActivity.setRatio5();
-                return true;
-            }
-            return false;
-        });
         return cropOption;
+    }
+
+    @Override
+    public void onClick(View view) {
+        int id = view.getId();
+        if (id == R.id.op1) {
+            editActivity.setRatio(1, 1);
+        } else if (id == R.id.op2) {
+            editActivity.setRatio(3, 2);
+        } else if (id == R.id.op3) {
+            editActivity.setRatio(4, 3);
+        } else if (id == R.id.op4) {
+            editActivity.setRatio(5, 4);
+        } else if (id == R.id.op5) {
+            editActivity.setRatio(9, 16);
+        } else if (id == R.id.op6) {
+            editActivity.setRatio(16, 9);
+        } else if (id == R.id.op7) {
+            editActivity.setRatio(16, 10);
+        }
     }
 }

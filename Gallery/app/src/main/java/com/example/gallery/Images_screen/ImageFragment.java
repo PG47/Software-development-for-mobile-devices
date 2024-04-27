@@ -326,7 +326,7 @@ public class ImageFragment extends Fragment {
         tempBitmap = Bitmap.createBitmap(pixels, bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
         cropImageView.setImageBitmap(tempBitmap);
     }
-    public void executeSaveChangeBrightness() {
+    public void executeSaveChangeFilter() {
         if (tempBitmap != null) {
             adjustedBitmap = tempBitmap;
             cropImageView.setImageBitmap(adjustedBitmap);
@@ -672,6 +672,9 @@ public class ImageFragment extends Fragment {
         cropImageView.setAspectRatio(1, 1);
         cropImageView.setShowCropOverlay(true);
     }
+    public void executeCancelCropOverlay() {
+        cropImageView.setShowCropOverlay(false);
+    }
     public void executeSetUpNormal() {
         cropImageView.setImageBitmap(adjustedBitmap);
     }
@@ -699,11 +702,7 @@ public class ImageFragment extends Fragment {
         verticalFlip = !verticalFlip && !horizontalFlip;
         cropImageView.setImageBitmap(tempBitmap);
     }
-    public void executeSetRatio1() { cropImageView.setAspectRatio(1,1); }
-    public void executeSetRatio2() { cropImageView.setAspectRatio(3,2); }
-    public void executeSetRatio3() { cropImageView.setAspectRatio(4,3); }
-    public void executeSetRatio4() { cropImageView.setAspectRatio(5,4); }
-    public void executeSetRatio5() { cropImageView.setAspectRatio(16,9); }
+    public void executeSetRatio(int x, int y) { cropImageView.setAspectRatio(x,y); }
     public boolean executeCheckChange() {
         if (originalBitmap.getWidth() != adjustedBitmap.getWidth() || originalBitmap.getHeight() != adjustedBitmap.getHeight()) {
             return true;

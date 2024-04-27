@@ -121,6 +121,8 @@ public class EditFragment extends Fragment {
                             transaction.addToBackStack(null);
                             transaction.commit();
 
+                            editActivity.invisibleSave("color");
+                            editActivity.updateReplaceInfo();
                             break;
                         }
                         case 3: {
