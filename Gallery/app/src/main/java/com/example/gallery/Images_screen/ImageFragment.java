@@ -3,9 +3,11 @@ package com.example.gallery.Images_screen;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
@@ -25,6 +27,7 @@ import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
 import android.text.InputType;
 import android.util.Log;
+import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -34,17 +37,26 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.example.gallery.DatabaseHelper;
+import com.example.gallery.Edit_tool_screen.AddNameForFaceActivity;
 import com.example.gallery.Edit_tool_screen.EditActivity;
 import com.example.gallery.R;
+import com.google.android.gms.vision.Frame;
+import com.google.android.gms.vision.face.Face;
+import com.google.android.gms.vision.face.FaceDetector;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -64,6 +76,7 @@ public class ImageFragment extends Fragment {
     Integer color, degValue = 0, optionColorSet = 0;
     Boolean horizontalFlip = false, verticalFlip = false;
     float xText, yText;
+    DatabaseHelper databaseHelper;
     public static ImageFragment newInstance(String strArg) {
         ImageFragment fragment = new ImageFragment();
         Bundle args = new Bundle();
@@ -109,6 +122,8 @@ public class ImageFragment extends Fragment {
         selectedImage = getArguments().getString("selectedImage");
         originalBitmap = BitmapFactory.decodeFile(selectedImage);
         adjustedBitmap = Bitmap.createBitmap(originalBitmap);
+
+        databaseHelper = new DatabaseHelper(context);
 
         bitmapWidth = originalBitmap.getWidth();
         bitmapHeight = originalBitmap.getHeight();
@@ -601,6 +616,9 @@ public class ImageFragment extends Fragment {
     public void executeZoom() {
 
     }
+    public void executeSetOriginalImage() {
+        cropImageView.setImageBitmap(adjustedBitmap);
+    }
     public void invisibleEditText() {
         if (editText != null) {
             editText.setVisibility(View.GONE);
@@ -719,5 +737,85 @@ public class ImageFragment extends Fragment {
         }
 
         return false;
+    }
+    public SparseArray<Face> executeFacesDetection() {
+        FaceDetector faceDetector = new FaceDetector.Builder(context)
+                .setTrackingEnabled(false)
+                .build();
+
+        if (!faceDetector.isOperational()) {
+            Log.d("Error:", "Get errors when setting up");
+        }
+
+        Frame frame = new Frame.Builder().setBitmap(adjustedBitmap).build();
+        SparseArray<Face> faces = faceDetector.detect(frame);
+        tempBitmap = drawRectanglesOnBitmap(faces);
+        cropImageView.setImageBitmap(tempBitmap);
+        return faces;
+    }
+    public Bitmap drawRectanglesOnBitmap(@NonNull SparseArray<Face> faces) {
+        Bitmap bitmapCopy = originalBitmap.copy(Bitmap.Config.ARGB_8888, true);
+
+        Canvas canvas = new Canvas(bitmapCopy);
+        Paint paint = new Paint();
+        paint.setColor(Color.RED);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(15);
+
+        for (int i = 0; i < faces.size(); i++) {
+            Face face = faces.valueAt(i);
+            float x = face.getPosition().x;
+            float y = face.getPosition().y;
+            float width = face.getWidth();
+            float height = face.getHeight();
+            canvas.drawRect(x, y, x + width, y + height, paint);
+        }
+
+        return bitmapCopy;
+    }
+    public void extractFaceBitmaps(SparseArray<Face> faces) {
+        List<Bitmap> faceBitmaps = new ArrayList<>();
+
+        for (int i = 0; i < faces.size(); i++) {
+            Face face = faces.valueAt(i);
+
+            float x = face.getPosition().x;
+            float y = face.getPosition().y;
+            float width = face.getWidth();
+            float height = face.getHeight();
+
+            Bitmap faceBitmap = Bitmap.createBitmap(originalBitmap, (int) x, (int) y, (int) width, (int) height);
+
+            faceBitmaps.add(faceBitmap);
+        }
+
+        List<String> filePaths = new ArrayList<>();
+        List<String> expectedNames = new ArrayList<>();
+        for (Bitmap bitmap : faceBitmaps) {
+            String filePath = saveBitmapToFile(bitmap);
+            filePaths.add(filePath);
+
+//            String name = databaseHelper.getExpectedName(bitmap);
+            expectedNames.add("Unknown");
+        }
+
+        Intent intent = new Intent(editActivity, AddNameForFaceActivity.class);
+        intent.putStringArrayListExtra("filePaths", (ArrayList<String>) filePaths);
+        intent.putStringArrayListExtra("expectedNames", (ArrayList<String>) expectedNames);
+        startActivity(intent);
+    }
+    private String saveBitmapToFile(Bitmap bitmap) {
+        File file = new File(getContext().getCacheDir(), "temp_image_" + System.currentTimeMillis() + ".png");
+
+        try {
+            FileOutputStream fos = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.flush();
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return file.getAbsolutePath();
     }
 }

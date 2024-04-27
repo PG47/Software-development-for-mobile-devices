@@ -64,43 +64,43 @@ public class AdvancedOptionsFragment extends Fragment {
             }
         }
 
-        bottomEditView = layoutAdvancedOption.findViewById(R.id.advancedOptions);
-        bottomEditView.setOnItemSelectedListener(item -> {
-            int itemId = item.getItemId();
-
-            if (itemId == R.id.option1) {
-                SupportAdvancedOptionsFragment supportAdvancedOptionsFragment = SupportAdvancedOptionsFragment.newInstance("Faces Detection");
-                transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.toDoWith, supportAdvancedOptionsFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
-                detailsActivity.FacesDetection();
-                return true;
-            } else if (itemId == R.id.option2) {
-                SupportAdvancedOptionsFragment supportAdvancedOptionsFragment = SupportAdvancedOptionsFragment.newInstance("Text Extraction");
-                transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.toDoWith, supportAdvancedOptionsFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
-                detailsActivity.showCropOverlay();
-                return true;
-            } else if (itemId == R.id.option3) {
-                detailsActivity.findSimular_images();
-                return true;
-            } else if (itemId == R.id.option4) {
-                SupportAdvancedOptionsFragment supportAdvancedOptionsFragment = SupportAdvancedOptionsFragment.newInstance("Change Name");
-                transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.toDoWith, supportAdvancedOptionsFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
-                return true;
-            } else if (itemId == R.id.option5) {
-
-                return true;
-            }
-
-            return false;
-        });
+//        bottomEditView = layoutAdvancedOption.findViewById(R.id.advancedOptions);
+//        bottomEditView.setOnItemSelectedListener(item -> {
+//            int itemId = item.getItemId();
+//
+//            if (itemId == R.id.option1) {
+//                SupportAdvancedOptionsFragment supportAdvancedOptionsFragment = SupportAdvancedOptionsFragment.newInstance("Faces Detection");
+//                transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+//                transaction.replace(R.id.toDoWith, supportAdvancedOptionsFragment);
+//                transaction.addToBackStack(null);
+//                transaction.commit();
+//                detailsActivity.FacesDetection();
+//                return true;
+//            } else if (itemId == R.id.option2) {
+//                SupportAdvancedOptionsFragment supportAdvancedOptionsFragment = SupportAdvancedOptionsFragment.newInstance("Text Extraction");
+//                transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+//                transaction.replace(R.id.toDoWith, supportAdvancedOptionsFragment);
+//                transaction.addToBackStack(null);
+//                transaction.commit();
+//                detailsActivity.showCropOverlay();
+//                return true;
+//            } else if (itemId == R.id.option3) {
+//                detailsActivity.findSimular_images();
+//                return true;
+//            } else if (itemId == R.id.option4) {
+//                SupportAdvancedOptionsFragment supportAdvancedOptionsFragment = SupportAdvancedOptionsFragment.newInstance("Change Name");
+//                transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+//                transaction.replace(R.id.toDoWith, supportAdvancedOptionsFragment);
+//                transaction.addToBackStack(null);
+//                transaction.commit();
+//                return true;
+//            } else if (itemId == R.id.option5) {
+//
+//                return true;
+//            }
+//
+//            return false;
+//        });
 
         return layoutAdvancedOption;
     }

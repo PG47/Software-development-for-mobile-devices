@@ -1,27 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:orientation="horizontal"
-    android:background="#808080">
+    android:background="@color/black">
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/advancedOptions"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        app:itemIconSize="40dp"
-        app:itemPaddingTop="0dp"
-        android:layout_gravity="center_vertical"
-        app:labelVisibilityMode="labeled"
-        app:itemTextAppearanceActiveBoldEnabled="true"
-        app:itemTextAppearanceInactive="@color/white"
-        app:itemActiveIndicatorStyle="@color/white"
-        app:menu="@menu/more_actions_on_image_menu"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:id="@+id/listAdvancedOptions">
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@drawable/btn_appearance"
+                android:src="@mipmap/ic_detect_face_foreground"
+                android:id="@+id/faceDetection"/>
 
-    </com.google.android.material.bottomnavigation.BottomNavigationView>
+            <TextView
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:text="Faces detection"
+                android:textAlignment="center"
+                android:layout_below="@id/faceDetection"
+                android:textColor="@color/white"
+                android:textSize="10sp"/>
+        </RelativeLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp">
+            <ImageView
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@drawable/btn_appearance"
+                android:src="@mipmap/ic_detect_text_foreground"
+                android:id="@+id/textExtraction"/>
+
+            <TextView
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:text="Text extraction"
+                android:textAlignment="center"
+                android:layout_below="@id/textExtraction"
+                android:textColor="@color/white"
+                android:textSize="10sp"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp">
+            <ImageView
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@drawable/btn_appearance"
+                android:src="@mipmap/ic_similarity_foreground"
+                android:id="@+id/similarity"/>
+
+            <TextView
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:text="Photos in similarity"
+                android:textAlignment="center"
+                android:layout_below="@id/similarity"
+                android:textColor="@color/white"
+                android:textSize="10sp"/>
+        </RelativeLayout>
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone"
+        android:textColor="@color/white"
+        android:id="@+id/setLoading"
+        android:textSize="15sp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/setLoading"
+        android:layout_marginTop="5dp"
+        android:visibility="gone"
+        android:layout_centerHorizontal="true"
+        android:paddingVertical="10dp"
+        android:id="@+id/addName"
+        android:paddingHorizontal="5dp"
+        android:text="Add name for face(s)"
+        android:background="@drawable/border"/>
+</RelativeLayout>

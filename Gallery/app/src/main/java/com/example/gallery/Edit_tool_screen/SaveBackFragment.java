@@ -80,6 +80,7 @@ public class SaveBackFragment extends Fragment {
             public void onClick(View view) {
                 if (editActivity != null) {
                     editActivity.cancelCropOverlay();
+                    editActivity.setOriginalImage();
                     editActivity.getBack();
                 }
             }
@@ -111,11 +112,13 @@ public class SaveBackFragment extends Fragment {
                     editActivity.saveChangeFilter();
                 } else if (Objects.equals(option, "blur")) {
 
+                } else if (Objects.equals(option, "advanced")) {
+
                 }
 
-                if (editActivity.checkChange()) {
-                    save.setVisibility(View.VISIBLE);
-                }
+//                if (editActivity.checkChange()) {
+//                    save.setVisibility(View.VISIBLE);
+//                }
                 doneAction.setVisibility(View.GONE);
             }
         });
@@ -136,6 +139,8 @@ public class SaveBackFragment extends Fragment {
             functionName.setText("Blurring");
         } else if (option == "crop") {
             functionName.setText("Cropping");
+        } else if (option == "advanced") {
+            functionName.setText("AI");
         }
         functionName.setVisibility(View.VISIBLE);
         save.setVisibility(View.GONE);

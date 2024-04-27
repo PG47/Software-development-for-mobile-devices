@@ -159,8 +159,17 @@ public class EditFragment extends Fragment {
                             editActivity.updateReplaceInfo();
                             break;
                         }
-                        case 6:
+                        case 6: {
+                            AdvancedFragment advancedFragment = AdvancedFragment.newInstance("Advanced");
+                            transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                            transaction.replace(R.id.AllOptions, advancedFragment);
+                            transaction.addToBackStack(null);
+                            transaction.commit();
+
+                            editActivity.invisibleSave("advanced");
+                            editActivity.updateReplaceInfo();
                             break;
+                        }
                         default:
                             Log.d("Error", "Option is not defined!");
                     }

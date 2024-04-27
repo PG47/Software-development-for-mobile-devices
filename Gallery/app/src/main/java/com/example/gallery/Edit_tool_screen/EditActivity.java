@@ -2,6 +2,7 @@ package com.example.gallery.Edit_tool_screen;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.SparseArray;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,6 +10,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.example.gallery.Images_screen.ImageFragment;
 import com.example.gallery.R;
+import com.google.android.gms.vision.face.Face;
 
 public class EditActivity extends AppCompatActivity {
     FragmentTransaction ft;
@@ -79,6 +81,8 @@ public class EditActivity extends AppCompatActivity {
     public void setCropOverlay() { fragmentImage.executeSetCropOverlay(); }
     public void cancelCropOverlay() { fragmentImage.executeCancelCropOverlay(); }
     public void setUpNormal() { fragmentImage.executeSetUpNormal(); }
+    public SparseArray<Face> FacesDetection() { return fragmentImage.executeFacesDetection(); }
+    public void extractFaces(SparseArray<Face> faces) { fragmentImage.extractFaceBitmaps(faces);}
     public void setUpHorizontalFlip() { fragmentImage.executeSetUpHorizontalFlip(); }
     public void setUpVerticalFlip() { fragmentImage.executeSetUpVerticalFlip(); }
     public void setRatio(int x, int y) { fragmentImage.executeSetRatio(x, y); }
@@ -107,4 +111,5 @@ public class EditActivity extends AppCompatActivity {
             ft.commit();
         }
     }
+    public void setOriginalImage() { fragmentImage.executeSetOriginalImage(); }
 }
