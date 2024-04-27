@@ -24,7 +24,8 @@
             android:layout_below="@id/minus90deg"
             android:text="-90°"
             android:textColor="@color/white"
-            android:textAlignment="center"/>
+            android:textAlignment="center"
+            android:textSize="10sp"/>
 
         <ImageView
             android:layout_width="45dp"
@@ -42,7 +43,62 @@
             android:text="+90°"
             android:textAlignment="center"
             android:textColor="@color/white"
-            android:layout_marginStart="55dp"/>
+            android:layout_marginStart="55dp"
+            android:textSize="10sp"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/outerLayout"
+        android:layout_alignParentRight="true"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="5dp">
+
+        <RelativeLayout
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/horizontalLayout">
+            <ImageView
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_centerHorizontal="true"
+                android:src="@drawable/ic_fliphorizontally_foreground"
+                android:background="@drawable/btn_border"
+                android:id="@+id/fliphorizontally"/>
+
+            <TextView
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/fliphorizontally"
+                android:text="Horizontal flip"
+                android:textColor="@color/white"
+                android:textAlignment="center"
+                android:textSize="10sp"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/verticalLayout"
+            android:layout_toRightOf="@id/horizontalLayout">
+            <ImageView
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_centerHorizontal="true"
+                android:src="@drawable/ic_flipvertically_foreground"
+                android:background="@drawable/btn_border"
+                android:id="@+id/flipvertically"/>
+
+            <TextView
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/flipvertically"
+                android:text="Vertical flip"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="10sp"/>
+        </RelativeLayout>
     </RelativeLayout>
 
     <RelativeLayout

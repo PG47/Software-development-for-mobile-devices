@@ -20,10 +20,10 @@ import com.example.gallery.R;
 public class RotateFragment extends Fragment {
     EditActivity editActivity;
     Context context;
-    TextView rotate30deg, rotate45deg, rotate60deg, rotate90deg, rotate180deg;
+    TextView rotate30deg, rotate45deg, rotate60deg, rotate90deg, rotate135deg, rotate180deg;
     SeekBar changeValue;
     TextView rotateAngle;
-    ImageView minus90deg, plus90deg;
+    ImageView minus90deg, plus90deg, horizontalFlip, verticalFlip;
 
     public static RotateFragment newInstance(String strArg) {
         RotateFragment fragment = new RotateFragment();
@@ -76,9 +76,12 @@ public class RotateFragment extends Fragment {
         rotate45deg = (TextView) rotateOption.findViewById(R.id.rotate45deg);
         rotate60deg = (TextView) rotateOption.findViewById(R.id.rotate60deg);
         rotate90deg = (TextView) rotateOption.findViewById(R.id.rotate90deg);
+        rotate135deg = (TextView) rotateOption.findViewById(R.id.rotate135deg);
         rotate180deg = (TextView) rotateOption.findViewById(R.id.rotate180deg);
         minus90deg = (ImageView) rotateOption.findViewById(R.id.minus90deg);
         plus90deg = (ImageView) rotateOption.findViewById(R.id.plus90deg);
+        horizontalFlip = (ImageView) rotateOption.findViewById(R.id.fliphorizontally);
+        verticalFlip = (ImageView) rotateOption.findViewById(R.id.flipvertically);
         changeValue.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -128,6 +131,14 @@ public class RotateFragment extends Fragment {
                 changeValue.setProgress(180 + 90);
             }
         });
+        rotate135deg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                rotateAngle.setText("135°");
+                editActivity.fastRotate(135);
+                changeValue.setProgress(180 + 135);
+            }
+        });
         rotate180deg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -146,6 +157,18 @@ public class RotateFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 editActivity.plus90deg();
+            }
+        });
+        horizontalFlip.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                editActivity.setUpHorizontalFlip();
+            }
+        });
+        verticalFlip.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                editActivity.setUpVerticalFlip();
             }
         });
         return rotateOption;

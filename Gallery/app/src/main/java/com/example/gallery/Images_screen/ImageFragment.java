@@ -707,25 +707,25 @@ public class ImageFragment extends Fragment {
     public void executeSetUpHorizontalFlip() {
         Matrix matrix = new Matrix();
         matrix.setScale(-1, 1);
-        if (horizontalFlip == false && verticalFlip == false) {
-            tempBitmap = Bitmap.createBitmap(adjustedBitmap, 0, 0, bitmapWidth, bitmapHeight, matrix, true);
-            horizontalFlip = true;
-        } else {
+        if (tempBitmap != null) {
             tempBitmap = Bitmap.createBitmap(tempBitmap, 0, 0, bitmapWidth, bitmapHeight, matrix, true);
-            horizontalFlip = false;
+        } else {
+            tempBitmap = Bitmap.createBitmap(adjustedBitmap, 0, 0, bitmapWidth, bitmapHeight, matrix, true);
         }
+        
+        horizontalFlip = !horizontalFlip && !verticalFlip;
         cropImageView.setImageBitmap(tempBitmap);
     }
     public void executeSetUpVerticalFlip() {
         Matrix matrix = new Matrix();
         matrix.setScale(1, -1);
-        if (verticalFlip == false && horizontalFlip == false) {
-            tempBitmap = Bitmap.createBitmap(adjustedBitmap, 0, 0, bitmapWidth, bitmapHeight, matrix, true);
-            verticalFlip = true;
-        } else {
+        if (tempBitmap != null) {
             tempBitmap = Bitmap.createBitmap(tempBitmap, 0, 0, bitmapWidth, bitmapHeight, matrix, true);
-            verticalFlip = false;
+        } else {
+            tempBitmap = Bitmap.createBitmap(adjustedBitmap, 0, 0, bitmapWidth, bitmapHeight, matrix, true);
         }
+
+        verticalFlip = !verticalFlip && !horizontalFlip;
         cropImageView.setImageBitmap(tempBitmap);
     }
     public void executeSetRatio1() { cropImageView.setAspectRatio(1,1); }
