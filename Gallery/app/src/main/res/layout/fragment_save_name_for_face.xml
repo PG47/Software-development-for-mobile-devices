@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/black">
 
     <ImageButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="-5dp"
+        android:adjustViewBounds="true"
+        android:background="#00000000"
+        android:scaleType="fitCenter"
         android:src="@drawable/ic_back_arrow_foreground"
-        android:background="@android:color/transparent"
-        android:layout_marginLeft="-25dp"
-        android:layout_marginTop="-10dp"
+        android:contentDescription="TODO"
         android:id="@+id/cancelAddName"/>
 
     <TextView
@@ -18,14 +21,16 @@
         android:layout_centerHorizontal="true"
         android:text="ADD NAME"
         android:textSize="25dp"
+        android:textColor="@color/white"
         android:layout_marginTop="14dp"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:text="DONE"
+        android:text="Done"
         android:textSize="25dp"
+        android:textColor="@color/white"
         android:layout_marginTop="14dp"
         android:layout_marginEnd="3dp"
         android:id="@+id/doneAddName"/>

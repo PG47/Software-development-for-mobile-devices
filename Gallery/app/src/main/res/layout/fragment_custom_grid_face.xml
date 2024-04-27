@@ -16,6 +16,7 @@
         android:paddingVertical="14dp"
         android:layout_below="@+id/image"
         android:text="Name:"
+        android:textColor="@color/white"
         android:id="@+id/tvName"
         android:textSize="15dp"/>
 
@@ -23,6 +24,7 @@
         android:layout_width="123dp"
         android:layout_height="50dp"
         android:id="@+id/name"
+        android:textColor="@color/white"
         android:layout_below="@+id/image"
         android:textSize="15dp"
         android:layout_toRightOf="@id/tvName"
