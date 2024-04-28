@@ -118,16 +118,47 @@ public class FilterFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View view) {
+        seekBar.setProgress(0);
         if (view.getId() == R.id.contrast) {
             type = "contrast";
+
+            contrast.setBackgroundResource(R.drawable.btn_appearance_new);
+            grayscale.setBackgroundResource(R.drawable.btn_appearance);
+            brightness.setBackgroundResource(R.drawable.btn_appearance);
+            sepia.setBackgroundResource(R.drawable.btn_appearance);
+            sharpen.setBackgroundResource(R.drawable.btn_appearance);
         } else if (view.getId() == R.id.grayscale) {
             type = "grayscale";
+
+            contrast.setBackgroundResource(R.drawable.btn_appearance);
+            grayscale.setBackgroundResource(R.drawable.btn_appearance_new);
+            brightness.setBackgroundResource(R.drawable.btn_appearance);
+            sepia.setBackgroundResource(R.drawable.btn_appearance);
+            sharpen.setBackgroundResource(R.drawable.btn_appearance);
         } else if (view.getId() == R.id.brightness) {
             type = "brightness";
+
+            contrast.setBackgroundResource(R.drawable.btn_appearance);
+            grayscale.setBackgroundResource(R.drawable.btn_appearance);
+            brightness.setBackgroundResource(R.drawable.btn_appearance_new);
+            sepia.setBackgroundResource(R.drawable.btn_appearance);
+            sharpen.setBackgroundResource(R.drawable.btn_appearance);
         } else if (view.getId() == R.id.sepia) {
             type = "sepia";
+
+            contrast.setBackgroundResource(R.drawable.btn_appearance);
+            grayscale.setBackgroundResource(R.drawable.btn_appearance);
+            brightness.setBackgroundResource(R.drawable.btn_appearance);
+            sepia.setBackgroundResource(R.drawable.btn_appearance_new);
+            sharpen.setBackgroundResource(R.drawable.btn_appearance);
         } else if (view.getId() == R.id.sharpen) {
             type = "sharpen";
+
+            contrast.setBackgroundResource(R.drawable.btn_appearance);
+            grayscale.setBackgroundResource(R.drawable.btn_appearance);
+            brightness.setBackgroundResource(R.drawable.btn_appearance);
+            sepia.setBackgroundResource(R.drawable.btn_appearance);
+            sharpen.setBackgroundResource(R.drawable.btn_appearance_new);
         }
     }
 }

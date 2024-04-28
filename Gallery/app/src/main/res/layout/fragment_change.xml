@@ -1,33 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:layout_centerVertical="true">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:text="Brightness:"
-        android:textColor="@color/black"
-        android:id="@+id/changeType"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:text="0"
-        android:textColor="@color/black"
-        android:layout_below="@+id/changeType"
-        android:id="@+id/value"/>
 
     <SeekBar
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/value"
         android:progressTint="#FFCF81"
         android:max="100"
+        android:backgroundTint="@color/white"
+        android:progressBackgroundTint="@color/white"
         android:progress="0"
+        android:layout_above="@id/value"
         android:id="@+id/seekbar"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:text="0"
+        android:textColor="@color/white"
+        android:id="@+id/value" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/value"
+        android:layout_marginTop="15dp"
+        android:layout_centerHorizontal="true">
+
+        <TextView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:textColor="@color/white"
+            android:gravity="center"
+            android:background="@drawable/btn_appearance"
+            android:text="0%"
+            android:id="@+id/level0"/>
+
+        <TextView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:textColor="@color/white"
+            android:gravity="center"
+            android:background="@drawable/btn_appearance"
+            android:text="25%"
+            android:layout_marginLeft="20dp"
+            android:id="@+id/level1"/>
+
+        <TextView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:textColor="@color/white"
+            android:gravity="center"
+            android:background="@drawable/btn_appearance"
+            android:text="50%"
+            android:layout_marginLeft="20dp"
+            android:id="@+id/level2"/>
+
+        <TextView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:textColor="@color/white"
+            android:gravity="center"
+            android:background="@drawable/btn_appearance"
+            android:text="75%"
+            android:layout_marginLeft="20dp"
+            android:id="@+id/level3"/>
+
+        <TextView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:textColor="@color/white"
+            android:gravity="center"
+            android:background="@drawable/btn_appearance"
+            android:text="100%"
+            android:layout_marginLeft="20dp"
+            android:id="@+id/level4"/>
+    </LinearLayout>
 
 </RelativeLayout>

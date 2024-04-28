@@ -14,12 +14,12 @@ import androidx.fragment.app.Fragment;
 
 import com.example.gallery.R;
 
-public class ChangeFragment extends Fragment {
+public class ChangeFragment extends Fragment implements View.OnClickListener {
     private EditActivity editActivity;
     private Context context;
     private static String changeType;
     private TextView type;
-    private TextView value;
+    private TextView value, level0, level1, level2, level3, level4;
     private SeekBar scrollValue;
 
     public static ChangeFragment newInstance(String strArg) {
@@ -67,33 +67,27 @@ public class ChangeFragment extends Fragment {
             }
         }
 
-        type = changeOption.findViewById(R.id.changeType);
         value = changeOption.findViewById(R.id.value);
         scrollValue = changeOption.findViewById(R.id.seekbar);
+        level0 = (TextView) changeOption.findViewById(R.id.level0);
+        level1 = (TextView) changeOption.findViewById(R.id.level1);
+        level2 = (TextView) changeOption.findViewById(R.id.level2);
+        level3 = (TextView) changeOption.findViewById(R.id.level3);
+        level4 = (TextView) changeOption.findViewById(R.id.level4);
 
-        type.setText(changeType);
+        level0.setOnClickListener(this);
+        level1.setOnClickListener(this);
+        level2.setOnClickListener(this);
+        level3.setOnClickListener(this);
+        level4.setOnClickListener(this);
+
         value.setText("0");
 
         scrollValue.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                if (changeType == "Brightness") {
-                    editActivity.changeBrightness(i);
-                    value.setText(String.valueOf(i));
-                } else if (changeType == "Contrast") {
-                    editActivity.changeContrast(i);
-                    value.setText(String.valueOf(i));
-                } else if (changeType == "Blur") {
+                if (changeType == "Blur") {
                     editActivity.changeBlur(i);
-                    value.setText(String.valueOf(i));
-                } else if (changeType == "Sepia") {
-                    editActivity.changeSepia(i);
-                    value.setText(String.valueOf(i));
-                } else if (changeType == "Grayscale") {
-                    editActivity.changeGrayscale(i);
-                    value.setText(String.valueOf(i));
-                } else if (changeType == "Sharpen") {
-                    editActivity.changeSharpen(i);
                     value.setText(String.valueOf(i));
                 }
             }
@@ -110,5 +104,46 @@ public class ChangeFragment extends Fragment {
         });
 
         return changeOption;
+    }
+
+    @Override
+    public void onClick(View view) {
+        int id = view.getId();
+        if (id == R.id.level0) {
+            editActivity.changeBlur(0);
+            level0.setBackgroundResource(R.drawable.btn_appearance_new);
+            level1.setBackgroundResource(R.drawable.btn_appearance);
+            level2.setBackgroundResource(R.drawable.btn_appearance);
+            level3.setBackgroundResource(R.drawable.btn_appearance);
+            level4.setBackgroundResource(R.drawable.btn_appearance);
+        } else if (id == R.id.level1) {
+            editActivity.changeBlur(25);
+            level0.setBackgroundResource(R.drawable.btn_appearance);
+            level1.setBackgroundResource(R.drawable.btn_appearance_new);
+            level2.setBackgroundResource(R.drawable.btn_appearance);
+            level3.setBackgroundResource(R.drawable.btn_appearance);
+            level4.setBackgroundResource(R.drawable.btn_appearance);
+        } else if (id == R.id.level2) {
+            editActivity.changeBlur(50);
+            level0.setBackgroundResource(R.drawable.btn_appearance);
+            level1.setBackgroundResource(R.drawable.btn_appearance);
+            level2.setBackgroundResource(R.drawable.btn_appearance_new);
+            level3.setBackgroundResource(R.drawable.btn_appearance);
+            level4.setBackgroundResource(R.drawable.btn_appearance);
+        } else if (id == R.id.level3) {
+            editActivity.changeBlur(75);
+            level0.setBackgroundResource(R.drawable.btn_appearance);
+            level1.setBackgroundResource(R.drawable.btn_appearance);
+            level2.setBackgroundResource(R.drawable.btn_appearance);
+            level3.setBackgroundResource(R.drawable.btn_appearance_new);
+            level4.setBackgroundResource(R.drawable.btn_appearance);
+        } else if (id == R.id.level4) {
+            editActivity.changeBlur(100);
+            level0.setBackgroundResource(R.drawable.btn_appearance);
+            level1.setBackgroundResource(R.drawable.btn_appearance);
+            level2.setBackgroundResource(R.drawable.btn_appearance);
+            level3.setBackgroundResource(R.drawable.btn_appearance);
+            level4.setBackgroundResource(R.drawable.btn_appearance_new);
+        }
     }
 }
