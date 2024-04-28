@@ -6,12 +6,14 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.credentials.CredentialManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Handler;
 import android.provider.MediaStore;
@@ -73,6 +75,9 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
     SearchFragment searchFragment;
     CredentialManager credentialManager;
     GoogleSignInClient mGoogleSignInClient;
+    GoogleSignInAccount account;
+    private boolean isLoggedIn = false;
+    private String googleUserId = "";
     private final OkHttpClient client = new OkHttpClient();
     private boolean insideAlbum = false;
     private boolean insideSearch = false;
@@ -128,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
 
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
-            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
+            account = completedTask.getResult(ApiException.class);
             String idToken = account.getIdToken();
             String authCode = account.getServerAuthCode();
 
@@ -151,13 +156,16 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
                     try (Response response = client.newCall(request).execute()) {
                         if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
 
+                        isLoggedIn = true;
+
                         Headers responseHeaders = response.headers();
                         for (int i = 0; i < responseHeaders.size(); i++) {
                             Log.d("CRED", responseHeaders.name(i) + ": " + responseHeaders.value(i));
                         }
 
                         assert response.body() != null;
-                        Log.d("CRED", response.body().string());
+                        googleUserId = response.body().string();
+                        Log.d("CRED", googleUserId);
                     } catch (IOException e) {
                         Log.d("CRED", "Error", e);
                     }
@@ -189,7 +197,6 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
         }
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestScopes(new Scope("https://www.googleapis.com/auth/photoslibrary"))
                 .requestServerAuthCode(getString(R.string.server_client_id))
                 .requestIdToken(getString(R.string.server_client_id))
                 .requestEmail()
@@ -258,7 +265,19 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
                 popupMenu.show();
                 return true;
             } else if (itemId == R.id.cloud) {
-                selectOptions.uploadCloud();
+                if (!isLoggedIn) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle("Error");
+                    builder.setMessage("You must log in to your Google account to backup images to cloud.");
+                    builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) { }
+                    });
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                }
+                else {
+                    selectOptions.uploadCloud(googleUserId);
+                }
                 return true;
             }
             else if (itemId == R.id.secure) {
