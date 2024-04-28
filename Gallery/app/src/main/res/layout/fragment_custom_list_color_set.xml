@@ -12,8 +12,6 @@
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:layout_centerHorizontal="true"
-            android:background="@drawable/btn_appearance"
-            android:src="@drawable/ic_rotate_foreground"
             android:id="@+id/option"/>
     </RelativeLayout>
 

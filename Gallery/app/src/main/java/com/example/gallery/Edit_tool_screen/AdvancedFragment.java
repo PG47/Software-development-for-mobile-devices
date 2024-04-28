@@ -116,7 +116,9 @@ public class AdvancedFragment extends Fragment implements View.OnClickListener {
                     }
 
                     textView.setText(text);
-                    addName.setVisibility(View.VISIBLE);
+                    if (faces.size() != 0) {
+                        addName.setVisibility(View.VISIBLE);
+                    }
                 }
             }, 100);
         } else if (id == R.id.textExtraction) {
@@ -175,6 +177,17 @@ public class AdvancedFragment extends Fragment implements View.OnClickListener {
                         public void onClick(DialogInterface dialogInterface, int i) {
                             dialogInterface.dismiss();
                             requireActivity().getSupportFragmentManager().popBackStack();
+                        }
+                    });
+
+                    builder.setNeutralButton("Copy to clipboard", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            ClipboardManager clipboard = (ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                            ClipData clip = ClipData.newPlainText("Text", textViewTemp.getText());
+                            clipboard.setPrimaryClip(clip);
+
+                            Toast.makeText(editActivity, "Text copied to clipboard", Toast.LENGTH_SHORT).show();
                         }
                     });
 

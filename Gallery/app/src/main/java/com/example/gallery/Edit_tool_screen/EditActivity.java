@@ -3,6 +3,7 @@ package com.example.gallery.Edit_tool_screen;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -87,8 +88,8 @@ public class EditActivity extends AppCompatActivity {
     public void changeSepia(int value) { fragmentImage.executeChangeSepia(value); }
     public void changeGrayscale(int value) { fragmentImage.executeChangeGrayscale(value); }
     public void changeSharpen(int value) { fragmentImage.executeChangeSharpen(value); }
-    public void updateColorSet(int index) { fragmentImage.executeUpdateColorSet(index); }
-    public void setValuePercentage(int value) { fragmentImage.executeColorFilter(value); }
+    public void updateColorSet(int index) { fragmentImage.executeColorFilter(index); }
+    public Bitmap[] getAppliedColorSet() { return fragmentImage.executeGetAppliedColorSet(); }
 
 
 
@@ -151,7 +152,6 @@ public class EditActivity extends AppCompatActivity {
         intent.putStringArrayListExtra("ResultImages", result);
         startActivity(intent);
     }
-
     private ArrayList<String> getAllShownImagesPath(Activity activity) {
         Uri uri;
         Cursor cursor;
@@ -184,7 +184,6 @@ public class EditActivity extends AppCompatActivity {
 
         return listOfAllImages;
     }
-
     boolean compare(String img1, String img2, int threshold) {
         Mat mat1 = Imgcodecs.imread(img1);
         Mat mat2 = Imgcodecs.imread(img2);

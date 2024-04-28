@@ -1,6 +1,7 @@
 package com.example.gallery.Edit_tool_screen;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,10 +24,8 @@ public class ColorSetFragment extends Fragment {
     EditActivity editActivity;
     Context context;
     FragmentTransaction transaction;
-    Integer[] iconImages = {R.drawable.ic_rotate_foreground, R.drawable.ic_rotate_foreground, R.drawable.ic_text_foreground, R.mipmap.ic_setting_foreground, R.mipmap.ic_filter_new_foreground, R.drawable.ic_blur_foreground, R.drawable.ic_crop_foreground, R.mipmap.ic_ai_foreground, R.mipmap.ic_ai_foreground, R.mipmap.ic_ai_foreground};
     String[] iconNames = {"Normal", "Fresh", "Transparent", "Warm", "Film", "Modern Yellow", "Black White", "Sepia", "Fog", "Fantasy"};
     ViewGroup scrollView;
-    SeekBar seekBar;
     TextView showValue;
     public static ColorSetFragment newInstance(String strArg) {
         ColorSetFragment fragment = new ColorSetFragment();
@@ -73,28 +72,11 @@ public class ColorSetFragment extends Fragment {
         }
 
         scrollView = layoutOption.findViewById(R.id.colorSet);
-        seekBar = layoutOption.findViewById(R.id.value);
         showValue = layoutOption.findViewById(R.id.showValue);
 
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                editActivity.setValuePercentage(i);
-                showValue.setText(String.valueOf(i));
-            }
+        Bitmap[] listBitmaps = editActivity.getAppliedColorSet();
 
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
-
-        for (int i = 0; i < iconImages.length; i++) {
+        for (int i = 0; i < iconNames.length; i++) {
             final View singleFrame = getLayoutInflater().inflate(R.layout.fragment_custom_list_color_set, null);
             singleFrame.setId(i);
             ImageView icon = (ImageView) singleFrame.findViewById(R.id.option);
@@ -110,20 +92,14 @@ public class ColorSetFragment extends Fragment {
                 @Override
                 public void onClick(View view) {
                     Integer id = view.getId();
-                    seekBar.setProgress(0);
                     editActivity.updateReplaceInfo();
                     editActivity.updateColorSet(id);
-                    if (id == 0) {
-                        seekBar.setVisibility(View.GONE);
-                        showValue.setVisibility(View.GONE);
-                    } else {
-                        seekBar.setVisibility(View.VISIBLE);
-                        showValue.setVisibility(View.VISIBLE);
-                    }
+                    showValue.setText(iconNames[id]);
                 }
             });
 
-            icon.setImageResource(iconImages[i]);
+            icon.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            icon.setImageBitmap(listBitmaps[i]);
             name.setText(iconNames[i]);
             scrollView.addView(singleFrame);
         }
