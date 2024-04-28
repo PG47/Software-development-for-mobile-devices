@@ -140,6 +140,12 @@ public class HeadBarFragment extends Fragment {
                             }
                         });
             }
+
+            Boolean reset = bundle.getBoolean("reset");
+            if (reset) {
+                isLoggedIn = false;
+                login.setImageResource(R.drawable.ic_user_google_foreground);
+            }
         }
 
         return layoutImage;

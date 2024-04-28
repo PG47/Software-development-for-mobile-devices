@@ -34,6 +34,7 @@ import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import com.example.gallery.Album_screen.AlbumFragment;
+import com.example.gallery.Detail_screen.DetailsActivity;
 import com.example.gallery.Images_screen.ImagesFragment;
 import com.example.gallery.Images_screen.SelectOptions;
 import com.example.gallery.Map_screen.MapFragment;
@@ -118,7 +119,8 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
 
     @Override
     public void showCloudImages() {
-
+        Intent intent = new Intent(MainActivity.this, CloudActivity.class);
+        startActivity(intent);
     }
 
     @Override
@@ -222,9 +224,26 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
                 .build();
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
-        account = GoogleSignIn.getLastSignedInAccount(this);
-        if (account != null) {
-            verifyIdTokenOnServer(account);
+        Intent intent = getIntent();
+        if (intent != null && intent.getBooleanExtra("logout", false)) {
+            mGoogleSignInClient.signOut();
+            isLoggedIn = false;
+
+            Bundle bundle = new Bundle();
+            bundle.putBoolean("reset", true);
+
+            HeadBarFragment fragmentHeadBar = new HeadBarFragment();
+            fragmentHeadBar.setArguments(bundle);
+            ft = getSupportFragmentManager().beginTransaction();
+            ft.replace(R.id.head_bar, fragmentHeadBar);
+            ft.commit();
+        }
+
+        else {
+            account = GoogleSignIn.getLastSignedInAccount(this);
+            if (account != null) {
+                verifyIdTokenOnServer(account);
+            }
         }
 
 //        ImageButton sortButton = findViewById(R.id.sort_button);

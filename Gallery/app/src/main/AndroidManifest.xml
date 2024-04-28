@@ -30,7 +30,7 @@
         android:usesCleartextTraffic="true">
         <activity
             android:name=".CloudActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".Edit_tool_screen.AddNameForFaceActivity"
             android:exported="true" />
