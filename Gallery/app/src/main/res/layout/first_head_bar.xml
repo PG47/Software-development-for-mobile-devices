@@ -3,14 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/black">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/headerBar"
         tools:ignore="ExtraText"
         android:layout_width="0dp"
         android:layout_height="50dp"
-        android:background="#D9D9D9"
+        android:background="@color/black"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -23,7 +24,7 @@
             android:paddingStart="15dp"
             android:paddingTop="10dp"
             android:text="@string/group_name"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             android:textSize="20sp"
             android:textStyle="bold|italic"
             app:layout_constraintStart_toStartOf="parent"
@@ -41,7 +42,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0"
-            app:srcCompat="@mipmap/camera_icon_foreground"
+            app:srcCompat="@drawable/ic_camera_foreground"
             tools:ignore="SpeakableTextPresentCheck" />
 
         <ImageButton
