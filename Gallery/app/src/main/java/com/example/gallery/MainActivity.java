@@ -34,7 +34,6 @@ import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import com.example.gallery.Album_screen.AlbumFragment;
-import com.example.gallery.Detail_screen.HeadBarOptions;
 import com.example.gallery.Images_screen.ImagesFragment;
 import com.example.gallery.Images_screen.SelectOptions;
 import com.example.gallery.Map_screen.MapFragment;
@@ -44,7 +43,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -119,6 +117,11 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
     }
 
     @Override
+    public void showCloudImages() {
+
+    }
+
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
@@ -134,48 +137,58 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
             account = completedTask.getResult(ApiException.class);
-            String idToken = account.getIdToken();
-            String authCode = account.getServerAuthCode();
-
-            assert idToken != null;
-            assert authCode != null;
-
-            RequestBody requestBody = new FormBody.Builder()
-                    .add("token", idToken)
-                    .add("auth", authCode)
-                    .build();
-
-            Request request = new Request.Builder()
-                    .url("http://royalmike.com/php/google/token_sign_in")
-                    .post(requestBody)
-                    .build();
-
-            Thread thread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try (Response response = client.newCall(request).execute()) {
-                        if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-
-                        isLoggedIn = true;
-
-                        Headers responseHeaders = response.headers();
-                        for (int i = 0; i < responseHeaders.size(); i++) {
-                            Log.d("CRED", responseHeaders.name(i) + ": " + responseHeaders.value(i));
-                        }
-
-                        assert response.body() != null;
-                        googleUserId = response.body().string();
-                        Log.d("CRED", googleUserId);
-                    } catch (IOException e) {
-                        Log.d("CRED", "Error", e);
-                    }
-                }
-            });
-
-            thread.start();
+            verifyIdTokenOnServer(account);
         } catch (ApiException e) {
             Log.e("CRED", "Google sign in error", e);
         }
+    }
+
+    private void verifyIdTokenOnServer(GoogleSignInAccount account) {
+        String idToken = account.getIdToken();
+        assert idToken != null;
+
+        RequestBody requestBody = new FormBody.Builder()
+                .add("token", idToken)
+                .build();
+
+        Request request = new Request.Builder()
+                .url("http://royalmike.com/php/google/token_sign_in")
+                .post(requestBody)
+                .build();
+
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try (Response response = client.newCall(request).execute()) {
+                    if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+                    isLoggedIn = true;
+
+                    Headers responseHeaders = response.headers();
+                    for (int i = 0; i < responseHeaders.size(); i++) {
+                        Log.d("CRED", responseHeaders.name(i) + ": " + responseHeaders.value(i));
+                    }
+
+                    assert response.body() != null;
+                    googleUserId = response.body().string();
+                    Log.d("CRED", googleUserId);
+
+                    Uri uri = account.getPhotoUrl();
+                    Bundle bundle = new Bundle();
+                    bundle.putParcelable("uri", uri);
+
+                    HeadBarFragment fragmentHeadBar = new HeadBarFragment();
+                    fragmentHeadBar.setArguments(bundle);
+                    ft = getSupportFragmentManager().beginTransaction();
+                    ft.replace(R.id.head_bar, fragmentHeadBar);
+                    ft.commit();
+                } catch (IOException e) {
+                    Log.d("CRED", "Error", e);
+                }
+            }
+        });
+
+        thread.start();
     }
 
     @Override
@@ -196,12 +209,23 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
             loadImages();
         }
 
+        f_headbar = HeadBarFragment.newInstance("first-headbar");
+        ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.head_bar, f_headbar);
+        //ft.addToBackStack(null); // Add transaction to the back stack
+        ft.commit();
+
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestServerAuthCode(getString(R.string.server_client_id))
                 .requestIdToken(getString(R.string.server_client_id))
                 .requestEmail()
                 .build();
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+
+        account = GoogleSignIn.getLastSignedInAccount(this);
+        if (account != null) {
+            verifyIdTokenOnServer(account);
+        }
 
 //        ImageButton sortButton = findViewById(R.id.sort_button);
 //        sortButton.setOnClickListener(new View.OnClickListener() {
@@ -212,12 +236,6 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
 //                sortImagesByOldestDate(); // Gọi phương thức sắp xếp
 //            }
 //        });
-
-        f_headbar = HeadBarFragment.newInstance("first-headbar");
-        ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.head_bar, f_headbar);
-        //ft.addToBackStack(null); // Add transaction to the back stack
-        ft.commit();
 
         imagesFragment = new ImagesFragment();
         albumFragment = new AlbumFragment();
