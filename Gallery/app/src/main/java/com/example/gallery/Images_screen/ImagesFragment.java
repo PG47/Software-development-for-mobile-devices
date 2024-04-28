@@ -210,11 +210,11 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         builder.show();
     }
 
+    private String[] monthsArray = new String[]{"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+
     private void showMonthPickerDialog(final int selectedYear) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Choose month");
-
-        String[] monthsArray = new String[]{"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 
         builder.setItems(monthsArray, new DialogInterface.OnClickListener() {
             @Override
@@ -250,7 +250,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         }
 
         if (imagesInRange.isEmpty()) {
-            Toast.makeText(requireContext(), "Không có ảnh trong tháng " + month + " năm " + year, Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "No images found in\n" + monthsArray[month - 1] + " of " + year, Toast.LENGTH_SHORT).show();
         } else {
             updateImages(imagesInRange);
         }
