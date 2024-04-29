@@ -68,7 +68,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             COLUMN_LIST_INT + " TEXT)";
     private static final String SQL_LIST_FACES = "CREATE TABLE IF NOT EXISTS " + LIST_FACES + "(" +
             COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-            COLUMN_IMAGE + " BLOB)";
+            COLUMN_IMAGE + " TEXT)";
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -110,7 +110,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public String getExpectedName(Bitmap bitmap) {
         String expectedName = "Unknown", tempName = "";
         Bitmap[] listBitmaps;
-        float result = 0F;
+        float result = 999999999F;
         Cursor cursor = null;
         Cursor cursor1 = null;
         SQLiteDatabase db = this.getReadableDatabase();
@@ -122,41 +122,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 do {
                     String allIdImages = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LIST_INT));
                     tempName = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAME));
-                    Log.d("test name", "value + " + tempName + ", " + allIdImages);
 
                     String[] splitIdImages = allIdImages.split(", ");
                     listBitmaps = new Bitmap[splitIdImages.length];
 
-                    for (int i = 0; i < splitIdImages.length; i++) {
-                        query = "SELECT " + COLUMN_IMAGE + " FROM " + LIST_FACES +
-                                " WHERE " + COLUMN_ID + " = ?";
-                        cursor1 = db.rawQuery(query, new String[]{splitIdImages[i]});
-                        if (cursor1.moveToFirst()) {
-                            byte[] byteArray = cursor1.getBlob(cursor1.getColumnIndexOrThrow(COLUMN_IMAGE));
-                            Bitmap buildBitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
-                            listBitmaps[i] = buildBitmap;
-                        }
+                    String idList = allIdImages.replaceAll(" ", "");
+                    query = "SELECT " + COLUMN_IMAGE + " FROM " + LIST_FACES +
+                            " WHERE " + COLUMN_ID + " IN (" + idList + ")";
+                    cursor1 = db.rawQuery(query, null);
+
+                    int index = 0;
+                    if (cursor1.moveToFirst()) {
+                        do {
+                            String path = cursor1.getString(cursor1.getColumnIndexOrThrow(COLUMN_IMAGE));
+                            Bitmap buildBitmap = BitmapFactory.decodeFile(path);
+                            listBitmaps[index++] = buildBitmap;
+                        } while (cursor1.moveToNext());
                     }
 
-//                    String idList = allIdImages.replaceAll(" ", "");
-//                    query = "SELECT " + COLUMN_IMAGE + " FROM " + LIST_FACES +
-//                            " WHERE " + COLUMN_ID + " IN (" + idList + ")";
-//                    cursor1 = db.rawQuery(query, null);
-//
-//                    int index = 0;
-//                    if (cursor1.moveToFirst()) {
-//                        do {
-//                            byte[] byteArray = cursor1.getBlob(cursor1.getColumnIndexOrThrow(COLUMN_IMAGE));
-//                            Bitmap buildBitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
-//                            listBitmaps[index++] = buildBitmap;
-//                        } while (cursor1.moveToNext());
-//                    }
-
                     float tempResult = compareSimilarity(listBitmaps, bitmap);
+                    Log.d("test name + score", "value: " + tempName + ", " + tempResult);
 
-                    Log.d("test 1", "value + " + tempResult);
-
-                    if (tempResult > result && tempResult <= 300) {
+                    if (tempResult < result && tempResult <= 30) {
                         result = tempResult;
                         expectedName = tempName;
                     }
@@ -175,7 +162,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.close();
         }
 
-        Log.d("result name", expectedName);
         return expectedName;
     }
     public float compareSimilarity(Bitmap[] listBitmaps, Bitmap bitmap) {
@@ -186,9 +172,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         double[] result = new double[listBitmaps.length];
         for (int i = 0; i < listBitmaps.length; i++) {
             Utils.bitmapToMat(listBitmaps[i], mat2);
-
-//            Imgproc.cvtColor(mat1, mat1, Imgproc.COLOR_BGR2GRAY);
-//            Imgproc.cvtColor(mat2, mat2, Imgproc.COLOR_BGR2GRAY);
 
             MatOfInt histSize = new MatOfInt(256);
             MatOfFloat ranges = new MatOfFloat(0f, 256f);
@@ -201,27 +184,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Core.normalize(hist2, hist2, 0, 1, Core.NORM_MINMAX, -1, new Mat());
 
             double score = Imgproc.compareHist(hist1, hist2, Imgproc.CV_COMP_CHISQR);
-            Log.d("value", "value + " + score);
             result[i] = score;
         }
 
         double avgValue = 0;
-        for (int i = 0; i < result.length; i++) {
-            avgValue += result[i];
+        for (double v : result) {
+            if (v <= 30) {
+                return (float) v;
+            }
+            avgValue += v;
         }
 
         avgValue = avgValue / result.length;
 
-        Log.d("test", "value + " + avgValue);
-
         return (float) avgValue;
     }
-    public void saveFaceToDB(String[] names, Bitmap[] images) {
+    public void saveFaceToDB(String[] names, String[] paths) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.beginTransaction();
         try {
             for (int i = 0; i < names.length; i++) {
-                long imageId = insertFaceImage(db, images[i]);
+                long imageId = insertFaceImage(db, paths[i]);
                 String name = getFullName(db, names[i]);
 
                 if (Objects.equals(name, "-1")) {
@@ -236,15 +219,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.close();
         }
     }
-    private long insertFaceImage(SQLiteDatabase db, Bitmap image) {
+    private long insertFaceImage(SQLiteDatabase db, String path) {
         ContentValues values = new ContentValues();
-        values.put(COLUMN_IMAGE, getBitmapAsByteArray(image));
+        values.put(COLUMN_IMAGE, path);
         return db.insert(LIST_FACES, null, values);
-    }
-    private byte[] getBitmapAsByteArray(Bitmap bitmap) {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream);
-        return outputStream.toByteArray();
     }
     private String getFullName(SQLiteDatabase db, String name) {
         Cursor cursor = db.query(FACES, new String[]{COLUMN_NAME}, COLUMN_NAME + "=?", new String[]{name}, null, null, null);
@@ -260,17 +238,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_NAME, name);
         values.put(COLUMN_LIST_INT, String.valueOf(imageId));
         db.insert(FACES, null, values);
-        Log.d("check", "value + " + name + ", " + imageId);
     }
     private void updateListFace(SQLiteDatabase db, String name, long imageId) {
         Cursor cursor = db.query(FACES, new String[]{COLUMN_LIST_INT}, COLUMN_NAME + "=?", new String[]{name}, null, null, null);
         if (cursor.moveToFirst()) {
             String existingList = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LIST_INT));
             String updatedList = existingList + ", " + imageId;
+            Log.d("test list", updatedList);
             ContentValues values = new ContentValues();
             values.put(COLUMN_LIST_INT, updatedList);
             db.update(FACES, values, COLUMN_NAME + "=?", new String[]{name});
-            Log.d("check", "value + " + name + ", " + updatedList);
         }
         cursor.close();
     }

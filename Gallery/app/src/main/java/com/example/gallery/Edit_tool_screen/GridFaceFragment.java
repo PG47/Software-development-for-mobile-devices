@@ -18,14 +18,14 @@ public class GridFaceFragment extends Fragment {
     AddNameForFaceActivity addNameForFaceActivity;
     Context context;
     GridView gridView;
-    static Bitmap[] bitmaps;
+    static String[] paths;
     static String[] names;
 
-    public static GridFaceFragment newInstance(String strArg, Bitmap[] listBitmaps, String[] listNames) {
+    public static GridFaceFragment newInstance(String strArg, String[] listPaths, String[] listNames) {
         GridFaceFragment fragment = new GridFaceFragment();
         Bundle args = new Bundle();
         args.putString("strArg1", strArg);
-        bitmaps = listBitmaps;
+        paths = listPaths;
         names = listNames;
         fragment.setArguments(args);
         return fragment;
@@ -68,7 +68,7 @@ public class GridFaceFragment extends Fragment {
         }
 
         gridView = (GridView) gridLayer.findViewById(R.id.myGrid);
-        gridView.setAdapter(new FaceAdapter(context, bitmaps, names));
+        gridView.setAdapter(new FaceAdapter(context, paths, names));
 
         return gridLayer;
     }
@@ -76,8 +76,7 @@ public class GridFaceFragment extends Fragment {
         String[] res = ((FaceAdapter) gridView.getAdapter()).getAllNames();
         return res;
     }
-    public Bitmap[] getAllImage() {
-        Bitmap[] res = ((FaceAdapter) gridView.getAdapter()).getAllImages();
-        return res;
+    public String[] getAllImagePath() {
+        return paths;
     }
 }

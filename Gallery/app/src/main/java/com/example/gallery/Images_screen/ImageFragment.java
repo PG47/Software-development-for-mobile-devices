@@ -53,6 +53,13 @@ import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
+import org.opencv.android.Utils;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -821,8 +828,8 @@ public class ImageFragment extends Fragment {
             float height = face.getHeight();
 
             Bitmap faceBitmap = Bitmap.createBitmap(originalBitmap, (int) x, (int) y, (int) width, (int) height);
-
-            faceBitmaps.add(faceBitmap);
+            Bitmap circularBitmap = cropToCircle(faceBitmap);
+            faceBitmaps.add(circularBitmap);
         }
 
         List<String> filePaths = new ArrayList<>();
@@ -831,14 +838,32 @@ public class ImageFragment extends Fragment {
             String filePath = saveBitmapToFile(bitmap);
             filePaths.add(filePath);
 
-//            String name = databaseHelper.getExpectedName(bitmap);
-            expectedNames.add("Unknown");
+            String name = databaseHelper.getExpectedName(bitmap);
+            expectedNames.add(name);
         }
 
         Intent intent = new Intent(editActivity, AddNameForFaceActivity.class);
         intent.putStringArrayListExtra("filePaths", (ArrayList<String>) filePaths);
         intent.putStringArrayListExtra("expectedNames", (ArrayList<String>) expectedNames);
         startActivity(intent);
+    }
+    public Bitmap cropToCircle(Bitmap faceBitmap) {
+        Mat mat = new Mat();
+        Utils.bitmapToMat(faceBitmap, mat);
+
+        int radius = (int) (0.4 * mat.width());
+        Point center = new Point(mat.width() / 2, mat.height() / 2);
+
+        Mat mask = new Mat(mat.rows(), mat.cols(), CvType.CV_8UC1, Scalar.all(0));
+        Imgproc.circle(mask, center, radius, new Scalar(255), -1);
+
+        Mat croppedMat = new Mat();
+        mat.copyTo(croppedMat, mask);
+
+        Bitmap croppedBitmap = Bitmap.createBitmap(croppedMat.cols(), croppedMat.rows(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(croppedMat, croppedBitmap);
+
+        return croppedBitmap;
     }
     private String saveBitmapToFile(Bitmap bitmap) {
         File file = new File(getContext().getCacheDir(), "temp_image_" + System.currentTimeMillis() + ".png");

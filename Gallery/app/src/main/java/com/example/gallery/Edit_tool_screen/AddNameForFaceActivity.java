@@ -20,6 +20,7 @@ public class AddNameForFaceActivity extends AppCompatActivity {
     GridFaceFragment gridFaceFragment;
     Bitmap[] listBitmaps;
     String[] listNames;
+    String[] listPaths;
     DatabaseHelper databaseHelper;
 
     @Override
@@ -32,8 +33,7 @@ public class AddNameForFaceActivity extends AppCompatActivity {
             ArrayList<String> filePaths = intent.getStringArrayListExtra("filePaths");
             ArrayList<String> name = intent.getStringArrayListExtra("expectedNames");
             if (filePaths != null) {
-                List<Bitmap> bitmaps = loadBitmapsFromFilePaths(filePaths);
-                listBitmaps = bitmaps.toArray(new Bitmap[0]);
+                listPaths = filePaths.toArray(new String[0]);
             }
             if (name != null) {
                 listNames = name.toArray(new String[0]);
@@ -41,7 +41,7 @@ public class AddNameForFaceActivity extends AppCompatActivity {
         }
 
         saveNameFragment = SaveNameFragment.newInstance("save");
-        gridFaceFragment = GridFaceFragment.newInstance("grid", listBitmaps, listNames);
+        gridFaceFragment = GridFaceFragment.newInstance("grid", listPaths, listNames);
         databaseHelper = new DatabaseHelper(this);
 
 
@@ -52,19 +52,9 @@ public class AddNameForFaceActivity extends AppCompatActivity {
         ft.addToBackStack(null);
         ft.commit();
     }
-    private List<Bitmap> loadBitmapsFromFilePaths(List<String> filePaths) {
-        List<Bitmap> bitmaps = new ArrayList<>();
-        for (String filePath : filePaths) {
-            Bitmap bitmap = BitmapFactory.decodeFile(filePath);
-            if (bitmap != null) {
-                bitmaps.add(bitmap);
-            }
-        }
-        return bitmaps;
-    }
     public void saveToDB() {
         String[] res = gridFaceFragment.getAllName();
-        Bitmap[] res1 = gridFaceFragment.getAllImage();
+        String[] res1 = gridFaceFragment.getAllImagePath();
         databaseHelper.saveFaceToDB(res, res1);
         this.finish();
     }

@@ -3,6 +3,7 @@ package com.example.gallery.Edit_tool_screen;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -14,23 +15,26 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import com.example.gallery.R;
 
 public class FaceAdapter extends BaseAdapter {
     private Context context;
     Bitmap[] facesBitmap;
+    String[] paths;
     String[] names;
 
-    public FaceAdapter(Context activityContext, Bitmap[] allFaces, String[] allNames) {
+    public FaceAdapter(Context activityContext, String[] allPaths, String[] allNames) {
         context = activityContext;
-        facesBitmap = allFaces;
+        paths = allPaths;
         names = allNames;
     }
 
     @Override
     public int getCount() {
-        return facesBitmap.length;
+        return paths.length;
     }
 
     @Override
@@ -46,9 +50,6 @@ public class FaceAdapter extends BaseAdapter {
     public String[] getAllNames() {
         return names;
     }
-    public Bitmap[] getAllImages() {
-        return facesBitmap;
-    }
 
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
@@ -62,6 +63,8 @@ public class FaceAdapter extends BaseAdapter {
             holder.imageView = (ImageView) view.findViewById(R.id.image);
             holder.textView = (TextView) view.findViewById(R.id.tvName);
             holder.editText = (EditText) view.findViewById(R.id.name);
+
+            facesBitmap = loadBitmapsFromFilePaths(paths);
 
             holder.editText.addTextChangedListener(new TextWatcher() {
                 @Override
@@ -104,5 +107,15 @@ public class FaceAdapter extends BaseAdapter {
     private int dpToPx(int dp) {
         float density = context.getResources().getDisplayMetrics().density;
         return Math.round(dp * density);
+    }
+    private Bitmap[] loadBitmapsFromFilePaths(String[] filePaths) {
+        List<Bitmap> bitmaps = new ArrayList<>();
+        for (String filePath : filePaths) {
+            Bitmap bitmap = BitmapFactory.decodeFile(filePath);
+            if (bitmap != null) {
+                bitmaps.add(bitmap);
+            }
+        }
+        return bitmaps.toArray(new Bitmap[0]);
     }
 }
