@@ -17,6 +17,7 @@ import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -119,13 +120,22 @@ public class OptionFragment extends Fragment {
         String size = formatSize(imageFile.length());
         String date = getModifiedDate(imageFile);
 
-        // Create and show the dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Image Information");
-        builder.setMessage("Name: " + name + "\n"
-                + "Path: " + path + "\n"
-                + "Size: " + size + "\n"
-                + "Date: " + date);
+        LayoutInflater inflater = requireActivity().getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_image_info, null);
+        builder.setView(dialogView);
+
+        TextView textName = dialogView.findViewById(R.id.text_name);
+        TextView textPath = dialogView.findViewById(R.id.text_path);
+        TextView textSize = dialogView.findViewById(R.id.text_size);
+        TextView textDate = dialogView.findViewById(R.id.text_date);
+
+        textName.setText(name);
+        textPath.setText(path);
+        textSize.setText(size);
+        textDate.setText(date);
+
         builder.setPositiveButton("OK", null);
         AlertDialog dialog = builder.create();
         dialog.show();
