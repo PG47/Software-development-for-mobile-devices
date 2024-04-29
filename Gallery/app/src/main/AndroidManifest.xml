@@ -29,6 +29,9 @@
         android:theme="@style/Theme.Gallery"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".CloudActivity"
+            android:exported="true" />
+        <activity
             android:name=".Edit_tool_screen.AddNameForFaceActivity"
             android:exported="true" />
         <activity
@@ -42,13 +45,13 @@
         </activity>
         <activity
             android:name=".Detail_screen.DetailsActivity"
-            android:exported="true"></activity>
+            android:exported="true" />
         <activity
             android:name=".Edit_tool_screen.EditActivity"
-            android:exported="true"></activity>
+            android:exported="true" />
         <activity
             android:name=".Edit_tool_screen.SimularResult"
-            android:exported="true"></activity>
+            android:exported="true" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

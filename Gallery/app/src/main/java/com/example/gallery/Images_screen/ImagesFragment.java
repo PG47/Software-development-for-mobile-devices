@@ -210,11 +210,11 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         builder.show();
     }
 
+    private String[] monthsArray = new String[]{"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+
     private void showMonthPickerDialog(final int selectedYear) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Choose month");
-
-        String[] monthsArray = new String[]{"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 
         builder.setItems(monthsArray, new DialogInterface.OnClickListener() {
             @Override
@@ -250,7 +250,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         }
 
         if (imagesInRange.isEmpty()) {
-            Toast.makeText(requireContext(), "Không có ảnh trong tháng " + month + " năm " + year, Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "No images found in\n" + monthsArray[month - 1] + " of " + year, Toast.LENGTH_SHORT).show();
         } else {
             updateImages(imagesInRange);
         }
@@ -1126,7 +1126,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             adapter.notifyDataSetChanged();
         }
 
-        public void getUriForCloud() {
+        public void getUriForCloud(String idToken) {
             ArrayList<Uri> selectedUris = new ArrayList<>();
             for (int i : selectedPositions) {
                 Glide.with(requireContext())
@@ -1147,7 +1147,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
                                     selectedUris.add(uri);
 
                                     if (selectedUris.size() == selectedPositions.size()) {
-                                        uploadCloud(selectedUris);
+                                        uploadCloud(selectedUris, idToken);
                                     }
                                 } catch (IOException e) {
                                     throw new RuntimeException(e);
@@ -1161,7 +1161,7 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             }
         }
 
-        public void uploadCloud(ArrayList<Uri> selectedUris) {
+        public void uploadCloud(ArrayList<Uri> selectedUris, String idToken) {
             final boolean[] failed = {false};
             final int[] count = {0};
             final int size = selectedUris.size();
@@ -1176,7 +1176,8 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             for (Uri uri : selectedUris) {
                 if (failed[0]) break;
                 final String randomKey = UUID.randomUUID().toString();
-                StorageReference uploadRef = storageReference.child("images/" + randomKey);
+                Log.d("ID", idToken);
+                StorageReference uploadRef = storageReference.child(idToken + "/" + randomKey);
 
                 uploadRef.putFile(uri)
                         .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -1250,8 +1251,8 @@ public class ImagesFragment extends Fragment implements SelectOptions {
     }
 
     @Override
-    public void uploadCloud() {
-        adapter.getUriForCloud();
+    public void uploadCloud(String idToken) {
+        adapter.getUriForCloud(idToken);
     }
 
     @Override

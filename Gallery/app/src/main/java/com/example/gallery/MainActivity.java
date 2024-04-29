@@ -6,12 +6,14 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.credentials.CredentialManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Handler;
 import android.provider.MediaStore;
@@ -32,7 +34,7 @@ import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import com.example.gallery.Album_screen.AlbumFragment;
-import com.example.gallery.Detail_screen.HeadBarOptions;
+import com.example.gallery.Detail_screen.DetailsActivity;
 import com.example.gallery.Images_screen.ImagesFragment;
 import com.example.gallery.Images_screen.SelectOptions;
 import com.example.gallery.Map_screen.MapFragment;
@@ -42,7 +44,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -73,6 +74,9 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
     SearchFragment searchFragment;
     CredentialManager credentialManager;
     GoogleSignInClient mGoogleSignInClient;
+    GoogleSignInAccount account;
+    private boolean isLoggedIn = false;
+    private String googleUserId = "";
     private final OkHttpClient client = new OkHttpClient();
     private boolean insideAlbum = false;
     private boolean insideSearch = false;
@@ -114,6 +118,12 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
     }
 
     @Override
+    public void showCloudImages() {
+        Intent intent = new Intent(MainActivity.this, CloudActivity.class);
+        startActivity(intent);
+    }
+
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
@@ -128,46 +138,59 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
 
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
-            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
-            String idToken = account.getIdToken();
-            String authCode = account.getServerAuthCode();
-
-            assert idToken != null;
-            assert authCode != null;
-
-            RequestBody requestBody = new FormBody.Builder()
-                    .add("token", idToken)
-                    .add("auth", authCode)
-                    .build();
-
-            Request request = new Request.Builder()
-                    .url("http://royalmike.com/php/google/token_sign_in")
-                    .post(requestBody)
-                    .build();
-
-            Thread thread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try (Response response = client.newCall(request).execute()) {
-                        if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-
-                        Headers responseHeaders = response.headers();
-                        for (int i = 0; i < responseHeaders.size(); i++) {
-                            Log.d("CRED", responseHeaders.name(i) + ": " + responseHeaders.value(i));
-                        }
-
-                        assert response.body() != null;
-                        Log.d("CRED", response.body().string());
-                    } catch (IOException e) {
-                        Log.d("CRED", "Error", e);
-                    }
-                }
-            });
-
-            thread.start();
+            account = completedTask.getResult(ApiException.class);
+            verifyIdTokenOnServer(account);
         } catch (ApiException e) {
             Log.e("CRED", "Google sign in error", e);
         }
+    }
+
+    private void verifyIdTokenOnServer(GoogleSignInAccount account) {
+        String idToken = account.getIdToken();
+        assert idToken != null;
+
+        RequestBody requestBody = new FormBody.Builder()
+                .add("token", idToken)
+                .build();
+
+        Request request = new Request.Builder()
+                .url("http://royalmike.com/php/google/token_sign_in")
+                .post(requestBody)
+                .build();
+
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try (Response response = client.newCall(request).execute()) {
+                    if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+                    isLoggedIn = true;
+
+                    Headers responseHeaders = response.headers();
+                    for (int i = 0; i < responseHeaders.size(); i++) {
+                        Log.d("CRED", responseHeaders.name(i) + ": " + responseHeaders.value(i));
+                    }
+
+                    assert response.body() != null;
+                    googleUserId = response.body().string();
+                    Log.d("CRED", googleUserId);
+
+                    Uri uri = account.getPhotoUrl();
+                    Bundle bundle = new Bundle();
+                    bundle.putParcelable("uri", uri);
+
+                    HeadBarFragment fragmentHeadBar = new HeadBarFragment();
+                    fragmentHeadBar.setArguments(bundle);
+                    ft = getSupportFragmentManager().beginTransaction();
+                    ft.replace(R.id.head_bar, fragmentHeadBar);
+                    ft.commit();
+                } catch (IOException e) {
+                    Log.d("CRED", "Error", e);
+                }
+            }
+        });
+
+        thread.start();
     }
 
     @Override
@@ -188,13 +211,40 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
             loadImages();
         }
 
+        f_headbar = HeadBarFragment.newInstance("first-headbar");
+        ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.head_bar, f_headbar);
+        //ft.addToBackStack(null); // Add transaction to the back stack
+        ft.commit();
+
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestScopes(new Scope("https://www.googleapis.com/auth/photoslibrary"))
                 .requestServerAuthCode(getString(R.string.server_client_id))
                 .requestIdToken(getString(R.string.server_client_id))
                 .requestEmail()
                 .build();
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+
+        Intent intent = getIntent();
+        if (intent != null && intent.getBooleanExtra("logout", false)) {
+            mGoogleSignInClient.signOut();
+            isLoggedIn = false;
+
+            Bundle bundle = new Bundle();
+            bundle.putBoolean("reset", true);
+
+            HeadBarFragment fragmentHeadBar = new HeadBarFragment();
+            fragmentHeadBar.setArguments(bundle);
+            ft = getSupportFragmentManager().beginTransaction();
+            ft.replace(R.id.head_bar, fragmentHeadBar);
+            ft.commit();
+        }
+
+        else {
+            account = GoogleSignIn.getLastSignedInAccount(this);
+            if (account != null) {
+                verifyIdTokenOnServer(account);
+            }
+        }
 
 //        ImageButton sortButton = findViewById(R.id.sort_button);
 //        sortButton.setOnClickListener(new View.OnClickListener() {
@@ -205,12 +255,6 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
 //                sortImagesByOldestDate(); // Gọi phương thức sắp xếp
 //            }
 //        });
-
-        f_headbar = HeadBarFragment.newInstance("first-headbar");
-        ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.head_bar, f_headbar);
-        //ft.addToBackStack(null); // Add transaction to the back stack
-        ft.commit();
 
         imagesFragment = new ImagesFragment();
         albumFragment = new AlbumFragment();
@@ -258,7 +302,19 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
                 popupMenu.show();
                 return true;
             } else if (itemId == R.id.cloud) {
-                selectOptions.uploadCloud();
+                if (!isLoggedIn) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle("Error");
+                    builder.setMessage("You must log in to your Google account to backup images to cloud.");
+                    builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) { }
+                    });
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                }
+                else {
+                    selectOptions.uploadCloud(googleUserId);
+                }
                 return true;
             }
             else if (itemId == R.id.secure) {
