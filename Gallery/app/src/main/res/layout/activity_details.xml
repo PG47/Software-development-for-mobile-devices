@@ -11,10 +11,12 @@
         android:id="@+id/detailsImage" />
 
     <FrameLayout
+        android:id="@+id/headerImage"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:id="@+id/headerImage"
-        android:layout_alignParentTop="true" />
+        android:layout_alignParentTop="true">
+
+    </FrameLayout>
 
     <FrameLayout
         android:layout_width="match_parent"
