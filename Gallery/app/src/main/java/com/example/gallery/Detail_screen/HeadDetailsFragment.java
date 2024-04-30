@@ -107,11 +107,12 @@ public class HeadDetailsFragment extends Fragment {
             }
         });
         addTag.setOnClickListener(new View.OnClickListener() {
-            Button positiveButton = null;
-            List<String> allValues = new ArrayList<>();
-            List<Integer> editTextIds = new ArrayList<>();
             @Override
             public void onClick(View view) {
+                final Button[] positiveButton = {null};
+                ArrayList<String> allValues = new ArrayList<>();
+                ArrayList<Integer> editTextIds = new ArrayList<>();
+
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
                 LayoutInflater inflater = LayoutInflater.from(context);
                 View dialogView = inflater.inflate(R.layout.dialog_add_tag, null);
@@ -120,6 +121,8 @@ public class HeadDetailsFragment extends Fragment {
                 ScrollView scrollView = dialogView.findViewById(R.id.allTags);
                 ImageButton addTagButton = dialogView.findViewById(R.id.toAddMoreTag);
                 ImageButton removeTagButton = dialogView.findViewById(R.id.toRemoveTag);
+
+                removeTagButton.setEnabled(false);
 
                 // add the first linear layout
                 LinearLayout newTagLayout = new LinearLayout(context);
@@ -176,17 +179,19 @@ public class HeadDetailsFragment extends Fragment {
                         allValues.set(0, value);
                         if (value.equals("")) {
                             warningLabel.setVisibility(View.VISIBLE);
-                            positiveButton.setEnabled(false);
-                            positiveButton.setTextColor(Color.GRAY);
+                            positiveButton[0].setEnabled(false);
+                            positiveButton[0].setTextColor(Color.GRAY);
                         } else {
                             warningLabel.setVisibility(View.GONE);
                             for (int n = 0; n < allValues.size(); n++) {
                                 if (allValues.get(n).equals("")) {
+                                    positiveButton[0].setEnabled(false);
+                                    positiveButton[0].setTextColor(Color.GRAY);
                                     return;
                                 }
                             }
-                            positiveButton.setEnabled(true);
-                            positiveButton.setTextColor(Color.GREEN);
+                            positiveButton[0].setEnabled(true);
+                            positiveButton[0].setTextColor(Color.GREEN);
                         }
                     }
 
@@ -215,27 +220,27 @@ public class HeadDetailsFragment extends Fragment {
                         }
 
                         allValues.remove(allValues.size() - 1);
-                        ((ArrayList<String>) allValues).trimToSize();
+                        allValues.trimToSize();
 
                         editTextIds.remove(editTextIds.size() - 1);
-                        ((ArrayList<Integer>) editTextIds).trimToSize();
+                        editTextIds.trimToSize();
 
                         for (int m = 0; m < allValues.size(); m++) {
                             if (allValues.get(m).equals("")) {
-                                positiveButton.setEnabled(false);
-                                positiveButton.setTextColor(Color.GRAY);
+                                positiveButton[0].setEnabled(false);
+                                positiveButton[0].setTextColor(Color.GRAY);
                                 return;
                             }
                         }
-                        positiveButton.setEnabled(true);
-                        positiveButton.setTextColor(Color.GREEN);
+                        positiveButton[0].setEnabled(true);
+                        positiveButton[0].setTextColor(Color.GREEN);
                     }
                 });
                 addTagButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        positiveButton.setEnabled(false);
-                        positiveButton.setTextColor(Color.GRAY);
+                        positiveButton[0].setEnabled(false);
+                        positiveButton[0].setTextColor(Color.GRAY);
 
                         if (linearLayoutContainer.getChildCount() >= 3) {
                             int childHeight = linearLayoutContainer.getChildAt(0).getHeight();
@@ -309,8 +314,8 @@ public class HeadDetailsFragment extends Fragment {
                                 allValues.set(index, value);
                                 if (value.equals("")) {
                                     warningLabel.setVisibility(View.VISIBLE);
-                                    positiveButton.setEnabled(false);
-                                    positiveButton.setTextColor(Color.GRAY);
+                                    positiveButton[0].setEnabled(false);
+                                    positiveButton[0].setTextColor(Color.GRAY);
                                 } else {
                                     warningLabel.setVisibility(View.GONE);
                                     for (int n = 0; n < allValues.size(); n++) {
@@ -318,8 +323,8 @@ public class HeadDetailsFragment extends Fragment {
                                             return;
                                         }
                                     }
-                                    positiveButton.setEnabled(true);
-                                    positiveButton.setTextColor(Color.GREEN);
+                                    positiveButton[0].setEnabled(true);
+                                    positiveButton[0].setTextColor(Color.GREEN);
                                 }
                             }
 
@@ -356,11 +361,11 @@ public class HeadDetailsFragment extends Fragment {
                 alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
                     @Override
                     public void onShow(DialogInterface dialogInterface) {
-                        positiveButton = alertDialog.getButton(dialogInterface.BUTTON_POSITIVE);
+                        positiveButton[0] = alertDialog.getButton(dialogInterface.BUTTON_POSITIVE);
                         Button negativeButton = alertDialog.getButton(dialogInterface.BUTTON_NEGATIVE);
                         negativeButton.setTextColor(Color.RED);
-                        positiveButton.setEnabled(false);
-                        positiveButton.setTextColor(Color.GRAY);
+                        positiveButton[0].setEnabled(false);
+                        positiveButton[0].setTextColor(Color.GRAY);
                     }
                 });
                 alertDialog.show();
