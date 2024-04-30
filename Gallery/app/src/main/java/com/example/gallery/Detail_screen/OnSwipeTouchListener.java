@@ -14,6 +14,7 @@ public class OnSwipeTouchListener implements View.OnTouchListener {
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
+        v.performClick();
         return gestureDetector.onTouchEvent(event);
     }
 
@@ -56,7 +57,15 @@ public class OnSwipeTouchListener implements View.OnTouchListener {
             }
             return result;
         }
+
+        @Override
+        public boolean onSingleTapConfirmed(MotionEvent e) {
+            onClick();
+            return true;
+        }
     }
+
+    public void onClick() {}
 
     public void onSwipeRight() {
     }

@@ -55,6 +55,7 @@ import com.example.gallery.NavigationSearch;
 import com.example.gallery.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.FirebaseException;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -502,31 +503,39 @@ public class ImagesFragment extends Fragment implements SelectOptions {
         }
 
         public View getView(final int position, View convertView, ViewGroup parent) {
-            final ImageView imageView;
-
-
+            ViewHolder holder;
             if (convertView == null) {
-                imageView = (ImageView) LayoutInflater.from(parent.getContext()).inflate(R.layout.item_image, parent, false);
+                convertView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_image, parent, false);
+                holder = new ViewHolder();
+                holder.imageView = (ImageView) convertView.findViewById(R.id.imageView); // Corrected ID here
+                convertView.setTag(holder);
             } else {
-                imageView = (ImageView) convertView;
+                holder = (ViewHolder) convertView.getTag();
             }
 
-            // Highlight selected items
+            // Set background based on selection
             if (isSelectionMode) {
-                imageView.setBackgroundResource(R.drawable.selected_image_background);
+                holder.imageView.setBackgroundResource(R.drawable.selected_image_background);
             } else {
-                // Otherwise, set transparent background
-                imageView.setBackgroundResource(android.R.color.transparent);
+                holder.imageView.setBackgroundResource(android.R.color.transparent);
             }
             if (selectedPositions.contains(position)) {
-                // If it's in selected positions, set background with chosen color
-                imageView.setBackgroundResource(R.drawable.selected_chosen_image_background);
+                holder.imageView.setBackgroundResource(R.drawable.selected_chosen_image_background);
             }
 
-            Glide.with(context).load(images.get(position)).centerCrop().into(imageView);
+            // Load image using Glide
+            Glide.with(context)
+                    .load(images.get(position))
+                    .centerCrop()
+                    .into(holder.imageView);
 
-            return imageView;
+            return convertView;
         }
+
+        class ViewHolder {
+            ImageView imageView;
+        }
+
 
         public void toggleSelection(int position) {
             if (selectedPositions.contains(position)) {

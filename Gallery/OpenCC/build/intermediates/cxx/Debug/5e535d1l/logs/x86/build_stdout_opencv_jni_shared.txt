@@ -1,3 +1,2 @@
 ninja: Entering directory `C:\Users\ASUS\Documents\mobile app dev\Software-development-for-mobile-devices\Gallery\OpenCC\.cxx\Debug\5e535d1l\x86'
-[1/2] Building CXX object CMakeFiles/opencv_jni_shared.dir/dummy.cpp.o
-[2/2] Linking CXX static library libopencv_jni_shared.a
+ninja: no work to do.

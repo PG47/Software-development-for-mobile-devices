@@ -12,11 +12,6 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/overlay"/>
-
-    <FrameLayout
-        android:layout_width="match_parent"
         android:layout_height="50dp"
         android:id="@+id/headerImage"
         android:layout_alignParentTop="true" />

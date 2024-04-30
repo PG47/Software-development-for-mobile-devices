@@ -55,6 +55,26 @@ public class DetailsActivity extends AppCompatActivity implements LargeImageFrag
     }
 
     @Override
+    public void onClickhide() {
+        ft = getSupportFragmentManager().beginTransaction();
+        if (!optionsHidden) {
+            ft.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+            ft.hide(headDetailsFragment);
+            ft.setCustomAnimations(R.anim.slide_up, R.anim.slide_down);
+            ft.hide(fragmentOption);
+        }
+        else {
+            ft.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+
+            ft.show(headDetailsFragment);
+            ft.setCustomAnimations(R.anim.slide_up, R.anim.slide_down);
+            ft.show(fragmentOption);
+        }
+        ft.commit();
+        optionsHidden = !optionsHidden;
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
@@ -102,29 +122,6 @@ public class DetailsActivity extends AppCompatActivity implements LargeImageFrag
         getOnBackPressedDispatcher().addCallback(this,onBackPressedCallback);
 
         optionsHidden = false;
-
-        FrameLayout layout = (FrameLayout) findViewById(R.id.overlay);
-        layout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ft = getSupportFragmentManager().beginTransaction();
-                if (!optionsHidden) {
-                    ft.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
-                    ft.hide(headDetailsFragment);
-                    ft.setCustomAnimations(R.anim.slide_up, R.anim.slide_down);
-                    ft.hide(fragmentOption);
-                }
-                else {
-                    ft.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
-
-                    ft.show(headDetailsFragment);
-                    ft.setCustomAnimations(R.anim.slide_up, R.anim.slide_down);
-                    ft.show(fragmentOption);
-                }
-                ft.commit();
-                optionsHidden = !optionsHidden;
-            }
-        });
 
 
         fragmentOption.setOnImageDeleteListener(new OptionFragment.OnImageDeleteListener() {
