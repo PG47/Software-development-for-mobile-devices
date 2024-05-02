@@ -303,7 +303,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    private boolean deleteRecursive(File fileOrDirectory) {
+    boolean deleteRecursive(File fileOrDirectory) {
         if (fileOrDirectory.isDirectory()) {
             File[] contents = fileOrDirectory.listFiles();
             if (contents != null) {

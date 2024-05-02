@@ -44,6 +44,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -120,6 +121,7 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
     @Override
     public void showCloudImages() {
         Intent intent = new Intent(MainActivity.this, CloudActivity.class);
+        intent.putExtra("id", googleUserId);
         startActivity(intent);
     }
 
@@ -240,10 +242,13 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
         }
 
         else {
-            account = GoogleSignIn.getLastSignedInAccount(this);
-            if (account != null) {
-                verifyIdTokenOnServer(account);
-            }
+            mGoogleSignInClient.silentSignIn()
+                    .addOnCompleteListener(this, new OnCompleteListener<GoogleSignInAccount>() {
+                        @Override
+                        public void onComplete(@NonNull Task<GoogleSignInAccount> task) {
+                            handleSignInResult(task);
+                        }
+                    });
         }
 
 //        ImageButton sortButton = findViewById(R.id.sort_button);
