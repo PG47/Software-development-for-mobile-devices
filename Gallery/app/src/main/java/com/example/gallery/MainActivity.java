@@ -1,5 +1,7 @@
 package com.example.gallery;
 
+import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
+
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
@@ -131,12 +133,23 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
 
         // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
         if (requestCode == 123) {
-            // The Task returned from this call is always completed, no need to attach
-            // a listener.
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            handleSignInResult(task);
+            handle_SignInResult(task);
         }
     }
+
+    private void handle_SignInResult(Task<GoogleSignInAccount> completedTask) {
+        try {
+            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
+            // Signed in successfully, show authenticated UI.
+            // You can access the user's account information through the 'account' object.
+            // For example, account.getEmail(), account.getDisplayName(), etc.
+        } catch (ApiException e) {
+            Log.w("GOOGLE", "signInResult:failed code=" + e.getStatusCode());
+            Toast.makeText(MainActivity.this,"Error when sign in google!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
