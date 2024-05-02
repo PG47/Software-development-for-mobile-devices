@@ -13,7 +13,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -28,7 +30,9 @@ import com.bumptech.glide.request.RequestOptions;
 import com.example.gallery.DatabaseHelper;
 import com.example.gallery.Edit_tool_screen.AddNameForFaceActivity;
 import com.example.gallery.R;
+import com.github.chrisbanes.photoview.OnSingleFlingListener;
 import com.github.chrisbanes.photoview.PhotoView;
+import com.github.chrisbanes.photoview.PhotoViewAttacher;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
@@ -45,6 +49,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LargeImageFragment extends Fragment {
+    private static final int SWIPE_THRESHOLD = 100;
+    private static final int SWIPE_VELOCITY_THRESHOLD = 100;
     DetailsActivity detailsActivity;
     Context context = null;
     CropImageView cropImageView=null;
@@ -125,18 +131,36 @@ public class LargeImageFragment extends Fragment {
         photoView = layoutImage.findViewById(R.id.photoView);
         photoView.setImageBitmap(rotatedBitmap);
         photoView.setVisibility(View.VISIBLE);
-        photoView.setOnTouchListener(new OnSwipeTouchListener(requireContext()) {
-            public void onSwipeRight() {
-                imagePath = getNextImagePath(imagePath, images, -1);
-                updateImage();
-            }
 
-            public void onClick() {
+        photoView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 onImageChangeListener.onClickhide();
             }
-            public void onSwipeLeft() {
-                imagePath = getNextImagePath(imagePath, images, 1);
-                updateImage();
+        });
+        photoView.setOnSingleFlingListener(new OnSingleFlingListener() {
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                boolean result = false;
+                try {
+                    float diffY = e2.getY() - e1.getY();
+                    float diffX = e2.getX() - e1.getX();
+                    if (Math.abs(diffX) > Math.abs(diffY)) {
+                        if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+                            if (diffX > 0) {
+                                imagePath = getNextImagePath(imagePath, images, -1);
+                                updateImage();
+                            } else {
+                                imagePath = getNextImagePath(imagePath, images, 1);
+                                updateImage();
+                            }
+                            result = true;
+                        }
+                    } else {}
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
+                return result;
             }
         });
 

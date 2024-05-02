@@ -123,7 +123,6 @@ public class DetailsActivity extends AppCompatActivity implements LargeImageFrag
 
         optionsHidden = false;
 
-
         fragmentOption.setOnImageDeleteListener(new OptionFragment.OnImageDeleteListener() {
             @Override
             public void onImageDeleted() {
