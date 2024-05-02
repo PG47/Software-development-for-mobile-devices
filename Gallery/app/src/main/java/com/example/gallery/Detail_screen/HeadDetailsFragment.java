@@ -370,11 +370,6 @@ public class HeadDetailsFragment extends Fragment {
                 });
                 alertDialog.show();
             }
-
-            public boolean checkEmpty() {
-
-                return false;
-            }
         });
         addToAlbum.setOnClickListener(new View.OnClickListener() {
             @Override
