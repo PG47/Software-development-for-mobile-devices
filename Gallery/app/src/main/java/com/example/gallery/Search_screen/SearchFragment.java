@@ -43,6 +43,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -54,12 +55,14 @@ import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.example.gallery.DatabaseHelper;
 import com.example.gallery.NavigationSearch;
 import com.example.gallery.R;
 import com.google.android.material.textfield.TextInputEditText;
@@ -103,7 +106,28 @@ public class SearchFragment extends Fragment {
                 String searchText = TextField.getText().toString();
                 if (searchText.isEmpty()) return;
                 searchText = searchText.trim();
-                openSearch.openSearch(searchText);
+
+                PopupMenu popupMenu = new PopupMenu(getContext(), v);
+                popupMenu.getMenuInflater().inflate(R.menu.search_menu, popupMenu.getMenu());
+
+                String finalSearchText = searchText;
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        int itemID= item.getItemId();
+                        if(itemID == R.id.menu_search_by_name) {
+                            openSearch.openSearch(finalSearchText);
+                            return true;
+                        } else if(itemID == R.id.menu_search_by_tag) {
+                            DatabaseHelper databaseHelper = new DatabaseHelper(requireActivity());
+                            ArrayList<String> result = databaseHelper.SearchByTag(finalSearchText);
+                            openSearch.openTags(result);
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+                popupMenu.show();
             }
         });
 

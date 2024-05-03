@@ -613,14 +613,6 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
                 new String[]{"%" + keyword + "%"},
                 null
         );
-
-//        if (cursor != null) {
-//            while (cursor.moveToNext()) {
-//                @SuppressLint("Range") String imagePath = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
-//                imagePaths.add(imagePath);
-//            }
-//            cursor.close();
-//        }
         if (cursor != null) {
             while (cursor.moveToNext()) {
                 int columnIndex = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
@@ -686,6 +678,23 @@ public class MainActivity extends AppCompatActivity implements NavigationChange,
 
         getSupportFragmentManager().beginTransaction().replace(R.id.mainFragment, imagesFragment).commit();
     }
+
+    @Override
+    public void openTags(ArrayList<String> img_path) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .remove(imagesFragment)
+                .commit();
+
+        ArrayList<String> imagePaths = img_path;
+
+        imagesFragment = new ImagesFragment(imagePaths, true);
+        selectOptions = (SelectOptions) imagesFragment;
+        insideSearch = true;
+
+        getSupportFragmentManager().beginTransaction().replace(R.id.mainFragment, imagesFragment).commit();
+    }
+
 
 
     @Override

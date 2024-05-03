@@ -54,20 +54,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String SQL_CREATE_SECURE_IMAGES = "CREATE TABLE IF NOT EXISTS " + SECURE_IMAGES + " (" +
             COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
             COLUMN_MEDIA_ID + " LONG, " +
-            COLUMN_ALBUM_ID + " INTERGER, " +
+            COLUMN_ALBUM_ID + " INTEGER, " +
             COLUMN_ORIGIN_PATH + " TEXT, " +
             "FOREIGN KEY(" + COLUMN_ALBUM_ID + ") REFERENCES " + SECURE_ALBUM + "(" + COLUMN_ALBUM_ID + "))";
 
     private static final String SQL_CREATE_FACES = "CREATE TABLE IF NOT EXISTS " + FACES + "(" +
             COLUMN_NAME + " TEXT PRIMARY KEY, " +
             COLUMN_LIST_INT + " TEXT)";
+
     private static final String SQL_LIST_FACES = "CREATE TABLE IF NOT EXISTS " + LIST_FACES + "(" +
             COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
             COLUMN_IMAGE + " TEXT)";
+
     private static final String SQL_TAG_ID_LIKE = "CREATE TABLE IF NOT EXISTS " + TAG_ID + "(" +
             COLUMN_IMAGE_PATH + " TEXT PRIMARY KEY, " +
-            COLUMN_TAG_ID + " TEXT, " +
+            COLUMN_TAG_ID + " INTEGER, " + // Changed to INTEGER
             COLUMN_LIKE + " BOOLEAN DEFAULT FALSE)";
+
     private static final String SQL_TAG_NAME = "CREATE TABLE IF NOT EXISTS " + TAG_NAME + "(" +
             COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
             COLUMN_NAME + " TEXT)";
@@ -224,6 +227,39 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_NAME, value);
         return (int) db.insert(TAG_NAME, null, values);
     }
+    public ArrayList<String> SearchByTag(String key) {
+        ArrayList<String> imagePaths = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        // Query to retrieve the tag ID for the given key
+        String tagIdQuery = "SELECT " + COLUMN_ID + " FROM " + TAG_NAME + " WHERE LOWER(" + COLUMN_NAME + ") = LOWER(?)";
+        Cursor tagIdCursor = db.rawQuery(tagIdQuery, new String[]{key});
+
+        if (tagIdCursor.moveToFirst()) {
+            int tagId = tagIdCursor.getInt(tagIdCursor.getColumnIndexOrThrow(COLUMN_ID));
+
+            // Query to retrieve the image paths associated with the tag ID
+            String imagePathQuery = "SELECT " + COLUMN_IMAGE_PATH + " FROM " + TAG_ID + " WHERE " + COLUMN_TAG_ID + " = ?";
+            Cursor imagePathCursor = db.rawQuery(imagePathQuery, new String[]{String.valueOf(tagId)});
+
+            if (imagePathCursor.moveToFirst()) {
+                do {
+                    String imagePath = imagePathCursor.getString(imagePathCursor.getColumnIndexOrThrow(COLUMN_IMAGE_PATH));
+                    imagePaths.add(imagePath);
+                } while (imagePathCursor.moveToNext());
+            }
+
+            imagePathCursor.close();
+        }
+
+        tagIdCursor.close();
+        db.close();
+
+        return imagePaths;
+    }
+
+
+
     public String getExpectedName(Bitmap bitmap) {
         String expectedName = "Unknown", tempName = "";
         Bitmap[] listBitmaps;

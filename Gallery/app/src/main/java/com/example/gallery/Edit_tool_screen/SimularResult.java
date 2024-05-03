@@ -138,6 +138,11 @@ public class SimularResult extends AppCompatActivity implements NavigationChange
     }
 
     @Override
+    public void openTags(ArrayList<String> img_path) {
+
+    }
+
+    @Override
     public void closeSearch() {
 
     }
