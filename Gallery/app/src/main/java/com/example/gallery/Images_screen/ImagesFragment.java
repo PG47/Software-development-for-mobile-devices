@@ -1,6 +1,7 @@
 package com.example.gallery.Images_screen;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -1175,11 +1176,9 @@ public class ImagesFragment extends Fragment implements SelectOptions {
             final int[] count = {0};
             final int size = selectedUris.size();
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
-            builder.setTitle("Uploading images...");
-            builder.setMessage("Uploaded 0 of " + size + " image(s)");
-
-            AlertDialog dialog = builder.create();
+            ProgressDialog dialog = new ProgressDialog(requireActivity());
+            dialog.setTitle("Uploading images...");
+            dialog.setMessage("Uploaded 0 of " + size + " image(s)");
             dialog.show();
 
             for (Uri uri : selectedUris) {
