@@ -103,7 +103,8 @@ public class EditActivity extends AppCompatActivity {
     public void cancelCropOverlay() { fragmentImage.executeCancelCropOverlay(); }
     public void setUpNormal() { fragmentImage.executeSetUpNormal(); }
     public SparseArray<Face> FacesDetection() { return fragmentImage.executeFacesDetection(); }
-    public void extractFaces(SparseArray<Face> faces) { fragmentImage.extractFaceBitmaps(faces);}
+    public void doSetImage() { fragmentImage.setImage(); }
+    public ArrayList<ArrayList<String>> extractFaces(SparseArray<Face> faces) { return fragmentImage.extractFaceBitmaps(faces);}
     public void setUpHorizontalFlip() { fragmentImage.executeSetUpHorizontalFlip(); }
     public void setUpVerticalFlip() { fragmentImage.executeSetUpVerticalFlip(); }
     public void setRatio(int x, int y) { fragmentImage.executeSetRatio(x, y); }

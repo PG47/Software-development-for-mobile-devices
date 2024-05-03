@@ -1,6 +1,9 @@
 package com.example.gallery.Edit_tool_screen;
 
+import static android.app.Activity.RESULT_OK;
+
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -69,6 +72,8 @@ public class SaveNameFragment extends Fragment {
         getBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Intent resultIntent = new Intent();
+                addNameForFaceActivity.setResult(RESULT_OK, resultIntent);
                 addNameForFaceActivity.finish();
             }
         });

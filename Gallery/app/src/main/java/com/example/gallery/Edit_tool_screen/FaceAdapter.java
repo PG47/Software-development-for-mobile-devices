@@ -28,8 +28,13 @@ public class FaceAdapter extends BaseAdapter {
 
     public FaceAdapter(Context activityContext, String[] allPaths, String[] allNames) {
         context = activityContext;
-        paths = allPaths;
-        names = allNames;
+        if (allPaths != null) {
+            paths = allPaths;
+            names = allNames;
+        } else {
+            paths = new String[]{};
+            names = new String[]{};
+        }
     }
 
     @Override

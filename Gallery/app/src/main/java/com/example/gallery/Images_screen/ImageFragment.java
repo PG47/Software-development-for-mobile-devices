@@ -770,8 +770,11 @@ public class ImageFragment extends Fragment {
         Frame frame = new Frame.Builder().setBitmap(adjustedBitmap).build();
         SparseArray<Face> faces = faceDetector.detect(frame);
         tempBitmap = drawRectanglesOnBitmap(faces);
-        cropImageView.setImageBitmap(tempBitmap);
+//        cropImageView.setImageBitmap(tempBitmap);
         return faces;
+    }
+    public void setImage() {
+        cropImageView.setImageBitmap(tempBitmap);
     }
     public Bitmap drawRectanglesOnBitmap(@NonNull SparseArray<Face> faces) {
         Bitmap bitmapCopy = originalBitmap.copy(Bitmap.Config.ARGB_8888, true);
@@ -793,7 +796,7 @@ public class ImageFragment extends Fragment {
 
         return bitmapCopy;
     }
-    public void extractFaceBitmaps(SparseArray<Face> faces) {
+    public ArrayList<ArrayList<String>> extractFaceBitmaps(SparseArray<Face> faces) {
         List<Bitmap> faceBitmaps = new ArrayList<>();
 
         for (int i = 0; i < faces.size(); i++) {
@@ -819,10 +822,10 @@ public class ImageFragment extends Fragment {
             expectedNames.add(name);
         }
 
-        Intent intent = new Intent(editActivity, AddNameForFaceActivity.class);
-        intent.putStringArrayListExtra("filePaths", (ArrayList<String>) filePaths);
-        intent.putStringArrayListExtra("expectedNames", (ArrayList<String>) expectedNames);
-        startActivity(intent);
+        ArrayList<ArrayList<String>> arrayLists = new ArrayList<>();
+        arrayLists.add((ArrayList<String>) filePaths);
+        arrayLists.add((ArrayList<String>) expectedNames);
+        return arrayLists;
     }
     public Bitmap cropToCircle(Bitmap faceBitmap) {
         Mat mat = new Mat();
