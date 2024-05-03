@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_change_name"
+        android:title="Change Name" />
+    <item
+        android:id="@+id/menu_add_album"
+        android:title="Add to Album" />
+    <item
+        android:id="@+id/menu_set_as_wallpaper"
+        android:title="Set as Wallpaper" />
+</menu>

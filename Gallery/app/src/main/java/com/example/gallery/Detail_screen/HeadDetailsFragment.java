@@ -18,6 +18,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -25,6 +26,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -566,9 +568,31 @@ public class HeadDetailsFragment extends Fragment {
         advancedOption.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                detailsActivity.replaceAdvancedOptionFragment();
+                PopupMenu popupMenu = new PopupMenu(getContext(), view);
+                popupMenu.getMenuInflater().inflate(R.menu.three_dot_popup_menu, popupMenu.getMenu());
+
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        int itemId = item.getItemId();
+                        if(itemId == R.id.menu_change_name) {
+                            //change image name
+                            return  true;
+                        } else if(itemId == R.id.menu_add_album) {
+                            //add to album
+                            return true;
+                        } else if(itemId == R.id.menu_set_as_wallpaper) {
+                            //set wallpaper
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+
+                popupMenu.show();
             }
         });
+
         return layoutImage;
     }
 
