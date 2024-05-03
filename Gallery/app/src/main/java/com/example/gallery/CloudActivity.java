@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -37,21 +38,72 @@ import com.google.firebase.storage.StorageReference;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
 
-public class CloudActivity extends AppCompatActivity implements NavigationChange {
+public class CloudActivity extends AppCompatActivity implements NavigationChange, NavigationAlbum, NavigationSearch {
+    private ArrayList<String> images;
     private ImagesFragment imagesFragment;
+    private SelectOptions selectOptions;
     private BottomNavigationView bottomCloudView;
     private String googleUserId;
     private DatabaseHelper databaseHelper;
+
+    private void reloadImagesUI(boolean replace) {
+        if (replace) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .remove(imagesFragment)
+                    .commit();
+        }
+        else {
+            getExistingCloudImages();
+        }
+
+        imagesFragment = new ImagesFragment(images);
+        selectOptions = (SelectOptions) imagesFragment;
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.mainFragment, imagesFragment)
+                .commit();
+    }
+
+    private void getExistingCloudImages() {
+        images.clear();
+
+        Uri uri;
+        Cursor cursor;
+        int column_index_data;
+
+        uri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+
+        String[] projection = { MediaStore.Images.Media.DATA };
+        String selection = MediaStore.Images.Media.BUCKET_DISPLAY_NAME + " = ?";
+        String[] selectionArgs = {"Firebase"};
+
+        cursor = CloudActivity.this.getContentResolver().query(uri, projection, selection,
+                selectionArgs, null);
+
+        assert cursor != null;
+        column_index_data = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+
+        while (cursor.moveToNext()) {
+            String absolutePathOfImage = cursor.getString(column_index_data);
+            images.add(absolutePathOfImage);
+        }
+
+        cursor.close();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cloud);
 
+        images = new ArrayList<>();
         databaseHelper = new DatabaseHelper(this);
 
         Intent intentChange = getIntent();
@@ -63,11 +115,15 @@ public class CloudActivity extends AppCompatActivity implements NavigationChange
 //                .replace(R.id.mainFragment, imagesFragment)
 //                .commit();
 
+        reloadImagesUI(false);
+
         bottomCloudView = findViewById(R.id.cloudToolbar);
         bottomCloudView.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
 
             if (itemId == R.id.reload) {
+                images.clear();
+
                 ProgressDialog dialog = new ProgressDialog(CloudActivity.this);
                 dialog.setTitle("Downloading images...");
                 dialog.setMessage("Please wait for all images to be downloaded.");
@@ -107,6 +163,7 @@ public class CloudActivity extends AppCompatActivity implements NavigationChange
                                                     count[0]++;
                                                     if (count[0] == size) {
                                                         dialog.dismiss();
+                                                        reloadImagesUI(true);
                                                         Toast.makeText(CloudActivity.this, "Downloaded " + size + " image(s) to Firebase Album.", Toast.LENGTH_LONG).show();
                                                     }
                                                 }
@@ -146,6 +203,9 @@ public class CloudActivity extends AppCompatActivity implements NavigationChange
         cv.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
 
         Uri finalUri = contentResolver.insert(uri, cv);
+        assert finalUri != null;
+        images.add(finalUri.toString());
+
         try {
             fos = contentResolver.openOutputStream(Objects.requireNonNull(finalUri));
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
@@ -162,6 +222,26 @@ public class CloudActivity extends AppCompatActivity implements NavigationChange
 
     @Override
     public void endSelection() {
+
+    }
+
+    @Override
+    public void openAlbum(ArrayList<String> images, boolean secure, String album_name) {
+
+    }
+
+    @Override
+    public void closeAlbum() {
+
+    }
+
+    @Override
+    public void openSearch(String keyword) {
+
+    }
+
+    @Override
+    public void closeSearch() {
 
     }
 }
