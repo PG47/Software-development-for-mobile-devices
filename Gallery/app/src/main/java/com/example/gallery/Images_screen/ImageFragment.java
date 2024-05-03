@@ -236,7 +236,6 @@ public class ImageFragment extends Fragment {
             cropImageView.setImageBitmap(colorBitmap);
         }
     }
-
     public Bitmap[] executeGetAppliedColorSet() {
         Bitmap[] res = new Bitmap[10];
         ColorMatrix colorMatrix = null;
@@ -272,7 +271,6 @@ public class ImageFragment extends Fragment {
         }
         return res;
     }
-
     public static ColorMatrix createFreshFilter() {
         ColorMatrix colorMatrix = new ColorMatrix();
         colorMatrix.set(new float[] {
@@ -406,6 +404,7 @@ public class ImageFragment extends Fragment {
             green = (int) ((green - 128) * contrastLevel + 128);
             blue = (int) ((blue - 128) * contrastLevel + 128);
 
+
             red = Math.min(255, Math.max(0, red));
             green = Math.min(255, Math.max(0, green));
             blue = Math.min(255, Math.max(0, blue));
@@ -416,57 +415,42 @@ public class ImageFragment extends Fragment {
         tempBitmap = Bitmap.createBitmap(pixels, bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
         cropImageView.setImageBitmap(tempBitmap);
     }
-
     public void executeChangeBlur(int value) {
-        // Calculate blur radius based on the provided value
         float blurRadius = value / 4.5F;
 
-        // Create an empty bitmap to store the blurred image
         adjustedBitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
 
-        // Copy the original bitmap to the blurred bitmap
         Canvas canvas = new Canvas(adjustedBitmap);
         canvas.drawBitmap(originalBitmap, 0, 0, null);
 
-        // Apply blur effect to the blurred bitmap
-        adjustedBitmap = applyBlur(adjustedBitmap, blurRadius);
+        tempBitmap = applyBlur(adjustedBitmap, blurRadius);
 
-        // Set the adjusted bitmap to the ImageView for display
-        cropImageView.setImageBitmap(adjustedBitmap);
+        cropImageView.setImageBitmap(tempBitmap);
     }
-
     private Bitmap applyBlur(Bitmap src, float blurRadius) {
         if (blurRadius <= 0) {
             return src;
         }
 
-        // Create a new bitmap for the blurred image
         Bitmap blurredBitmap = Bitmap.createBitmap(src.getWidth(), src.getHeight(), Bitmap.Config.ARGB_8888);
 
-        // Create a RenderScript context
         RenderScript rs = RenderScript.create(context);
 
-        // Allocate memory for Renderscript to work with
         Allocation input = Allocation.createFromBitmap(rs, src, Allocation.MipmapControl.MIPMAP_NONE, Allocation.USAGE_SCRIPT);
         Allocation output = Allocation.createTyped(rs, input.getType());
 
-        // Create a blur script
         ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
         script.setRadius(blurRadius);
 
-        // Perform the blur operation
         script.setInput(input);
         script.forEach(output);
 
-        // Copy the blurred image from the Allocation to the blurred bitmap
         output.copyTo(blurredBitmap);
 
-        // Destroy RenderScript resources
         rs.destroy();
 
         return blurredBitmap;
     }
-
     public void executeChangeSepia(int value) {
         float intensity = value / 10f;
 
@@ -519,7 +503,6 @@ public class ImageFragment extends Fragment {
         tempBitmap = Bitmap.createBitmap(pixels, bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
         cropImageView.setImageBitmap(tempBitmap);
     }
-
     public void executeChangeSharpen(int value) {
         float intensity = value / 10f;
 
@@ -545,22 +528,16 @@ public class ImageFragment extends Fragment {
         tempBitmap = Bitmap.createBitmap(pixels, bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888);
         cropImageView.setImageBitmap(tempBitmap);
     }
-
-
-
-
-
-
     public void executeAddEditText() {
         editText = new EditText(context);
         ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(
                 ConstraintLayout.LayoutParams.WRAP_CONTENT,
                 ConstraintLayout.LayoutParams.WRAP_CONTENT
         );
-        layoutParams.leftToLeft = R.id.cropImageView;
-        layoutParams.rightToRight = R.id.cropImageView;
-        layoutParams.topToTop = R.id.cropImageView;
-        layoutParams.bottomToBottom = R.id.cropImageView;
+        layoutParams.leftToLeft = R.id.myRl;
+        layoutParams.rightToRight = R.id.myRl;
+        layoutParams.topToTop = R.id.myRl;
+        layoutParams.bottomToBottom = R.id.myRl;
 
         editText.setLayoutParams(layoutParams);
         editText.setHint("Enter text here");
@@ -595,8 +572,8 @@ public class ImageFragment extends Fragment {
                         float relativeX = newX / cropImageView.getWidth();
                         float relativeY = newY / cropImageView.getHeight();
 
-                        xText = (float) (relativeX * adjustedBitmap.getWidth());
-                        yText = (float) (relativeY * adjustedBitmap.getHeight());
+                        xText = (float) Math.max(0, Math.min(relativeX * adjustedBitmap.getWidth(), adjustedBitmap.getWidth()));
+                        yText = (float) Math.max(0, Math.min(relativeY * adjustedBitmap.getHeight(), adjustedBitmap.getHeight()));
 
                         v.setX(newX);
                         v.setY(newY);
@@ -709,7 +686,7 @@ public class ImageFragment extends Fragment {
         canvas.drawBitmap(adjustedBitmap, 0, 0, null);
 
         Paint paint = new Paint();
-        float fontSizePx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, Float.parseFloat(fontSize) * 3.5F, getResources().getDisplayMetrics());
+        float fontSizePx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, Float.parseFloat(fontSize) * 1.5F, getResources().getDisplayMetrics());
         paint.setTextSize(fontSizePx);
         paint.setColor(color);
 

@@ -21,7 +21,7 @@
 
         <Spinner
             android:layout_width="120dp"
-            android:layout_height="48dp"
+            android:layout_height="36dp"
             android:background="@drawable/border"
             android:layout_marginLeft="4dp"
             android:id="@+id/listFonts"
@@ -38,7 +38,7 @@
 
         <EditText
             android:layout_width="60dp"
-            android:layout_height="40dp"
+            android:layout_height="36dp"
             android:background="@drawable/border"
             android:layout_marginLeft="4dp"
             android:text="11"
@@ -61,11 +61,11 @@
             android:text="Type face:"
             android:layout_marginLeft="5dp"
             android:textColor="@color/white"
-            android:paddingVertical="14dp"
+            android:gravity="center_vertical"
             android:textSize="13sp"/>
 
         <TextView
-            android:layout_width="35dp"
+            android:layout_width="30dp"
             android:layout_height="wrap_content"
             android:textAlignment="center"
             android:text="I"
@@ -73,11 +73,11 @@
             android:id="@+id/italic"
             android:textStyle="italic"
             android:layout_marginLeft="5dp"
-            android:paddingVertical="3dp"
+            android:paddingVertical="0dp"
             android:background="@drawable/border"/>
 
         <TextView
-            android:layout_width="35dp"
+            android:layout_width="30dp"
             android:layout_height="wrap_content"
             android:textAlignment="center"
             android:text="B"
@@ -85,7 +85,7 @@
             android:textStyle="bold"
             android:id="@+id/bold"
             android:layout_marginLeft="5dp"
-            android:paddingVertical="3dp"
+            android:paddingVertical="0dp"
             android:background="@drawable/border"/>
     </LinearLayout>
 

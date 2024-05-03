@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -74,7 +76,21 @@ public class ColorSetFragment extends Fragment {
         scrollView = layoutOption.findViewById(R.id.colorSet);
         showValue = layoutOption.findViewById(R.id.showValue);
 
-        Bitmap[] listBitmaps = editActivity.getAppliedColorSet();
+        Handler handler = new Handler(Looper.getMainLooper());
+
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Bitmap[] listBitmaps = editActivity.getAppliedColorSet();
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        showImageWithColorSet(listBitmaps);
+                    }
+                });
+            }
+        });
+        thread.start();
 
         for (int i = 0; i < iconNames.length; i++) {
             final View singleFrame = getLayoutInflater().inflate(R.layout.fragment_custom_list_color_set, null);
@@ -99,11 +115,18 @@ public class ColorSetFragment extends Fragment {
             });
 
             icon.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            icon.setImageBitmap(listBitmaps[i]);
             name.setText(iconNames[i]);
             scrollView.addView(singleFrame);
         }
 
         return layoutOption;
+    }
+    public void showImageWithColorSet(Bitmap[] result) {
+        for (int i = 0; i < result.length; i++) {
+            ImageView icon = (ImageView) scrollView.findViewById(i).findViewById(R.id.option);
+            if (icon != null && result[i] != null) {
+                icon.setImageBitmap(result[i]);
+            }
+        }
     }
 }

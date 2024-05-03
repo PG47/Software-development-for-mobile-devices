@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -32,6 +33,7 @@ public class AdvancedFragment extends Fragment implements View.OnClickListener {
     LinearLayout layout;
     TextView textView, addName, scanText;
     SparseArray<Face> faces;
+    Handler handler;
 
     public static AdvancedFragment newInstance(String strArg) {
         AdvancedFragment fragment = new AdvancedFragment();
@@ -85,6 +87,8 @@ public class AdvancedFragment extends Fragment implements View.OnClickListener {
         addName = (TextView) advancedLayout.findViewById(R.id.addName);
         scanText = (TextView) advancedLayout.findViewById(R.id.scanText);
 
+        handler = new Handler(Looper.getMainLooper());
+
         faceDetection.setOnClickListener(this);
         textExtraction.setOnClickListener(this);
         similarPhoto.setOnClickListener(this);
@@ -102,25 +106,18 @@ public class AdvancedFragment extends Fragment implements View.OnClickListener {
             textView.setText("Detecting faces...");
             textView.setVisibility(View.VISIBLE);
 
-            new Handler().postDelayed(new Runnable() {
+            new Thread(new Runnable() {
                 @Override
                 public void run() {
                     faces = editActivity.FacesDetection();
-                    String text = null;
-                    if (faces.size() == 0) {
-                        text = "There is no people in the image...";
-                    } else if (faces.size() == 1) {
-                        text = "There is one person in the image...";
-                    } else if (faces.size() > 1) {
-                        text = "There are " + faces.size() + " people in the image...";
-                    }
-
-                    textView.setText(text);
-                    if (faces.size() != 0) {
-                        addName.setVisibility(View.VISIBLE);
-                    }
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            doneFaceDetection();
+                        }
+                    });
                 }
-            }, 100);
+            }).start();
         } else if (id == R.id.textExtraction) {
             editActivity.setCropOverlay();
             layout.setVisibility(View.GONE);
@@ -142,60 +139,84 @@ public class AdvancedFragment extends Fragment implements View.OnClickListener {
         } else if (id == R.id.scanText) {
             scanText.setVisibility(View.GONE);
             textView.setText("Scanning text...");
-            new Handler().postDelayed(new Runnable() {
+            new Thread(new Runnable() {
                 @Override
                 public void run() {
                     String text = editActivity.extractText();
-
-                    AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-                    builder.setTitle("Text from Image");
-
-                    final TextView textViewTemp = new TextView(requireContext());
-                    textViewTemp.setText(text);
-                    textViewTemp.setBackgroundColor(Color.WHITE);
-                    textViewTemp.setTextColor(Color.BLACK);
-                    textViewTemp.setPadding(16, 16, 16, 16);
-                    textViewTemp.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-                    textViewTemp.setTextIsSelectable(true);
-
-                    textViewTemp.setOnLongClickListener(new View.OnLongClickListener() {
+                    handler.post(new Runnable() {
                         @Override
-                        public boolean onLongClick(View v) {
-                            ClipboardManager clipboard = (ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                            ClipData clip = ClipData.newPlainText("Text", textViewTemp.getText());
-                            clipboard.setPrimaryClip(clip);
-
-                            Toast.makeText(requireContext(), "Text copied to clipboard", Toast.LENGTH_SHORT).show();
-
-                            return true;
+                        public void run() {
+                            doneExtractText(text);
                         }
                     });
-
-                    builder.setView(textViewTemp);
-                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            dialogInterface.dismiss();
-                            requireActivity().getSupportFragmentManager().popBackStack();
-                        }
-                    });
-
-                    builder.setNeutralButton("Copy to clipboard", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            ClipboardManager clipboard = (ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                            ClipData clip = ClipData.newPlainText("Text", textViewTemp.getText());
-                            clipboard.setPrimaryClip(clip);
-
-                            Toast.makeText(editActivity, "Text copied to clipboard", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-
-                    AlertDialog dialog = builder.create();
-                    dialog.show();
-                    textView.setText("Scanned successfully!");
                 }
-            }, 100);
+            }).start();
+        }
+    }
+
+    public void doneExtractText(String text) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Text from Image");
+
+        final TextView textViewTemp = new TextView(requireContext());
+        textViewTemp.setText(text);
+        textViewTemp.setBackgroundColor(Color.WHITE);
+        textViewTemp.setTextColor(Color.BLACK);
+        textViewTemp.setPadding(16, 16, 16, 16);
+        textViewTemp.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        textViewTemp.setTextIsSelectable(true);
+
+        textViewTemp.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                ClipboardManager clipboard = (ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("Text", textViewTemp.getText());
+                clipboard.setPrimaryClip(clip);
+
+                Toast.makeText(requireContext(), "Text copied to clipboard", Toast.LENGTH_SHORT).show();
+
+                return true;
+            }
+        });
+
+        builder.setView(textViewTemp);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+                requireActivity().getSupportFragmentManager().popBackStack();
+            }
+        });
+
+        builder.setNeutralButton("Copy to clipboard", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                ClipboardManager clipboard = (ClipboardManager) requireContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("Text", textViewTemp.getText());
+                clipboard.setPrimaryClip(clip);
+
+                Toast.makeText(editActivity, "Text copied to clipboard", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        textView.setText("Scanned successfully!");
+    }
+
+    public void doneFaceDetection() {
+        String text = null;
+        if (faces.size() == 0) {
+            text = "There is no people in the image...";
+        } else if (faces.size() == 1) {
+            text = "There is one person in the image...";
+        } else if (faces.size() > 1) {
+            text = "There are " + faces.size() + " people in the image...";
+        }
+
+        textView.setText(text);
+        if (faces.size() != 0) {
+            addName.setVisibility(View.VISIBLE);
         }
     }
 }
