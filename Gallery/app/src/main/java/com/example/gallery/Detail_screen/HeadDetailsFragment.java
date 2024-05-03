@@ -15,6 +15,7 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,11 +34,13 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.example.gallery.DatabaseHelper;
 import com.example.gallery.R;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class HeadDetailsFragment extends Fragment {
     DetailsActivity detailsActivity;
@@ -45,6 +48,7 @@ public class HeadDetailsFragment extends Fragment {
     ImageButton exit, addTag, addToAlbum, setWallpaper, advancedOption;
     String selectedImage;
     Bitmap originalBitmap;
+    DatabaseHelper databaseHelper;
 
     public static HeadDetailsFragment newInstance(String strArg) {
         HeadDetailsFragment fragment = new HeadDetailsFragment();
@@ -93,6 +97,8 @@ public class HeadDetailsFragment extends Fragment {
         selectedImage = getArguments().getString("selectedImage");
         originalBitmap = BitmapFactory.decodeFile(selectedImage);
 
+        databaseHelper = new DatabaseHelper(context);
+
         exit = (ImageButton) layoutImage.findViewById(R.id.getBackButton);
         addTag = (ImageButton) layoutImage.findViewById(R.id.component1);
         addToAlbum = (ImageButton) layoutImage.findViewById(R.id.component2);
@@ -109,6 +115,8 @@ public class HeadDetailsFragment extends Fragment {
         addTag.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                String[] currentTags = databaseHelper.getTags(selectedImage).split(", ");
+
                 final Button[] positiveButton = {null};
                 ArrayList<String> allValues = new ArrayList<>();
                 ArrayList<Integer> editTextIds = new ArrayList<>();
@@ -140,7 +148,7 @@ public class HeadDetailsFragment extends Fragment {
                 tagLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
 
                 TextView warningLabel = new TextView(context);
-                tagLabel.setLayoutParams(new LinearLayout.LayoutParams(
+                warningLabel.setLayoutParams(new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT));
                 warningLabel.setText("* Required input");
@@ -156,8 +164,6 @@ public class HeadDetailsFragment extends Fragment {
                 tagEditText.setMaxLines(1);
                 tagEditText.setInputType(InputType.TYPE_CLASS_TEXT);
 
-                allValues.add("");
-
                 int id = View.generateViewId();
                 tagEditText.setId(id);
                 editTextIds.add(id);
@@ -167,6 +173,125 @@ public class HeadDetailsFragment extends Fragment {
                 newTagLayout.addView(warningLabel);
 
                 linearLayoutContainer.addView(newTagLayout);
+
+                if (currentTags.length >= 1) {
+                    tagEditText.setText(currentTags[0]);
+                    allValues.add(currentTags[0]);
+                    warningLabel.setVisibility(View.GONE);
+
+                    if (currentTags.length > 1) {
+                        removeTagButton.setEnabled(true);
+                    }
+
+                    for (int i = 1; i < currentTags.length; i++) {
+                        LinearLayout newTagLayout1 = new LinearLayout(context);
+                        newTagLayout1.setLayoutParams(new LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT));
+                        newTagLayout1.setOrientation(LinearLayout.VERTICAL);
+
+                        TextView tagLabel1 = new TextView(context);
+                        tagLabel1.setLayoutParams(new LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.WRAP_CONTENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT));
+                        tagLabel1.setText("Tag " + (linearLayoutContainer.getChildCount() + 1));
+                        tagLabel1.setTextColor(ContextCompat.getColor(context, R.color.black));
+                        tagLabel1.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+
+                        TextView warningLabel1 = new TextView(context);
+                        warningLabel1.setLayoutParams(new LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.WRAP_CONTENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT));
+                        warningLabel1.setText("* Required input");
+                        warningLabel1.setTypeface(Typeface.defaultFromStyle(Typeface.ITALIC));
+                        warningLabel1.setTextColor(ContextCompat.getColor(context, R.color.red));
+                        warningLabel1.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
+                        warningLabel1.setVisibility(View.GONE);
+
+                        EditText tagEditText1 = new EditText(context);
+                        tagEditText1.setLayoutParams(new LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT));
+                        tagEditText1.setMaxLines(1);
+                        tagEditText1.setInputType(InputType.TYPE_CLASS_TEXT);
+                        tagEditText1.setText(currentTags[i]);
+
+                        allValues.add(currentTags[i]);
+
+                        int id1 = View.generateViewId();
+                        tagEditText1.setId(id1);
+                        editTextIds.add(id1);
+
+                        tagEditText1.addTextChangedListener(new TextWatcher() {
+                            int index;
+                            @Override
+                            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                                for (int k = 0; k < editTextIds.size(); k++) {
+                                    int tempId = editTextIds.get(k);
+                                    if (tempId == tagEditText1.getId()) {
+                                        index = k;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                                String value = tagEditText1.getText().toString().trim();
+                                allValues.set(index, value);
+                                if (value.equals("")) {
+                                    warningLabel1.setVisibility(View.VISIBLE);
+                                    positiveButton[0].setEnabled(false);
+                                    positiveButton[0].setTextColor(Color.GRAY);
+                                } else {
+                                    warningLabel1.setVisibility(View.GONE);
+                                    for (int n = 0; n < allValues.size(); n++) {
+                                        if (allValues.get(n).equals("")) {
+                                            return;
+                                        }
+                                    }
+
+                                    if (!value.equals(currentTags[index])) {
+                                        positiveButton[0].setEnabled(true);
+                                        positiveButton[0].setTextColor(Color.GREEN);
+                                    } else {
+                                        positiveButton[0].setEnabled(false);
+                                        positiveButton[0].setTextColor(Color.GRAY);
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void afterTextChanged(Editable editable) {
+
+                            }
+                        });
+
+                        newTagLayout1.addView(tagLabel1);
+                        newTagLayout1.addView(tagEditText1);
+                        newTagLayout1.addView(warningLabel1);
+
+                        linearLayoutContainer.addView(newTagLayout1);
+
+                        if (linearLayoutContainer.getChildCount() > 3) {
+                            int childHeight1 = linearLayoutContainer.getChildAt(0).getHeight();
+                            int desiredHeight1 = 3 * childHeight1;
+
+                            ViewGroup.LayoutParams layoutParams1 = scrollView.getLayoutParams();
+                            layoutParams1.height = desiredHeight1;
+                            scrollView.setLayoutParams(layoutParams1);
+
+                            scrollView.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    scrollView.fullScroll(View.FOCUS_DOWN);
+                                }
+                            });
+                        }
+                    }
+                } else {
+                    allValues.add("");
+                }
                 tagEditText.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -190,8 +315,13 @@ public class HeadDetailsFragment extends Fragment {
                                     return;
                                 }
                             }
-                            positiveButton[0].setEnabled(true);
-                            positiveButton[0].setTextColor(Color.GREEN);
+                            if (currentTags.length == 0 || !value.equals(currentTags[0])) {
+                                positiveButton[0].setEnabled(true);
+                                positiveButton[0].setTextColor(Color.GREEN);
+                            } else {
+                                positiveButton[0].setEnabled(false);
+                                positiveButton[0].setTextColor(Color.GRAY);
+                            }
                         }
                     }
 
@@ -251,6 +381,8 @@ public class HeadDetailsFragment extends Fragment {
                             scrollView.setLayoutParams(layoutParams);
                         }
 
+                        if (linearLayoutContainer.getChildCount() > 6) return;
+
                         if (linearLayoutContainer.getChildCount() >= 6) {
                             addTagButton.setEnabled(false);
                         } else {
@@ -273,7 +405,7 @@ public class HeadDetailsFragment extends Fragment {
                         tagLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
 
                         TextView warningLabel = new TextView(context);
-                        tagLabel.setLayoutParams(new LinearLayout.LayoutParams(
+                        warningLabel.setLayoutParams(new LinearLayout.LayoutParams(
                                 LinearLayout.LayoutParams.WRAP_CONTENT,
                                 LinearLayout.LayoutParams.WRAP_CONTENT));
                         warningLabel.setText("* Required input");
@@ -353,7 +485,10 @@ public class HeadDetailsFragment extends Fragment {
                 builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        Toast.makeText(detailsActivity, "Tags: " + allValues.get(0), Toast.LENGTH_SHORT).show();
+                        boolean result = databaseHelper.addOrUpdateTags(allValues, selectedImage);
+                        if (result) {
+                            Toast.makeText(detailsActivity, "Tag(s) for image has been saved successfully!", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 });
                 builder.setNegativeButton("Cancel", null);
@@ -366,6 +501,26 @@ public class HeadDetailsFragment extends Fragment {
                         negativeButton.setTextColor(Color.RED);
                         positiveButton[0].setEnabled(false);
                         positiveButton[0].setTextColor(Color.GRAY);
+
+                        if (currentTags.length > 0 && !Objects.equals(currentTags[0], "")) {
+                            positiveButton[0].setText("Update");
+                        }
+
+                        if (currentTags.length > 3) {
+                            int childHeight1 = linearLayoutContainer.getChildAt(0).getHeight();
+                            int desiredHeight1 = 3 * childHeight1;
+
+                            ViewGroup.LayoutParams layoutParams1 = scrollView.getLayoutParams();
+                            layoutParams1.height = desiredHeight1;
+                            scrollView.setLayoutParams(layoutParams1);
+
+                            scrollView.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    scrollView.fullScroll(View.FOCUS_DOWN);
+                                }
+                            });
+                        }
                     }
                 });
                 alertDialog.show();

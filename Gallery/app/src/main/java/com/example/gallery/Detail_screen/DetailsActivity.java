@@ -135,7 +135,6 @@ public class DetailsActivity extends AppCompatActivity implements LargeImageFrag
         });
     }
 
-
     public void replaceAdvancedOptionFragment() {
         if (showAdvancedOptions == false) {
             AdvancedOptionsFragment advancedOptionsFragment = AdvancedOptionsFragment.newInstance("AdvancedOptions");

@@ -9,28 +9,18 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
-import android.util.SparseArray;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
-
-import com.google.android.gms.vision.Frame;
-import com.google.android.gms.vision.face.Face;
-import com.google.android.gms.vision.face.FaceDetector;
-import com.google.android.gms.vision.text.TextBlock;
-import com.google.android.gms.vision.text.TextRecognizer;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfFloat;
 import org.opencv.core.MatOfInt;
-import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.objdetect.CascadeClassifier;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "team7_gallery.db";
@@ -50,7 +40,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_NAME = "name";
     private static final String COLUMN_LIST_INT = "image_int";
     private static final String COLUMN_IMAGE = "image";
-
+    private static final String TAG_ID = "tag_id";
+    private static final String COLUMN_IMAGE_PATH = "image_path";
+    private static final String COLUMN_TAG_ID = "ids";
+    private static final String COLUMN_LIKE = "isLike";
+    private static final String TAG_NAME = "tag_name";
     private static final String SQL_CREATE_SECURE_ALBUM = "CREATE TABLE IF NOT EXISTS " + SECURE_ALBUM + " (" +
             COLUMN_ALBUM_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
             COLUMN_ALBUM_NAME + " TEXT UNIQUE, " +
@@ -69,6 +63,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String SQL_LIST_FACES = "CREATE TABLE IF NOT EXISTS " + LIST_FACES + "(" +
             COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
             COLUMN_IMAGE + " TEXT)";
+    private static final String SQL_TAG_ID_LIKE = "CREATE TABLE IF NOT EXISTS " + TAG_ID + "(" +
+            COLUMN_IMAGE_PATH + " TEXT PRIMARY KEY, " +
+            COLUMN_TAG_ID + " TEXT, " +
+            COLUMN_LIKE + " BOOLEAN DEFAULT FALSE)";
+    private static final String SQL_TAG_NAME = "CREATE TABLE IF NOT EXISTS " + TAG_NAME + "(" +
+            COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            COLUMN_NAME + " TEXT)";
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -77,6 +78,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_SECURE_IMAGES);
         db.execSQL(SQL_CREATE_FACES);
         db.execSQL(SQL_LIST_FACES);
+        db.execSQL(SQL_TAG_ID_LIKE);
+        db.execSQL(SQL_TAG_NAME);
+//        db.execSQL("DROP TABLE IF EXISTS " + TAG_ID);
+//        db.execSQL("DROP TABLE IF EXISTS " + TAG_NAME);
 //        db.execSQL("DROP TABLE IF EXISTS " + FACES);
 //        db.execSQL("DROP TABLE IF EXISTS " + LIST_FACES);
     }
@@ -106,6 +111,91 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         return listInt;
+    }
+    public String getTags(String selectedImage) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String result = "";
+        Cursor cursor, cursor1;
+        String query = "SELECT " + COLUMN_TAG_ID + " FROM " + TAG_ID + " WHERE " + COLUMN_IMAGE_PATH + " = ?";
+        cursor = db.rawQuery(query, new String[]{selectedImage});
+
+        if (cursor.moveToFirst()) {
+            String tag_ids = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TAG_ID));
+            tag_ids = tag_ids.replaceAll(", ", ",");
+
+            query = "SELECT " + COLUMN_NAME + " FROM " + TAG_NAME + " WHERE " + COLUMN_ID + " IN( " + tag_ids + ")";
+            cursor1 = db.rawQuery(query, null);
+
+            if (cursor1.moveToFirst()) {
+                do {
+                    String value = cursor1.getString(cursor1.getColumnIndexOrThrow(COLUMN_NAME));
+                    result += value + ", ";
+                } while (cursor1.moveToNext());
+            }
+
+            result = result.substring(0, result.length() - 2);
+        }
+        return result;
+    }
+    public boolean addOrUpdateTags(ArrayList<String> allValues, String selectedImage) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String tag_ids = String.valueOf(getIds(db, allValues));
+        boolean isExists = checkImageExists(db, selectedImage);
+        long result = saveTags(db, selectedImage, tag_ids, isExists);
+        Log.d("return", tag_ids);
+        return true;
+    }
+    public boolean checkImageExists(SQLiteDatabase db, String selectedImage) {
+        boolean res = false;
+        Cursor cursor = null;
+        String query = null;
+
+        query = "SELECT * FROM " + TAG_ID + " WHERE " + COLUMN_IMAGE_PATH + " = ?";
+        cursor = db.rawQuery(query, new String[]{selectedImage});
+
+        if (cursor.moveToFirst()) {
+            return true;
+        }
+
+        return res;
+    }
+    public StringBuilder getIds(SQLiteDatabase db, ArrayList<String> allValues) {
+        StringBuilder result = new StringBuilder();
+        Cursor cursor = null;
+        String query = null;
+
+        for (int i = 0; i < allValues.size(); i++) {
+            query = "SELECT * FROM " + TAG_NAME + " WHERE LOWER(" + COLUMN_NAME + ") = LOWER(?)";
+            cursor = db.rawQuery(query, new String[]{allValues.get(i)});
+            int index = -1;
+
+            if (cursor.moveToFirst()) {
+                index = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
+            } else {
+                index = addTagName(db, allValues.get(i));
+            }
+            result.append(index).append(", ");
+        }
+
+        result = new StringBuilder(result.substring(0, result.length() - 2));
+
+        return result;
+    }
+    public long saveTags(SQLiteDatabase db, String selectedImage, String tag_ids, boolean isExists) {
+        ContentValues values = new ContentValues();
+        if (isExists) {
+            values.put(COLUMN_TAG_ID, tag_ids);
+            return db.update(TAG_ID, values, COLUMN_IMAGE_PATH + " = ?", new String[]{selectedImage});
+        } else {
+            values.put(COLUMN_IMAGE_PATH, selectedImage);
+            values.put(COLUMN_TAG_ID, tag_ids);
+            return db.insert(TAG_ID, null, values);
+        }
+    }
+    public int addTagName(SQLiteDatabase db, String value) {
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_NAME, value);
+        return (int) db.insert(TAG_NAME, null, values);
     }
     public String getExpectedName(Bitmap bitmap) {
         String expectedName = "Unknown", tempName = "";
