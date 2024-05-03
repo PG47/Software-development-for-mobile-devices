@@ -154,6 +154,7 @@ public class LargeImageFragment extends Fragment {
                                 imagePath = getNextImagePath(imagePath, images, 1);
                                 updateImage();
                             }
+                            detailsActivity.updateSelectedImage(imagePath);
                             result = true;
                         }
                     } else {}

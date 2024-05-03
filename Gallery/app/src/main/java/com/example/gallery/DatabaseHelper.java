@@ -13,6 +13,7 @@ import android.util.Log;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 import org.opencv.android.Utils;
@@ -111,6 +112,32 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         return listInt;
+    }
+    public List<String> getSearchResult(String value) {
+        List<String> res = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TAG_NAME + " WHERE LOWER(" + COLUMN_NAME + ") = LOWER(?)";
+        Cursor cursor = db.rawQuery(query, new String[]{value});
+        if (cursor.moveToFirst()) {
+            int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
+            query = "SELECT * FROM " + TAG_ID;
+            Cursor cursor1 = db.rawQuery(query, null);
+
+            if (cursor1.moveToFirst()) {
+                do {
+                    String[] listIds = cursor1.getString(cursor1.getColumnIndexOrThrow(COLUMN_TAG_ID)).split(", ");
+                    String imgPath = cursor1.getString(cursor1.getColumnIndexOrThrow(COLUMN_IMAGE_PATH));
+
+                    for (int i = 0; i < listIds.length; i++) {
+                        if (listIds[i] == String.valueOf(id)) {
+                            res.add(imgPath);
+                            break;
+                        }
+                    }
+                } while (cursor1.moveToNext());
+            }
+        }
+        return res;
     }
     public String getTags(String selectedImage) {
         SQLiteDatabase db = this.getReadableDatabase();

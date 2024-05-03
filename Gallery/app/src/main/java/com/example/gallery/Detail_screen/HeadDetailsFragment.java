@@ -571,4 +571,8 @@ public class HeadDetailsFragment extends Fragment {
         });
         return layoutImage;
     }
+
+    public void updateSelectedImage(String image_path) {
+        selectedImage = image_path;
+    }
 }
