@@ -33,7 +33,8 @@ import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
-public class DetailsActivity extends AppCompatActivity implements LargeImageFragment.OnImageChangeListener {
+public class DetailsActivity extends AppCompatActivity implements LargeImageFragment.OnImageChangeListener ,
+        HeadDetailsFragment.OnPathChangeListener {
     FragmentTransaction ft;
     HeadDetailsFragment headDetailsFragment;
     LargeImageFragment fragmentImage;
@@ -48,6 +49,19 @@ public class DetailsActivity extends AppCompatActivity implements LargeImageFrag
     public interface OnImageChangeListener {
         void onChange();
     }
+    @Override
+    public void onPathChanged(String newPath) {
+        // Update the images list
+        for (int i = 0; i < images.size(); i++) {
+            if (images.get(i).equals(img_path)) {
+                images.set(i, newPath);
+            }
+        }
+        // Update img_path
+        img_path = newPath;
+        onImageChanged(img_path);
+    }
+
 
     @Override
     public void onImageChanged(String newImagePath) {
@@ -81,13 +95,14 @@ public class DetailsActivity extends AppCompatActivity implements LargeImageFrag
         onImageNewChangeListener = getIntent().getParcelableExtra("ImageChangeListener");
 
         headDetailsFragment = HeadDetailsFragment.newInstance("header");
+        headDetailsFragment.setOnPathChangeListener(this);
         fragmentImage = LargeImageFragment.newInstance("image");
         fragmentImage.setOnImageChangeListener(this);
         fragmentOption = OptionFragment.newInstance("option");
 
         Intent intent = getIntent();
         img_path = intent.getStringExtra("SelectedImage");
-        ArrayList<String> images = intent.getStringArrayListExtra("ImageList"); // Receive the list of images
+        images = intent.getStringArrayListExtra("ImageList"); // Receive the list of images
 
         Bundle bundle = new Bundle();
         bundle.putString("selectedImage", img_path);
