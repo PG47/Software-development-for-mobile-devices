@@ -58,6 +58,7 @@ public class LargeImageFragment extends Fragment {
     Bitmap originalBitmap, tempBitmap;
     String imagePath;
     DatabaseHelper databaseHelper;
+    String newPath;
     private ArrayList<String> images;
 
     public interface OnImageChangeListener {
@@ -287,12 +288,15 @@ public class LargeImageFragment extends Fragment {
 
         File parentDir = oldFile.getParentFile();
         File newFile = new File(parentDir, name);
+        newPath = oldFile.getParentFile().getAbsolutePath();
+        Log.d("old name", oldFile.getAbsolutePath());
+        Log.d("new name", newFile.getAbsolutePath());
 
-        Boolean res = oldFile.renameTo(newFile);
-        if (res) {
-            return true;
-        }
-        return false;
+        return oldFile.renameTo(newFile);
+    }
+
+    public String executeGetPath() {
+        return newPath;
     }
 
     public void updateImage() {

@@ -68,7 +68,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String SQL_TAG_ID_LIKE = "CREATE TABLE IF NOT EXISTS " + TAG_ID + "(" +
             COLUMN_IMAGE_PATH + " TEXT PRIMARY KEY, " +
-            COLUMN_TAG_ID + " INTEGER, " + // Changed to INTEGER
+            COLUMN_TAG_ID + " TEXT, " +
             COLUMN_LIKE + " BOOLEAN DEFAULT FALSE)";
 
     private static final String SQL_TAG_NAME = "CREATE TABLE IF NOT EXISTS " + TAG_NAME + "(" +

@@ -160,12 +160,15 @@ public class DetailsActivity extends AppCompatActivity implements LargeImageFrag
     public String extractText() { return fragmentImage.executeExtractText(); }
     public void FacesDetection() { fragmentImage.executeFacesDetection(); }
     public String getCurrentName() { return fragmentImage.executeGetCurrentName(); }
-    public void setNewNameForImage(String name) { 
+    public String setNewNameForImage(String name) {
         boolean res = fragmentImage.executeSetNewNameForImage(name);
         if (res) {
             Toast.makeText(this, "Change successfully", Toast.LENGTH_SHORT).show();
+            String path = fragmentImage.executeGetPath();
+            return path;
         } else {
-            Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Some errors occur", Toast.LENGTH_SHORT).show();
+            return "";
         }
     }
 

@@ -103,8 +103,6 @@ public class HeadDetailsFragment extends Fragment {
 
         exit = (ImageButton) layoutImage.findViewById(R.id.getBackButton);
         addTag = (ImageButton) layoutImage.findViewById(R.id.component1);
-        addToAlbum = (ImageButton) layoutImage.findViewById(R.id.component2);
-        setWallpaper = (ImageButton) layoutImage.findViewById(R.id.component3);
         advancedOption = (ImageButton) layoutImage.findViewById(R.id.component4);
         exit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -528,43 +526,6 @@ public class HeadDetailsFragment extends Fragment {
                 alertDialog.show();
             }
         });
-        addToAlbum.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-            }
-        });
-        setWallpaper.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                LayoutInflater inflater = LayoutInflater.from(context);
-                View view1 = inflater.inflate(R.layout.dialog_wallpaper_confirmation, null);
-                ImageView imageView = view1.findViewById(R.id.imageView);
-                imageView.setImageBitmap(originalBitmap);
-
-                int maxHeight = (int) (context.getResources().getDisplayMetrics().heightPixels * 0.5);
-                imageView.setMaxHeight(maxHeight);
-
-                builder.setView(view1);
-                builder.setTitle("Set Wallpaper");
-                builder.setMessage("Do you want to set this image as your wallpaper?");
-                builder.setPositiveButton("Set Wallpaper", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        WallpaperManager wallpaperManager = WallpaperManager.getInstance(context);
-                        try {
-                            wallpaperManager.setBitmap(originalBitmap, null, true, WallpaperManager.FLAG_SYSTEM);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-                builder.setNegativeButton("Cancel", null);
-                AlertDialog dialog = builder.create();
-                dialog.show();
-            }
-        });
         advancedOption.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -577,12 +538,104 @@ public class HeadDetailsFragment extends Fragment {
                         int itemId = item.getItemId();
                         if(itemId == R.id.menu_change_name) {
                             //change image name
+                            final Button[] positiveButton = {null};
+                            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                            LayoutInflater inflater = LayoutInflater.from(context);
+                            View view1 = inflater.inflate(R.layout.dialog_change_name, null);
+                            TextView curName = view1.findViewById(R.id.curName);
+                            EditText inputNewName = view1.findViewById(R.id.inputNewName);
+                            String currentName = detailsActivity.getCurrentName();
+
+                            builder.setView(view1);
+                            builder.setTitle("Change Image's name");
+                            curName.setText(currentName);
+
+                            inputNewName.addTextChangedListener(new TextWatcher() {
+                                @Override
+                                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                                }
+
+                                @Override
+                                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                                    String value = inputNewName.getText().toString().trim();
+                                    if (!value.equals(currentName) && !value.equals("")) {
+                                        positiveButton[0].setEnabled(true);
+                                        positiveButton[0].setTextColor(Color.GREEN);
+                                    } else {
+                                        positiveButton[0].setEnabled(false);
+                                        positiveButton[0].setTextColor(Color.GRAY);
+                                    }
+                                }
+
+                                @Override
+                                public void afterTextChanged(Editable editable) {
+
+                                }
+                            });
+
+                            builder.setPositiveButton("Change", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    String value = inputNewName.getText().toString().trim();
+                                    String path = detailsActivity.setNewNameForImage(value);
+                                    Log.d("path", path);
+                                }
+                            });
+                            builder.setNegativeButton("Cancel", null);
+                            AlertDialog dialog = builder.create();
+                            dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                                @Override
+                                public void onShow(DialogInterface dialogInterface) {
+                                    positiveButton[0] = dialog.getButton(dialogInterface.BUTTON_POSITIVE);
+                                    Button negativeButton = dialog.getButton(dialogInterface.BUTTON_NEGATIVE);
+                                    negativeButton.setTextColor(Color.RED);
+                                    positiveButton[0].setEnabled(false);
+                                    positiveButton[0].setTextColor(Color.GRAY);
+                                }
+                            });
+                            dialog.show();
                             return  true;
                         } else if(itemId == R.id.menu_add_album) {
                             //add to album
                             return true;
                         } else if(itemId == R.id.menu_set_as_wallpaper) {
-                            //set wallpaper
+                            final Button[] positiveButton = {null};
+                            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                            LayoutInflater inflater = LayoutInflater.from(context);
+                            View view1 = inflater.inflate(R.layout.dialog_wallpaper_confirmation, null);
+                            ImageView imageView = view1.findViewById(R.id.imageView);
+                            imageView.setImageBitmap(originalBitmap);
+
+                            int maxHeight = (int) (context.getResources().getDisplayMetrics().heightPixels * 0.5);
+                            imageView.setMaxHeight(maxHeight);
+
+                            builder.setView(view1);
+                            builder.setTitle("Set Wallpaper");
+                            builder.setMessage("Do you want to set this image as your wallpaper?");
+                            builder.setPositiveButton("Set Wallpaper", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    WallpaperManager wallpaperManager = WallpaperManager.getInstance(context);
+                                    try {
+                                        wallpaperManager.setBitmap(originalBitmap, null, true, WallpaperManager.FLAG_SYSTEM);
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
+                            builder.setNegativeButton("Cancel", null);
+                            AlertDialog dialog = builder.create();
+                            dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                                @Override
+                                public void onShow(DialogInterface dialogInterface) {
+                                    positiveButton[0] = dialog.getButton(dialogInterface.BUTTON_POSITIVE);
+                                    Button negativeButton = dialog.getButton(dialogInterface.BUTTON_NEGATIVE);
+                                    negativeButton.setTextColor(Color.RED);
+                                    positiveButton[0].setTextColor(Color.GREEN);
+                                }
+                            });
+                            dialog.show();
                             return true;
                         }
                         return false;
