@@ -579,7 +579,7 @@ public class HeadDetailsFragment extends Fragment {
                                 public void onClick(DialogInterface dialogInterface, int i) {
                                     String value = inputNewName.getText().toString().trim();
                                     String path = detailsActivity.setNewNameForImage(value);
-                                    Log.d("path", path);
+                                    databaseHelper.updateNewPath(path + "/" + currentName, path + "/" + value);
                                 }
                             });
                             builder.setNegativeButton("Cancel", null);

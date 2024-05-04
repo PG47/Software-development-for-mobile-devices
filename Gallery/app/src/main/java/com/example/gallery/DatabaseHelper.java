@@ -142,6 +142,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         return res;
     }
+    public void updateNewPath(String oldPath, String newPath) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db1 = this.getWritableDatabase();
+        Cursor cursor;
+        String query = "SELECT * FROM " + TAG_ID + " WHERE " + COLUMN_IMAGE_PATH + " = ?";
+        cursor = db.rawQuery(query, new String[]{oldPath});
+        if (cursor.moveToFirst()) {
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_IMAGE_PATH, newPath);
+            db1.update(TAG_ID, values, COLUMN_IMAGE_PATH + " = ?", new String[]{oldPath});
+        }
+
+        cursor.close();
+        db.close();
+        db1.close();
+    }
     public String getTags(String selectedImage) {
         SQLiteDatabase db = this.getReadableDatabase();
         String result = "";
