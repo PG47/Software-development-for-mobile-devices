@@ -3,24 +3,32 @@ package com.example.gallery.Detail_screen;
 import android.app.WallpaperManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -37,14 +45,17 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.gallery.DatabaseHelper;
+import com.example.gallery.Images_screen.SelectOptions;
+import com.example.gallery.MainActivity;
 import com.example.gallery.R;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class HeadDetailsFragment extends Fragment {
+public class HeadDetailsFragment extends Fragment{
     DetailsActivity detailsActivity;
     Context context = null;
     ImageButton exit, addTag, addToAlbum, setWallpaper, advancedOption;
@@ -58,6 +69,17 @@ public class HeadDetailsFragment extends Fragment {
         args.putString("strArg1", strArg);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    public void updateSelectedImage(String imgPath) {
+    }
+
+    public interface OnPathChangeListener {
+        void onPathChanged(String newImagePath);
+    }
+    private OnPathChangeListener onPathChangeListener;
+    public void setOnPathChangeListener(OnPathChangeListener listener) {
+        this.onPathChangeListener = listener;
     }
 
     @Override
@@ -598,7 +620,34 @@ public class HeadDetailsFragment extends Fragment {
                             return  true;
                         } else if(itemId == R.id.menu_add_album) {
                             //add to album
-                            return true;
+                            PopupMenu popupMenu1 = new PopupMenu(getContext(), view);
+                            popupMenu1.getMenuInflater().inflate(R.menu.add_to_album_menu, popupMenu1.getMenu());
+
+                            // Inside your setOnMenuItemClickListener method
+                            popupMenu1.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                                @Override
+                                public boolean onMenuItemClick(MenuItem item) {
+                                    // Handle menu item click
+                                    int itemId = item.getItemId(); // Get the ID of the clicked menu item
+                                    // Use if-else statements to handle menu item clicks
+                                    if (itemId == R.id.menu_add_to_exist_album) {
+                                        // Handle "Add to existing album" menu item click
+                                        Log.d("PopupMenu", "Add to existing album clicked");
+                                        add_to_Album();
+                                        return true;
+                                    } else if (itemId == R.id.menu_add_to_new_album) {
+                                        // Handle "Create new album" menu item click
+                                        Log.d("PopupMenu", "Create new album clicked");
+                                        add_to_new_Album();
+                                        return true;
+                                    } else {
+                                        return false;
+                                    }
+                                }
+                            });
+                            popupMenu1.setOnDismissListener(menu -> {Log.d("PopupMenu", "Dismissed");});
+                            popupMenu1.show();
+                            return  true;
                         } else if(itemId == R.id.menu_set_as_wallpaper) {
                             final Button[] positiveButton = {null};
                             AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -648,8 +697,212 @@ public class HeadDetailsFragment extends Fragment {
 
         return layoutImage;
     }
+    private ArrayList<String> getAllAlbums() {
+        ArrayList<String> albumNames = new ArrayList<>();
 
-    public void updateSelectedImage(String image_path) {
-        selectedImage = image_path;
+        // Query the device's media store for the list of albums
+        Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+        String[] projection = {MediaStore.Images.Media.BUCKET_DISPLAY_NAME};
+        String orderBy = MediaStore.Images.Media.DATE_TAKEN + " DESC";
+
+        try (Cursor cursor = requireContext().getContentResolver().query(uri, projection, null, null, orderBy)) {
+            if (cursor != null) {
+                while (cursor.moveToNext()) {
+                    String albumName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME));
+                    if (!albumNames.contains(albumName)) {
+                        albumNames.add(albumName);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return albumNames;
     }
+    public void add_to_Album() {
+        ArrayList<String> albumNames = getAllAlbums();
+
+        // Convert ArrayList<String> to String array
+        String[] albumsArray = albumNames.toArray(new String[0]);
+
+        // Create a dialog to act as the popup menu
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Choose Album");
+
+        // Add albums to the list dynamically
+        builder.setItems(albumsArray, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                String selectedAlbum = albumNames.get(which);
+                moveImagesToAlbum(selectedAlbum); // Call moveImagesToAlbum with the selected album name
+            }
+        });
+
+        // Show the dialog
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        // Set dialog position to center
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+        Window window = dialog.getWindow();
+        if (window != null) {
+            lp.copyFrom(window.getAttributes());
+            lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
+            lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            lp.gravity = Gravity.CENTER;
+            window.setAttributes(lp);
+        }
+
+
+    }
+
+    private void moveImagesToAlbum(String albumName) {
+        // Get the directory path of the target album
+        File albumDir = new File(Environment.getExternalStorageDirectory(), "DCIM/" + albumName);
+
+        if (!albumDir.exists()) {
+            // Create the target album directory if it doesn't exist
+            if (!albumDir.mkdirs()) {
+                // If directory creation fails, show an error toast and return
+                Toast.makeText(requireContext(), "Failed to create album directory", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
+        // Move selected images to the target album directory
+        //if it was the secured images, unlock it and remove from the secure album
+        /*if(databaseHelper.find_album_id(albumName) != -1) {
+            long r_img = databaseHelper.deleteImage;
+        }*/
+
+        // Get the source file
+        File sourceFile = new File(selectedImage);
+
+        // Get the destination file path
+        String destinationFilePath = albumDir.getPath() + "/" + sourceFile.getName();
+
+        // Create the destination file
+        File destinationFile = new File(destinationFilePath);
+
+        try {
+            // Perform the file move operation
+            if (sourceFile.renameTo(destinationFile)) {
+                // If move operation is successful, update the gallery database
+                MediaScannerConnection.scanFile(requireContext(), new String[]{destinationFilePath}, null, null);
+                selectedImage = destinationFilePath;
+                if (onPathChangeListener != null) {
+                    onPathChangeListener.onPathChanged(selectedImage);
+                }
+            } else {
+                // If move operation fails, show an error toast
+                Toast.makeText(requireContext(), "Failed to move image: " + sourceFile.getName(), Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            // If an exception occurs during the move operation, show an error toast
+            e.printStackTrace();
+            Toast.makeText(requireContext(), "Error moving image: " + sourceFile.getName(), Toast.LENGTH_SHORT).show();
+        }
+
+        //if you moved all the img secure, delete the previous secured album
+        /*if(!Secured_album.isEmpty()) {
+            int count = databaseHelper.countImages_in_Album(Secured_album);
+            if(count==0) {
+                databaseHelper.delete_Album(Secured_album);
+            }
+        }*/
+
+        // Notify user about successful move
+        Toast.makeText(requireContext(), "Images moved to album: " +albumName , Toast.LENGTH_SHORT).show();
+    }
+
+    // Helper method to get album ID based on the album name
+    private boolean CheckAlbum(String albumName) {
+        String[] projection = {MediaStore.Images.Media.BUCKET_ID};
+        String selection = MediaStore.Images.Media.BUCKET_DISPLAY_NAME + "=?";
+        String[] selectionArgs = {albumName};
+        Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+
+        Cursor cursor = requireActivity().getContentResolver().query(uri, projection, selection, selectionArgs, null);
+
+        if (cursor != null) {
+            try {
+                if (cursor.moveToFirst()) {
+                    int columnIndex = cursor.getColumnIndex(MediaStore.Images.Media.BUCKET_ID);
+                    if (columnIndex != -1) {
+                        return true;
+                    } else {
+                        // Log an error if the column index is -1
+                        Log.e("ImagesFragment", "Column index for BUCKET_ID is -1");
+                    }
+                }
+            } finally {
+                cursor.close();
+            }
+        } else {
+            // Log an error if the cursor is null
+            Log.e("ImagesFragment", "Cursor is null");
+        }
+        return false;
+    }
+
+    public void add_to_new_Album() {
+        // Create an EditText view for user input
+        final EditText input = new EditText(requireContext());
+
+        // Create an AlertDialog builder
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Create New Album");
+        builder.setMessage("Enter the name for the new album:");
+
+        // Add the EditText view to the dialog
+        builder.setView(input);
+
+        // Set positive button for user confirmation
+        builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String albumName = input.getText().toString().trim();
+                if (!albumName.isEmpty()) {
+                    if (!CheckAlbum(albumName)) {
+                        // Call method to add images to the new album with the provided name
+                        addImagesToNewAlbum(albumName);
+                    } else {
+                        // Show error toast if album already exists
+                        Toast.makeText(requireContext(), "Album already exists", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    // Show error toast if album name is empty
+                    Toast.makeText(requireContext(), "Album name cannot be empty", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        // Set negative button for cancel action
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        // Show the dialog
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    private void addImagesToNewAlbum(String albumName) {
+        // Create a directory in the DCIM folder with the provided album name
+        File albumDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), albumName);
+        if (albumDir.mkdirs()) {
+            // If directory creation is successful, show a success toast
+            Toast.makeText(requireContext(), "Folder Created!\n" + albumDir.getAbsolutePath(), Toast.LENGTH_SHORT).show();
+        } else {
+            // If directory creation fails, show an error toast
+            Toast.makeText(requireContext(), "Failed to create folder!", Toast.LENGTH_SHORT).show();
+        }
+
+        // Now move all the selected images to the new album
+        moveImagesToAlbum(albumName);
+    }
+
 }
